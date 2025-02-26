@@ -1,0 +1,15 @@
+gunicorn  # Neccesary for app.yaml
+pydantic # Neccesary for config.py
+Flask==2.2
+python-dotenv
+rich>=11.2.0
+requests
+pydantic-settings
+# flask-sqlalchemy==2.5.1
+flask-sqlalchemy==3.0.2
+psycopg2-binary
+flask-login
+flask_swagger_ui
+flask_validator # Validation for string, countries, etc.
+pyshorteners # URL shortener
+Werkzeug==2.2.2
