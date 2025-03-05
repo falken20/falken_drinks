@@ -3,7 +3,7 @@ Flask
 flask-login
 pydantic # Neccesary for config.py
 pydantic-settings
-
+flask-sqlalchemy>=3.0.2
 
 
 # gunicorn  # Neccesary for app.yaml
