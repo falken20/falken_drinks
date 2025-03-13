@@ -1,0 +1,16 @@
+[project]
+name = "falken-drinks"
+version = "0.1.0"
+description = "Falken apps to manage daily drinks"
+authors = ["Falken"]
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "flask>=3.1.0",
+    "flask-login>=0.6.3",
+    "flask-sqlalchemy>=3.1.1",
+    "pydantic>=2.10.6",
+    "pydantic-settings>=2.8.1",
+    "rich>=13.9.4",
+]
