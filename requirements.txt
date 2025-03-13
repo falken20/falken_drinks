@@ -4,15 +4,11 @@ flask-login
 pydantic # Neccesary for config.py
 pydantic-settings
 flask-sqlalchemy
+python-dotenv
 
 
 # gunicorn  # Neccesary for app.yaml
-# Flask==2.2
-# python-dotenv
-# rich>=11.2.0
 # requests
-# flask-sqlalchemy==2.5.1
-# flask-sqlalchemy==3.0.2
 # psycopg2-binary
 # flask_swagger_ui
 # flask_validator # Validation for string, countries, etc.
