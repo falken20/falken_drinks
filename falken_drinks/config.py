@@ -5,6 +5,7 @@
 # from pydantic import BaseSettings # Old version
 import os
 import sys
+import toml
 from pydantic.v1 import BaseSettings
 # from pydantic_settings import BaseSettings # New version
 # import pyshorteners
@@ -16,7 +17,10 @@ from .logger import Log
 
 print("Loading config.py")
 
-__title__ = 'Falken Plants'
+# Get name app from pyproject.toml
+
+
+__title__ = 'Falken Drinks'
 __version__ = '1.0.0'
 __author__ = 'Falken'
 __url_github__ = 'https://github.com/falken20/'
@@ -122,6 +126,28 @@ class Settings(BaseSettings):
         # settings, pydantic loads your environment variables from the .env file.
         env_file = ".env"
         env_file_encoding = 'utf-8'
+
+    def __init__(self) -> None:
+        super().__init__()
+        data_app = self.get_params_from_toml()
+        self.APP_DATA = {
+            'title': data_app['tool']['poetry']['name'],
+            'version': data_app['tool']['poetry']['version'],
+            'author': data_app['tool']['poetry']['authors'][0],
+            'url_github': data_app['tool']['poetry']['repository'],
+            'url_twitter': __url_twitter__,
+            'url_linkedin': __url_linkedin__,
+            'license': data_app['tool']['poetry']['license'],
+            'copyrigth': __copyrigth__,
+            'features': __features__
+        }
+
+    def get_params_from_toml(self) -> dict:
+        """ Get the parameters from a TOML file """
+        toml_file = os.path.join(self.BASE_DIR, "pyproject.toml")
+        with open(toml_file, "r") as f:
+            data = toml.load(f)
+        return data
 
 
 @lru_cache
