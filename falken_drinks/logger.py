@@ -44,7 +44,7 @@ class Log():
             level = Log.debug.__name__.upper()
 
             if level in LEVEL_LOG.upper():
-                console.print(time, level, message, style=style)
+                console.print(time, level, "🟨", message, style=style)
 
         except Exception as err:
             Log.error("Error to print log", err, sys)
@@ -56,7 +56,7 @@ class Log():
             level = Log.info.__name__.upper()
 
             if level in LEVEL_LOG.upper():
-                console.print(time, level, message, style=style)
+                console.print(time, level, "🟩", message, style=style)
 
         except Exception as err:
             Log.error("Error to print log", err, sys)
@@ -68,7 +68,7 @@ class Log():
             level = Log.warning.__name__.upper()
 
             if level in LEVEL_LOG.upper():
-                console.print(time, level, message, style=style)
+                console.print(time, level, "🟧", message, style=style)
 
         except Exception as err:
             Log.error("Error to print log", err, sys)
@@ -88,7 +88,7 @@ class Log():
 
             if level in LEVEL_LOG.upper():
                 console.rule("ERROR")
-                console.print(time, level, message,
+                console.print(time, level, "🟥", message,
                               f"\nLine: {sys.exc_info()[2].tb_lineno} {type(err).__name__} ",
                               f"\nMethod: {sys.exc_info()[2].tb_frame.f_code.co_name} ",
                               f"\nFile: {sys.exc_info()[2].tb_frame.f_code.co_filename} ",
