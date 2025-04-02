@@ -66,8 +66,8 @@ class Drink(db.Model):
     __tablename__ = "drinks"
     drink_id = db.Column(db.Integer, primary_key=True)
     drink_name = db.Column(db.String(100), nullable=False)
-    drink_water_percentage = db.Column(db.Integer, nullable=False, max=100, default=100)
-    drink_alcohol_percentage = db.Column(db.Integer, nullable=False, max=100, default=0)
+    drink_water_percentage = db.Column(db.Integer, nullable=False, default=100)
+    drink_alcohol_percentage = db.Column(db.Integer, nullable=False, default=0)
     drink_image = db.Column(db.String(100), nullable=True)
 
     def __repr__(self) -> str:
@@ -81,18 +81,6 @@ class Drink(db.Model):
         self.drink_water_percentage = drink_water_percentage
         self.drink_alcohol_percentage = drink_alcohol_percentage
         self.drink_image = drink_image
-
-    @validates('drink_name')
-    def validate_name(self, key, value):
-        if not value:
-            raise ValueError("Drink name can't be empty")
-        return value
-    
-    @validates('drink_water_percentage', 'drink_alcohol_percentage')
-    def validate_percentage(self, key, value):
-        if not value:
-            raise ValueError("Drink percentage can't be empty")
-        return value
     
     def serialize(self):
         return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
@@ -117,6 +105,12 @@ class Drink(db.Model):
                                 "Drink alcohol percentage should be a number between 0 and 100")
         ValidateGreaterThanOrEqual(cls.drink_alcohol_percentage, 0, True,
                                    "Drink alcohol percentage should be a number between 0 and 100")
+
+    @validates('drink_name')
+    def validate_name(self, key, value):
+        if not value:
+            raise ValueError("Drink name can't be empty")
+        return value
     
     @validates('drink_image')
     def validate_empty_string(self, key, value):
@@ -127,8 +121,10 @@ class Drink(db.Model):
         
     @validates('drink_water_percentage', 'drink_alcohol_percentage')
     def validate_percentage(self, key, value):
-        if not value:
+        if value is None:
             raise ValueError("Drink percentage can't be empty")
+        if not (0 <= value <= 100):
+            raise ValueError(f"{key} must be between 0 and 100")
         return value
     
     @validates('drink_image')

@@ -130,6 +130,8 @@ class Settings(BaseSettings):
     def __init__(self) -> None:
         super().__init__()
         data_app = self.get_params_from_toml()
+        Log.debug("Data from pyproject.toml:")
+        Log.info_dict(data_app)
         self.APP_DATA = {
             'title': data_app['tool']['poetry']['name'],
             'version': data_app['tool']['poetry']['version'],
@@ -138,13 +140,16 @@ class Settings(BaseSettings):
             'url_twitter': __url_twitter__,
             'url_linkedin': __url_linkedin__,
             'license': data_app['tool']['poetry']['license'],
-            'copyrigth': __copyrigth__,
+            'copyrigth': __copyright__,
             'features': __features__
         }
 
     def get_params_from_toml(self) -> dict:
         """ Get the parameters from a TOML file """
-        toml_file = os.path.join(self.BASE_DIR, "pyproject.toml")
+        Log.info("Getting parameters from pyproject.toml")
+        base_dir_toml = os.path.abspath(os.path.dirname(self.BASE_DIR))
+        Log.debug(f"base_dir_toml: {base_dir_toml}")
+        toml_file = os.path.join(base_dir_toml, "pyproject.toml")
         with open(toml_file, "r") as f:
             data = toml.load(f)
         return data
