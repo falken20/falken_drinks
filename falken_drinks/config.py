@@ -17,20 +17,6 @@ from .logger import Log
 
 print("Loading config.py")
 
-# Get name app from pyproject.toml
-
-
-__title__ = 'Falken Drinks'
-__version__ = '1.0.0'
-__author__ = 'Falken'
-__url_github__ = 'https://github.com/falken20/'
-__url_twitter__ = 'https://twitter.com/richionline'
-__url_linkedin__ = 'https://www.linkedin.com/in/richionline/'
-__license__ = 'MIT License'
-__copyright__ = '© 2024 by Richi Rod AKA @richionline / falken20'
-__features__ = [
-]
-
 
 # Method to shorten a URL
 def shorten_url(url: str) -> str:
@@ -109,17 +95,7 @@ class Settings(BaseSettings):
         "testing": TestingConfig,
         "production": ProductionConfig
     }
-    APP_DATA = {
-        'title': __title__,
-        'version': __version__,
-        'author': __author__,
-        'url_github': __url_github__,
-        'url_twitter': __url_twitter__,
-        'url_linkedin': __url_linkedin__,
-        'license': __license__,
-        'copyrigth': __copyright__,
-        'features': __features__,
-    }
+    APP_DATA = {}
 
     class Config:
         # When you add the Config class with the path to your env_file to your
@@ -133,15 +109,16 @@ class Settings(BaseSettings):
         Log.debug("Data from pyproject.toml:")
         Log.info_dict(data_app)
         self.APP_DATA = {
-            'title': data_app['tool']['poetry']['name'],
-            'version': data_app['tool']['poetry']['version'],
-            'author': data_app['tool']['poetry']['authors'][0],
-            'url_github': data_app['tool']['poetry']['repository'],
-            'url_twitter': __url_twitter__,
-            'url_linkedin': __url_linkedin__,
-            'license': data_app['tool']['poetry']['license'],
-            'copyrigth': __copyright__,
-            'features': __features__
+            'title': data_app['project']['title'],
+            'version': data_app['project']['version'],
+            'author': data_app['project']['authors'],
+            'license': data_app['project']['license'],
+            'url_github': data_app['project']['url_github'],
+            'url_twitter': data_app['project']['url_twitter'],
+            'url_linkedin': data_app['project']['url_linkedin'],
+            'description': data_app['project']['description'],
+            'copyright': data_app['project']['copyright'],
+            'features': data_app['project']['features'],
         }
 
     def get_params_from_toml(self) -> dict:

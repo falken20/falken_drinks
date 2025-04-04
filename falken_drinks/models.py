@@ -234,11 +234,11 @@ if __name__ == '__main__':  # pragma: no cover # To doesn't check in tests
         environment = input(
             "Select the environment to create the tables (development, testing, production, exit):\n")
         if environment == "development":
-            app.config.from_object("falken_plants.config.DevelopmentConfig")
+            app.config.from_object("falken_drinks.config.DevelopmentConfig")
         elif environment == "testing":
-            app.config.from_object("falken_plants.config.TestingConfig")
+            app.config.from_object("falken_drinks.config.TestingConfig")
         elif environment == "production":
-            app.config.from_object("falken_plants.config.ProductionConfig")
+            app.config.from_object("falken_drinks.config.ProductionConfig")
         elif environment == "exit":
             Log.info("Process finished")
             exit(0)

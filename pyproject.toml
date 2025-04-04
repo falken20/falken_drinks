@@ -1,9 +1,15 @@
 [project]
 name = "falken-drinks"
 version = "0.1.0"
+title = "Falken Drinks"
 description = "Falken apps to manage daily drinks"
 authors = ["Falken"]
 license = "MIT"
+url_github = "https://github.com/falken20/"
+url_twitter = "https://twitter.com/richionline"
+url_linkedin = "https://www.linkedin.com/in/richionline/"
+copyright = "© 2024 by Richi Rod AKA @richionline / falken20"
+features = ["flask", "gunicorn", "pydantic", "rich", "toml"]
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
