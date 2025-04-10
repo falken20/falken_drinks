@@ -17,8 +17,8 @@ load_dotenv(find_dotenv())
 # Create console object for logs
 console = Console()
 
-style_DEBUG = Style(color="white", bgcolor="cyan")  # style_debug = "red bold"
-style_INFO = Style(color="green")
+style_DEBUG = Style(color="yellow")  # style_debug = "red bold"
+style_INFO = Style(color="green", bold=True)
 style_WARNING = Style(color="orange3", bold=True)
 style_ERROR = Style(color="red", bgcolor="white", bold=True)
 

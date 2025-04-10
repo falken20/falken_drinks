@@ -38,6 +38,7 @@ def create_app(test_config=None):
 
         app = Flask(__name__, template_folder="../templates",
                     static_folder="../static")
+        Log.debug(f"App name: {app.name}")
         app.config.from_object(settings)
 
         # If we are executing tests, we will use the test configuration

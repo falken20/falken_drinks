@@ -18,18 +18,18 @@ def check_cache(seconds: int = 3600):  # 60 minutes default
     # maxsize is the size of the cache as you defined it with the maxsize attribute of the decorator.
     # currsize  is the current size of the cache.
     global previous_cache
-    # Log.info(f"CACHE calendar_data(): {calendar_data.cache_info()}", style="yelloW")
+    # Log.info(f"CACHE calendar_data(): {calendar_data.cache_info()}")
     Log.info(
-        f"CACHE get_settings(): {get_settings.cache_info()}", style="yelloW")
+        f"CACHE get_settings(): {get_settings.cache_info()}")
     Log.info(
-        f"Checking expiration time for cache({seconds=})...", style="yellow")
-    Log.debug(f"Previous cache: {previous_cache}", style="yellow")
-    Log.debug(f"Current time: {datetime.now()}", style="yellow")
+        f"Checking expiration time for cache({seconds=})...")
+    Log.debug(f"Previous cache: {previous_cache}")
+    Log.debug(f"Current time: {datetime.now()}")
     difference = (datetime.now() - previous_cache).seconds
     Log.info(
-        f"Cache span: {int(difference)} seconds ({int(difference / 60)} minutes)", style="yellow")
+        f"Cache span: {int(difference)} seconds ({int(difference / 60)} minutes)")
     if difference > seconds:
-        Log.info("Cleaning cache by expiration...", style="yellow")
+        Log.info("Cleaning cache by expiration...")
         # calendar.cache_clear()
         previous_cache = datetime.now()
-        # Log.info(f"CACHE: {calendar.cache_info()}", style="yellow")
+        # Log.info(f"CACHE: {calendar.cache_info()}")
