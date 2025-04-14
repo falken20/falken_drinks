@@ -216,7 +216,7 @@ def init_db(app):
 
 
 ######################################################################
-# For execution in the console: python -m falken_plants.models       #
+# For execution in the console: python -m falken_drinks.models       #
 ######################################################################
 # FORMAT = '%(asctime)s %(levelname)s %(lineno)d %(filename)s %(funcName)s: %(message)s'
 # logging.basicConfig(level=logging.INFO, format=FORMAT)

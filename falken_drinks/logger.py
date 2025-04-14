@@ -18,7 +18,7 @@ load_dotenv(find_dotenv())
 console = Console()
 
 style_DEBUG = Style(color="yellow")  # style_debug = "red bold"
-style_INFO = Style(color="green", bold=True)
+style_INFO = Style(color="green")
 style_WARNING = Style(color="orange3", bold=True)
 style_ERROR = Style(color="red", bgcolor="white", bold=True)
 
@@ -96,4 +96,4 @@ class Log():
                               style=style)
 
         except Exception:
-            print("Error to print log")
+            print("Error to print log", err, sys)

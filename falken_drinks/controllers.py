@@ -3,7 +3,7 @@ from datetime import date
 # import pprint
 import sys
 
-from .models import db, Plant, Calendar, User
+from .models import db, Drink, DrinkLog, User
 from .logger import Log
 from .config import shorten_url
 

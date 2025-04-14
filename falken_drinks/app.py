@@ -31,10 +31,10 @@ basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def create_app(test_config=None):
     try:
-        Log.info("***** Creating app...", style="red bold")
+        Log.info("***** Creating app...")
 
         config_mode = settings.CONFIG_MODE
-        Log.info(f"***** Running in {config_mode.upper()} mode", style="red bold")
+        Log.info(f"***** Running in {config_mode.upper()} mode")
 
         app = Flask(__name__, template_folder="../templates",
                     static_folder="../static")
@@ -46,12 +46,13 @@ def create_app(test_config=None):
             app.config.from_object(test_config)
         else:
             app.config.from_object(settings.CONFIG_ENV[config_mode])
-
         app.config['TEMPLATE_AUTO_RELOAD'] = True
         app.config['DEBUG'] = True if config_mode == "development" else False
         app.config['ENV'] = config_mode
+        Log.info(f"App config loaded from {config_mode} successfully")
 
         db.init_app(app)
+        Log.info("Database initialized successfully")
 
         # A user loader tells Flask-Login how to find a specific user from the ID that is stored in their
         # session cookie.
@@ -68,18 +69,22 @@ def create_app(test_config=None):
             except Exception:
                 Log.error("Error loading user", None, os)
                 return None
+        Log.info("Login manager initialized successfully")
 
         # blueprint for auth routes in our app
         from .auth import auth as auth_blueprint
         app.register_blueprint(auth_blueprint)
+        Log.info("Auth blueprint registered successfully")
 
         # blueprint for non-auth parts of app
         from .main import main as main_blueprint
         app.register_blueprint(main_blueprint)
+        Log.info("Main blueprint registered successfully")
 
         # blueprint for API urls
         from .urls import urls as urls_blueprint
         app.register_blueprint(urls_blueprint)
+        Log.info("URLs blueprint registered successfully")
 
         # blueprint for swagger
         from .swagger import swagger_ui_blueprint, SWAGGER_URL
