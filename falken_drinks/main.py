@@ -8,7 +8,7 @@ import sys
 from .logger import Log
 from .controllers import ControllerPlant
 
-print("Loading main.py")
+Log.info("***** Loading app.py")
 
 main = Blueprint('main', __name__)
 

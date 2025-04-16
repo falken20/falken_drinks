@@ -9,8 +9,6 @@ from datetime import datetime
 from dotenv import load_dotenv, find_dotenv
 import pprint
 
-print("Loading logger.py")
-
 # Load .env file
 load_dotenv(find_dotenv())
 
@@ -96,4 +94,4 @@ class Log():
                               style=style)
 
         except Exception:
-            print("Error to print log", err, sys)
+            print("Error to print log:", err, sys)

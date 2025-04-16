@@ -7,7 +7,7 @@ from .models import db, Drink, DrinkLog, User
 from .logger import Log
 from .config import shorten_url
 
-Log.debug("Loading controllers.py")
+Log.info("***** Loading controllers.py")
 
 # The CRUD operations use to return a JSON response:
 # return jsonify(response)

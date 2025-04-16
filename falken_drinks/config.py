@@ -15,7 +15,7 @@ from functools import lru_cache
 
 from .logger import Log
 
-print("Loading config.py")
+Log.info("***** Loading config.py")
 
 
 # Method to shorten a URL

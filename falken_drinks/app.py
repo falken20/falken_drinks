@@ -3,6 +3,7 @@
 
 from flask import Flask
 import os
+import sys
 from dotenv import load_dotenv, find_dotenv
 from flask_login import LoginManager
 
@@ -11,7 +12,7 @@ from .config import get_settings, print_settings_environment
 from .cache import check_cache
 from .models import db
 
-print("Loading app.py")
+Log.info("***** Loading app.py")
 
 # Set environment vars
 load_dotenv(find_dotenv())
@@ -67,7 +68,7 @@ def create_app(test_config=None):
                 # Since the user_id is just the primary key of our user table, use it in the query for the user
                 return User.query.get(int(user_id))
             except Exception:
-                Log.error("Error loading user", None, os)
+                Log.error("Error loading user", None, sys)
                 return None
         Log.info("Login manager initialized successfully")
 
@@ -104,7 +105,7 @@ def create_app(test_config=None):
         return app
 
     except Exception as err:
-        Log.error("Error creating app", err, os)
+        Log.error("Error creating app", err, sys)
         return None
 
 

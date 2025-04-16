@@ -8,7 +8,7 @@ from flask_login import login_required, current_user
 from .controllers import ControllerPlant
 from .logger import Log
 
-print("Loading urls.py")
+Log.info("***** Loading urls.py")
 
 urls = Blueprint('urls', __name__)
 
