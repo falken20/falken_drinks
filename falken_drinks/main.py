@@ -6,7 +6,6 @@ from flask_login import login_required, current_user
 import sys
 
 from .logger import Log
-from .controllers import ControllerPlant
 
 Log.info("***** Loading app.py")
 
@@ -21,22 +20,10 @@ def index():
         f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
     Log.debug(f"Current user: {current_user}")
 
-    all_plants = ControllerPlant.list_all_plants(current_user.id)
+    # all_plants = ControllerPlant.list_all_plants(current_user.id)
 
     # return redirect(url_for('main.view_all_plants'))
-    return render_template('plant_list.html', plants=all_plants, message="")
-
-
-@main.route('/show_grouped/')
-@login_required
-def show_grouped():
-    Log.info(
-        f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
-    Log.debug(f"Current user: {current_user}")
-
-    all_plants = ControllerPlant.list_all_plants(current_user.id)
-
-    return render_template('plant_list_group.html', plants=all_plants, message="")
+    return render_template('base.html')
 
 
 @main.route("/profile", methods=['GET'])

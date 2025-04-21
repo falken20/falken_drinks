@@ -5,7 +5,7 @@ from flask import request, redirect, Blueprint, render_template
 from flask_login import login_required, current_user
 # import pprint
 
-from .controllers import ControllerPlant
+from .controllers import ControllerUser
 from .logger import Log
 
 Log.info("***** Loading urls.py")
