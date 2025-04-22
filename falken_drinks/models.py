@@ -14,9 +14,9 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import validates
 from sqlalchemy import inspect
 from flask_validator import (ValidateString, ValidateInteger, ValidateEmail, ValidateLessThanOrEqual,
-                             ValidateGreaterThanOrEqual, ValidateBoolean)
+                             ValidateGreaterThanOrEqual)
 
-from .config import get_settings, print_settings_environment
+from .config import get_settings
 from .logger import Log
 
 Log.info("***** Loading models.py")
