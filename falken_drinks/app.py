@@ -18,7 +18,7 @@ Log.info("***** Loading app.py")
 load_dotenv(find_dotenv())
 
 settings = get_settings()
-Log.info("***** Environment vars:", style="red bold")
+Log.info("***** Environment vars:")
 Log.info_dict(settings.dict(), level_log="INFO")
 
 console.rule(settings.APP_DATA['title'] + " " +
@@ -93,14 +93,17 @@ def create_app(test_config=None):
         Log.debug(f"Running Swagger in {SWAGGER_URL}")
 
         if config_mode == "testing" or test_config is not None:
-            Log.info("***** App config TESTING mode:", style="red bold")
+            Log.info("***** App config TESTING mode:")
             print_settings_environment(settings.CONFIG_ENV["testing"])
         else:
             # print_app_config(app)
-            Log.info("***** App config:", style="red bold")
+            Log.info("***** App config:")
             Log.info_dict(dict(app.config), level_log="INFO")
 
-        Log.info("***** App created succesfully", style="red bold")
+        Log.info(f"APP URL: {app.config['BASE_URL']}")
+        Log.info(f"APP version: {settings.APP_DATA['version']}")
+        Log.info(f"APP Environment: {app.config['CONFIG_MODE']}")
+        Log.info("***** App created succesfully")
 
         return app
 
