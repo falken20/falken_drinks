@@ -38,10 +38,10 @@ class User(UserMixin, db.Model):
                              default=date.today, onupdate=date.today)
 
     def __repr__(self) -> str:
-        return f"<User ({self.id} - {self.name})>"
+        return f"<User ({self.user_id} - {self.name})>"
 
     def __str__(self) -> str:
-        return f"<User ({self.id} - {self.name})>"
+        return f"<User ({self.user_id} - {self.name})>"
 
     # Validations => https://flask-validator.readthedocs.io/en/latest/index.html
     # The __declare_last__() hook allows definition of a class level function that is
@@ -60,6 +60,11 @@ class User(UserMixin, db.Model):
     # How to serialize SqlAlchemy PostgreSQL query to JSON => https://stackoverflow.com/a/46180522
     def serialize(self):
         return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
+    
+    # We have to override the method get_id() to return the user_id because we use
+    # the user_id instead of the id field. And Flask-Login uses the id field by default.
+    def get_id(self):
+        return str(self.user_id)
     
 
 class Drink(db.Model):
