@@ -34,14 +34,6 @@
                     <div class="navbar-item">
                         <div class="buttons">
                             {% if current_user.is_authenticated %}
-                            <a href="{{ url_for('main.show_grouped') }} " class="button is-primary is-small buttons_app">
-                                  <i class="bi bi-columns-gap" style="font-size: 20px" title="Change vision"></i>
-                            </a>
-                            <a href="{{ url_for('urls.view_create_plant') }}" class="button is-primary is-small buttons_app">
-                                <i class="bi bi-flower1" style="font-size: 20px" title="Add new plant"></i>
-                            </a>
-                            {% endif %}
-                            {% if current_user.is_authenticated %}
                             <a href="{{ url_for('main.profile') }}" class="button is-primary is-small buttons_app">
                                 <i class="bi bi-person-badge" style="font-size: 20px" title="Profile"></i>
                             </a>

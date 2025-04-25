@@ -1,0 +1,145 @@
+.logo-app {
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    display: block;
+    padding: 0rem !important;
+}
+
+.navbar-brand {
+    padding-top: 0rem !important; 
+    padding-bottom: 0rem !important;    
+    padding-left: 0rem !important;
+    padding-right: 0rem !important;
+    margin-right: 0px !important;
+}
+
+.form-group {
+    margin-bottom: 0.5rem !important;
+    color: black;
+    text-align: left;
+    font-size: small;
+    font-weight: bold;
+}
+
+small {
+    font-size: 50% !important;
+}
+
+p {
+    font-size: 50% !important;
+    text-align: justify;
+}
+
+.navbar-item img{
+    max-height: 2.75rem !important;
+}
+
+.buttons_app {
+    margin-top: 0.1rem !important;
+    margin-bottom: 0.1rem !important;
+    margin-left: 0.1rem !important;
+    margin-right: 0.1rem !important;
+    background-color: white !important;
+    color: black !important
+}
+
+.card-body {
+    margin-top: 0.1rem !important; 
+    margin-bottom: 0.1rem !important;    
+    margin-left: 0.1rem !important;
+    margin-right: 0.1rem !important;
+    display: flex !important;
+    justify-content: center !important;
+}
+
+.center_table {
+    margin: 0px auto !important;
+}
+
+
+
+
+.mainPage {
+    text-align: center;
+    font-size: 2em;
+    background-image: url('/static/images/background.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: left;
+    opacity: 0.85;
+}
+
+.menuText {
+    text-align: center;
+    align-content: center !important;
+    color: black;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    font-size: 40%;
+    padding-left: 15%;
+}
+
+.iconData {
+    width: 30%;
+}
+
+.appData {
+    color: black !important;
+    font-size: 70% !important;
+    text-align: center;
+    font-weight: bolder;
+}
+
+.todayDate {
+    color: red !important; 
+    font-size: 80% !important;
+    font-weight: bolder;
+    text-align: center;
+}
+
+.buttonApp {
+    color: black !important;
+    background-color: white !important;    
+    font-size: 60% !important;
+}
+
+.radioButtonApp {
+    width: 0.60em !important;
+    height: 0.60em !important;
+    margin-top:0.60em !important;
+}
+
+.contentTable {
+    width:100%;
+    display: flex;
+    justify-content: center;
+}
+
+.calendar {
+    font-size: 40% !important;
+    color: black;
+    background-color: white;
+    opacity: .90;
+    padding: 3px;
+}
+
+th, td {
+    padding-top: auto !important;
+    padding-bottom: auto !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    vertical-align: middle !important;
+    text-align: center !important;
+}
+
+.hero-body {
+    padding-top: 2rem !important; 
+    padding-bottom: 0.2rem !important;    
+    padding-left: 1rem !important;
+    display: block !important;
+}
+
+.hero.is-fullheight {
+    min-height: 100vh; 
+}
