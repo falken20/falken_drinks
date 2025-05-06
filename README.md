@@ -2,7 +2,7 @@
   
 <!-- Para logo se puede usar https://studio.tailorbrands.com/-->
 <img src="./static/images/logo_app.png" alt="drawing" width="400"/>
-<a href="https://richionline-portfolio.nw.r.appspot.com"><img src="https://richionline-portfolio.nw.r.appspot.com/static/assets/falken_logo_new.ico" width=40 alt="Personal Portfolio web"></a>
+<a href="https://richionline-portfolio.nw.r.appspot.com"><img src="https://richionline-portfolio.nw.r.appspot.com//static/assets/falken/falken_logo_ia_original.png" width=40 alt="Personal Portfolio web"></a>
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue) ![GitHub language count](https://img.shields.io/github/languages/count/falken20/falken_drinks) ![GitHub Top languaje](https://img.shields.io/github/languages/top/falken20/falken_drinks) ![Test coverage](https://img.shields.io/badge/test%20coverage-0%25-green) ![GitHub License](https://img.shields.io/github/license/falken20/falken_drinks) ![Python used version](https://img.shields.io/static/v1?label=python&message=3.11&color=blue&logo=python&logoColor=white)
 
