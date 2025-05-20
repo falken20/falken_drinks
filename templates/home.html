@@ -10,71 +10,17 @@
 
 <div class="container" style="text-align: center;">    
 
-    <table class="table table-sm table-borderless center_table" style="max-width: 600px;">
-        <tbody>
-        {% for plant in plants %}
-            <tr style="font-size:smaller;">
-                <div class="row">
-                    <td style="width: 30%; text-align: center;">
-                        {% if plant.image == "" %}
-                            <img src="/static/images/apple_touch_icon.png" height="70">
-                        {% else %}
-                            <img src="{{ plant.image }}" height="70">
-                        {% endif %}
-                    </td>
-                    <td style="width:70%" colspan="2"> 
-                        <div style="font-weight: bold;">
-                            {{ plant.name }}
-                        </div>
-                        <div><small style="color: red; font-weight: bold;" id="name_tech"> {{ plant.name_tech }} </small></div>
-                        <div>
-                            <small>
-                                <table>
-                                    <tr>
-                                        <td>🌞 {{ plant.watering_summer }}/m</td>
-                                        <td>❄️ {{ plant.watering_winter }}/m</td>
-                                        <td>
-                                            {% if plant.spray %}
-                                                💦
-                                            {% else %}
-                                                ⛔️
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if plant.direct_sun == 1 %}
-                                                🌑
-                                            {% elif plant.direct_sun == 2 %}
-                                                🌗
-                                            {% elif plant.direct_sun == 3 %}
-                                                🌞
-                                            {% else %}
-                                                ❓
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                </table>
-                            </small>
-                        </div>                        
-                    </td>
-                </div>
-            </tr>
-            <tr style="font-size:smaller;">
-                <td colspan="2">
-                    <div class="row"><small>{{ plant.comment }}</small></div>
-                </td>
-            </tr>
-            <tr class="border-bottom">
-                <div class="row">
-                    <td colspan="2">
-                        <a class="btn btn-success btn-sm btn-block buttons_app" href="{{url_for('urls.view_update_plant', plant_id=plant.id)}}">
-                            <i class="bi bi-pencil-square" style="font-size: 25px;" title="Edit"></i></a>
-                        <a class="btn btn-danger btn-sm btn-block buttons_app" href="{{url_for('urls.delete_plant', plant_id=plant.id, ope='DELETE')}}">
-                            <i class="bi bi-trash" style="font-size: 25px" title="Delete"></i></a>
-                    </td>
-                </div>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+        <h1 style="color: white">Day consume</h1>
+        <div class="progress progress-bar-font" style="max-width: 100%">
+            <div class="progress-bar" style="width: 70%">70%
+            </div>
+            <div class="progress-bar bg-dark" style="width: 10%">10%
+            </div>
+            <div class="progress-bar bg-danger progress-bar-stripped" style="width: 12%">12%
+            </div>
+            <div class="progress-bar bg-success progress-bar-stripped" style="width: 8%">8%
+            </div>
+        </div>
+
 </div>
 {% endblock content %}

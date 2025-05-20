@@ -143,3 +143,8 @@ th, td {
 .hero.is-fullheight {
     min-height: 100vh; 
 }
+
+.progress-bar-font {
+    font-size: 40% !important;
+    font-weight: bold;
+}
