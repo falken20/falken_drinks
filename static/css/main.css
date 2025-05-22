@@ -144,7 +144,9 @@ th, td {
     min-height: 100vh; 
 }
 
-.progress-bar-font {
+.progress-bar-style {
     font-size: 40% !important;
     font-weight: bold;
+    margin-top: 30px !important;
+    margin-bottom: 10px !important;
 }
