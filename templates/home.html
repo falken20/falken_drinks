@@ -10,9 +10,13 @@
 
 <div class="container" style="text-align: center;">    
 
-        <h1 style="color: white">Day consume</h1>
+        <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px;">
+            <div style="border: 2px solid #fff; border-radius: 12px; padding: 16px 32px; background: rgba(0,0,0,0.3);">
+                <h1 style="color: white; margin: 0;">Goal 2560ml</h1>
+            </div>
+        </div>
         <div class="progress progress-bar-style" style="max-width: 100%;">
-            <div class="progress-bar" style="width: 70%">70%
+            <div class="progress-bar" style="width: 50%">50%
             </div>
             <div class="progress-bar bg-dark" style="width: 10%">10%
             </div>
@@ -28,17 +32,66 @@
             <span style="color: #198754; margin-left: 15px;">&#9632;</span> Other
         </div>
 
+        <!-- Drink icon carousel -->
+        <div style="margin: 30px auto; max-width: 90%; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 15px;">
+            <h3 style="color: white; margin-bottom: 15px;">Select your drink</h3>
+            <div class="drink-carousel" style="display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 15px; padding: 10px 0; justify-content: center;">
+                <div class="drink-icon" onclick="selectDrink('Water')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-water-96.png') }}" alt="Water" style="height: 60px; background: rgba(13, 110, 253, 0.2); padding: 10px; border-radius: 50%;">
+                    <p style="color: white; margin-top: 5px; font-size: 0.8rem;">Water</p>
+                </div>
+                <div class="drink-icon" onclick="selectDrink('Coffee')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-coffee-96.png') }}" alt="Coffee" style="height: 60px; background: rgba(33, 37, 41, 0.2); padding: 10px; border-radius: 50%;">
+                    <p style="color: white; margin-top: 5px; font-size: 0.8rem;">Coffee</p>
+                </div>
+                <div class="drink-icon" onclick="selectDrink('Wine')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-wine-96.png') }}" alt="Wine" style="height: 60px; background: rgba(220, 53, 69, 0.2); padding: 10px; border-radius: 50%;">
+                    <p style="color: white; margin-top: 5px; font-size: 0.8rem;">Wine</p>
+                </div>
+                <div class="drink-icon" onclick="selectDrink('Beer')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-beer-100.png') }}" alt="Beer" style="height: 60px; background: rgba(220, 53, 69, 0.2); padding: 10px; border-radius: 50%;">
+                    <p style="color: white; margin-top: 5px; font-size: 0.8rem;">Beer</p>
+                </div>
+                <div class="drink-icon" onclick="selectDrink('Cocktail')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-alcohol-drink-96.png') }}" alt="Cocktail" style="height: 60px; background: rgba(220, 53, 69, 0.2); padding: 10px; border-radius: 50%;">
+                    <p style="color: white; margin-top: 5px; font-size: 0.8rem;">Cocktail</p>
+                </div>
+                <div class="drink-icon" onclick="selectDrink('Shot')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-shot-100.png') }}" alt="Shot" style="height: 60px; background: rgba(220, 53, 69, 0.2); padding: 10px; border-radius: 50%;">
+                    <p style="color: white; margin-top: 5px; font-size: 0.8rem;">Shot</p>
+                </div>
+                <div class="drink-icon" onclick="selectDrink('Soda')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-coke-96.png') }}" alt="Soda" style="height: 60px; background: rgba(25, 135, 84, 0.2); padding: 10px; border-radius: 50%;">
+                    <p style="color: white; margin-top: 5px; font-size: 0.8rem;">Soda</p>
+                </div>
+                <div class="drink-icon" onclick="selectDrink('Milk')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-milk-96.png') }}" alt="Milk" style="height: 60px; background: rgba(25, 135, 84, 0.2); padding: 10px; border-radius: 50%;">
+                    <p style="color: white; margin-top: 5px; font-size: 0.8rem;">Milk</p>
+                </div>
+                <div class="drink-icon" onclick="selectDrink('Energy')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-energy-drink-96.png') }}" alt="Energy Drink" style="height: 60px; background: rgba(25, 135, 84, 0.2); padding: 10px; border-radius: 50%;">
+                    <p style="color: white; margin-top: 5px; font-size: 0.8rem;">Energy</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Drink selection and amount input -->
         <div class="row" style="margin-top: 30px; display: flex; justify-content: center; align-items: flex-start;">
             <div class="col-md-6" style="text-align: left; max-width: 300px;">
                 <form id="drink-form">
                     <div class="form-check">
                         <input class="form-check-input" type="radio" name="drink" id="water" value="Water" checked>
-                        <label class="form-check-label" for="water">Water</label>
+                        <label class="form-check-label" for="water">
+                            <img src="{{ url_for('static', filename='images/drinks/icons8-water-96.png') }}" alt="Water" style="height: 40px; vertical-align: middle; margin-right: 6px;">
+                            Water
+                        </label>
                     </div>
                     <div class="form-check">
                         <input class="form-check-input" type="radio" name="drink" id="coffee" value="Coffee/Tea">
-                        <label class="form-check-label" for="coffee">Coffee/Tea</label>
+                        <label class="form-check-label" for="coffee">
+                            <img src="{{ url_for('static', filename='images/drinks/icons8-coffee-96.png') }}" alt="Coffee/Tea" style="height: 40px; vertical-align: middle; margin-right: 6px;">
+                            Coffee/Tea
+                        </label>
                     </div>
                     <div class="form-check">
                         <input class="form-check-input" type="radio" name="drink" id="alcohol" value="Alcohol">
@@ -52,6 +105,7 @@
                             <option value="Soda">Soda</option>
                             <option value="Milk">Milk</option>
                             <option value="Smoothie">Smoothie</option>
+                            <option value="Energy">Energy Drink</option>
                             <option value="Other">Other...</option>
                         </select>
                     </div>
@@ -60,8 +114,10 @@
             <div class="col-md-6" style="text-align: left; max-width: 200px;">
                 <label for="amount" style="color: #eee;">Amount (ml):</label>
                 <input type="number" id="amount" name="amount" class="form-control" min="0" step="50" placeholder="Enter amount">
+                <button type="button" class="btn btn-primary mt-3 w-100" onclick="addDrink()">Add Drink</button>
             </div>
         </div>
+        <script src="{{ url_for('static', filename='js/drink_selector.js') }}"></script>
         <script>
             // Show combo only if 'Other' is selected
             document.addEventListener('DOMContentLoaded', function() {
@@ -78,6 +134,32 @@
                     });
                 });
             });
+            
+            // Function to add a drink (placeholder)
+            function addDrink() {
+                const drinkForm = document.getElementById('drink-form');
+                const selectedDrink = document.querySelector('input[name="drink"]:checked').value;
+                const amount = document.getElementById('amount').value;
+                
+                // If "Other" is selected, get the specific drink type from the dropdown
+                let drinkType = selectedDrink;
+                if (selectedDrink === "Other") {
+                    const otherSelect = document.getElementById('other-drink-select');
+                    drinkType = otherSelect.options[otherSelect.selectedIndex].value;
+                }
+                
+                if (!amount) {
+                    alert("Please enter an amount.");
+                    return;
+                }
+                
+                // Here you would typically make an API call to save the drink
+                console.log(`Adding ${amount}ml of ${drinkType}`);
+                alert(`Added ${amount}ml of ${drinkType}!`);
+                
+                // Reset form
+                document.getElementById('amount').value = '';
+            }
         </script>
 </div>
 {% endblock content %}
