@@ -75,48 +75,41 @@
             </div>
         </div>
 
-        <!-- Drink selection and amount input -->
-        <div class="row" style="margin-top: 30px; display: flex; justify-content: center; align-items: flex-start;">
-            <div class="col-md-6" style="text-align: left; max-width: 300px;">
-                <form id="drink-form">
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="drink" id="water" value="Water" checked>
-                        <label class="form-check-label" for="water">
-                            <img src="{{ url_for('static', filename='images/drinks/icons8-water-96.png') }}" alt="Water" style="height: 40px; vertical-align: middle; margin-right: 6px;">
-                            Water
-                        </label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="drink" id="coffee" value="Coffee/Tea">
-                        <label class="form-check-label" for="coffee">
-                            <img src="{{ url_for('static', filename='images/drinks/icons8-coffee-96.png') }}" alt="Coffee/Tea" style="height: 40px; vertical-align: middle; margin-right: 6px;">
-                            Coffee/Tea
-                        </label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="drink" id="alcohol" value="Alcohol">
-                        <label class="form-check-label" for="alcohol">Alcohol</label>
-                    </div>
-                    <div class="form-check" style="display: flex; align-items: center;">
-                        <input class="form-check-input" type="radio" name="drink" id="other" value="Other">
-                        <label class="form-check-label" for="other" style="margin-right: 8px;">Other</label>
-                        <select id="other-drink-select" name="other-drink" class="form-select" style="width: 120px; display: none; margin-left: 8px;">
-                            <option value="Juice">Juice</option>
-                            <option value="Soda">Soda</option>
-                            <option value="Milk">Milk</option>
-                            <option value="Smoothie">Smoothie</option>
-                            <option value="Energy">Energy Drink</option>
-                            <option value="Other">Other...</option>
-                        </select>
-                    </div>
-                </form>
+        <!-- Drink amount input carousel -->
+        <div style="margin: 10px auto; max-width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.069); border-radius: 15px;">
+            <h4 style="color: white; margin-bottom: 10px;">Select amount</h4>
+            <div class="amount-carousel" style="display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 15px; padding: 10px 0; justify-content: center;">
+                <div class="amount-option" onclick="selectAmount(100)" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
+                    <div style="height: 70px; width: 70px; display: flex; justify-content: center; align-items: center; background: rgba(13, 110, 253, 0.2); border-radius: 50%; font-size: 1.2rem; color: white; font-weight: bold;">100ml</div>
+                </div>
+                <div class="amount-option" onclick="selectAmount(200)" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
+                    <div style="height: 70px; width: 70px; display: flex; justify-content: center; align-items: center; background: rgba(13, 110, 253, 0.2); border-radius: 50%; font-size: 1.2rem; color: white; font-weight: bold;">200ml</div>
+                </div>
+                <div class="amount-option" onclick="selectAmount(250)" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
+                    <div style="height: 70px; width: 70px; display: flex; justify-content: center; align-items: center; background: rgba(13, 110, 253, 0.2); border-radius: 50%; font-size: 1.2rem; color: white; font-weight: bold;">250ml</div>
+                </div>
+                <div class="amount-option" onclick="selectAmount(330)" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
+                    <div style="height: 70px; width: 70px; display: flex; justify-content: center; align-items: center; background: rgba(13, 110, 253, 0.2); border-radius: 50%; font-size: 1.2rem; color: white; font-weight: bold;">330ml</div>
+                </div>
+                <div class="amount-option" onclick="selectAmount(500)" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
+                    <div style="height: 70px; width: 70px; display: flex; justify-content: center; align-items: center; background: rgba(13, 110, 253, 0.2); border-radius: 50%; font-size: 1.2rem; color: white; font-weight: bold;">500ml</div>
+                </div>
+                <div class="amount-option" onclick="selectCustomAmount()" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
+                    <div style="height: 70px; width: 70px; display: flex; justify-content: center; align-items: center; background: rgba(220, 53, 69, 0.2); border-radius: 50%; font-size: 1.2rem; color: white; font-weight: bold;">Other</div>
+                </div>
             </div>
-            <div class="col-md-6" style="text-align: left; max-width: 200px;">
-                <label for="amount" style="color: #eee;">Amount (ml):</label>
-                <input type="number" id="amount" name="amount" class="form-control" min="0" step="50" placeholder="Enter amount">
-                <button type="button" class="btn btn-primary mt-3 w-100" onclick="addDrink()">Add Drink</button>
+            <div id="custom-amount-container" style="margin-top: 10px; display: none; justify-content: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="number" id="custom-amount" class="form-control" style="max-width: 120px;" placeholder="Enter ml">
+                    <button class="btn btn-sm btn-primary" onclick="confirmCustomAmount()">OK</button>
+                </div>
             </div>
         </div>
+        
+        <div style="margin: 20px auto; text-align: center;">
+            <button type="button" class="btn btn-primary" style="min-width: 150px;" onclick="addDrink()">Add Drink</button>
+        </div>
+
         <script src="{{ url_for('static', filename='js/drink_selector.js') }}"></script>
         <script>
             // Show combo only if 'Other' is selected
@@ -135,7 +128,19 @@
                 });
             });
             
-            // Function to add a drink (placeholder)
+            // Add event listener for custom amount input to handle Enter key
+            document.addEventListener('DOMContentLoaded', function() {
+                const customAmountInput = document.getElementById('custom-amount');
+                if (customAmountInput) {
+                    customAmountInput.addEventListener('keyup', function(event) {
+                        if (event.key === "Enter") {
+                            confirmCustomAmount();
+                        }
+                    });
+                }
+            });
+            
+            // Function to add a drink
             function addDrink() {
                 const drinkForm = document.getElementById('drink-form');
                 const selectedDrink = document.querySelector('input[name="drink"]:checked').value;
@@ -159,6 +164,41 @@
                 
                 // Reset form
                 document.getElementById('amount').value = '';
+            }
+
+            // JavaScript functions for amount selection
+            let selectedAmount = 100; // Default amount
+
+            function selectAmount(amount) {
+                selectedAmount = amount;
+                document.querySelectorAll('.amount-option').forEach(option => {
+                    option.querySelector('div').style.background = 'rgba(13, 110, 253, 0.2)';
+                    option.querySelector('div').style.color = 'white';
+                });
+                const activeOption = document.querySelector(`.amount-option[onclick="selectAmount(${amount})"]`);
+                if (activeOption) {
+                    activeOption.querySelector('div').style.background = 'rgba(13, 110, 253, 0.5)';
+                    activeOption.querySelector('div').style.color = 'white';
+                }
+            }
+
+            function selectCustomAmount() {
+                const customAmountContainer = document.getElementById('custom-amount-container');
+                customAmountContainer.style.display = 'flex';
+                document.getElementById('custom-amount').focus();
+            }
+
+            function confirmCustomAmount() {
+                const customAmountInput = document.getElementById('custom-amount');
+                const amount = customAmountInput.value;
+                if (!amount || isNaN(amount) || amount <= 0) {
+                    alert("Please enter a valid amount.");
+                    return;
+                }
+                selectedAmount = amount;
+                alert(`Custom amount set to ${amount}ml`);
+                document.getElementById('amount').value = amount;
+                document.getElementById('custom-amount-container').style.display = 'none';
             }
         </script>
 </div>
