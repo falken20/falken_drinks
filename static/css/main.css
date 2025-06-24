@@ -27,7 +27,7 @@ small {
 }
 
 p {
-    font-size: 50% !important;
+    font-size: 50%;
     text-align: justify;
 }
 
@@ -56,6 +56,9 @@ p {
 .center_table {
     margin: 0px auto !important;
 }
+
+
+
 
 
 
