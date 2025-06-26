@@ -35,41 +35,41 @@
         <!-- Drink icon carousel -->
         <div style="margin: 10px auto; max-width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.069); border-radius: 15px;">
             <!-- <h4 style="color: white; margin-bottom: 10px;">Select your drink</h4> -->
-            <div class="drink-carousel" style="display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 15px; padding: 10px 0; justify-content: center;">
+            <div class="drink-carousel" style="display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 15px; padding: 10px 0; justify-content: left;">
                 <div class="drink-icon" onclick="selectDrink('Water')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
-                    <img src="{{ url_for('static', filename='images/drinks/icons8-water-96.png') }}" alt="Water" style="height: 50px; background: rgba(13, 110, 253, 0.2); padding: 10px; border-radius: 50%;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-water-96.png') }}" alt="Water" style="height: 50px; background: rgba(13, 110, 253, 0.2); padding: 5px; border-radius: 50%;">
                     <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Water</p>
                 </div>
                 <div class="drink-icon" onclick="selectDrink('Coffee')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
-                    <img src="{{ url_for('static', filename='images/drinks/icons8-coffee-96.png') }}" alt="Coffee" style="height: 50px; background: rgba(33, 37, 41, 0.2); padding: 10px; border-radius: 50%;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-coffee-96.png') }}" alt="Coffee" style="height: 50px; background: rgba(33, 37, 41, 0.2); padding: 5px; border-radius: 50%;">
                     <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Coffee</p>
                 </div>
                 <div class="drink-icon" onclick="selectDrink('Wine')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
-                    <img src="{{ url_for('static', filename='images/drinks/icons8-wine-96.png') }}" alt="Wine" style="height: 50px; background: rgba(220, 53, 69, 0.2); padding: 10px; border-radius: 50%;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-wine-96.png') }}" alt="Wine" style="height: 50px; background: rgba(220, 53, 69, 0.2); padding: 5px; border-radius: 50%;">
                     <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Wine</p>
                 </div>
                 <div class="drink-icon" onclick="selectDrink('Beer')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
-                    <img src="{{ url_for('static', filename='images/drinks/icons8-beer-100.png') }}" alt="Beer" style="height: 50px; background: rgba(220, 53, 69, 0.2); padding: 10px; border-radius: 50%;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-beer-100.png') }}" alt="Beer" style="height: 50px; background: rgba(220, 53, 69, 0.2); padding: 5px; border-radius: 50%;">
                     <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Beer</p>
                 </div>
                 <div class="drink-icon" onclick="selectDrink('Cocktail')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
-                    <img src="{{ url_for('static', filename='images/drinks/icons8-alcohol-drink-96.png') }}" alt="Cocktail" style="height: 50px; background: rgba(220, 53, 69, 0.2); padding: 10px; border-radius: 50%;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-alcohol-drink-96.png') }}" alt="Cocktail" style="height: 50px; background: rgba(220, 53, 69, 0.2); padding: 5px; border-radius: 50%;">
                     <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Cocktail</p>
                 </div>
                 <div class="drink-icon" onclick="selectDrink('Shot')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
-                    <img src="{{ url_for('static', filename='images/drinks/icons8-shot-100.png') }}" alt="Shot" style="height: 50px; background: rgba(220, 53, 69, 0.2); padding: 10px; border-radius: 50%;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-shot-100.png') }}" alt="Shot" style="height: 50px; background: rgba(220, 53, 69, 0.2); padding: 5px; border-radius: 50%;">
                     <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Shot</p>
                 </div>
                 <div class="drink-icon" onclick="selectDrink('Soda')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
-                    <img src="{{ url_for('static', filename='images/drinks/icons8-coke-96.png') }}" alt="Soda" style="height: 50px; background: rgba(25, 135, 84, 0.2); padding: 10px; border-radius: 50%;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-coke-96.png') }}" alt="Soda" style="height: 50px; background: rgba(25, 135, 84, 0.2); padding: 5px; border-radius: 50%;">
                     <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Soda</p>
                 </div>
                 <div class="drink-icon" onclick="selectDrink('Milk')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
-                    <img src="{{ url_for('static', filename='images/drinks/icons8-milk-96.png') }}" alt="Milk" style="height: 50px; background: rgba(25, 135, 84, 0.2); padding: 10px; border-radius: 50%;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-milk-96.png') }}" alt="Milk" style="height: 50px; background: rgba(25, 135, 84, 0.2); padding: 5px; border-radius: 50%;">
                     <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Milk</p>
                 </div>
                 <div class="drink-icon" onclick="selectDrink('Energy')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
-                    <img src="{{ url_for('static', filename='images/drinks/icons8-energy-drink-96.png') }}" alt="Energy Drink" style="height: 50px; background: rgba(25, 135, 84, 0.2); padding: 10px; border-radius: 50%;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-energy-drink-96.png') }}" alt="Energy Drink" style="height: 50px; background: rgba(25, 135, 84, 0.2); padding: 5px; border-radius: 50%;">
                     <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Energy</p>
                 </div>
             </div>
@@ -78,7 +78,7 @@
         <!-- Drink amount input carousel -->
         <div style="margin: 10px auto; max-width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.069); border-radius: 15px;">
             <!-- <h4 style="color: white; margin-bottom: 10px;">Select amount</h4> -->
-            <div class="amount-carousel" style="display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 15px; padding: 10px 0; justify-content: center;">
+            <div class="amount-carousel" style="display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 15px; padding: 10px 0; justify-content: left;">
                 <div class="amount-option" onclick="selectAmount(100)" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
                     <div style="height: 50px; width: 50px; display: flex; justify-content: center; align-items: center; background: rgba(13, 110, 253, 0.2); border-radius: 50%; font-size: 0.9rem; color: white; font-weight: bold;">100ml</div>
                 </div>
@@ -104,7 +104,33 @@
                     <button class="btn btn-sm btn-primary" onclick="confirmCustomAmount()">OK</button>
                 </div>
             </div>
+            
+            <!-- Alcohol percentage selector - only shows for alcoholic drinks -->
+            <div id="alcohol-percentage-container" style="margin-top: 10px; display: none; justify-content: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label style="color: white; margin-bottom: 0; margin-right: 5px;">Alcohol %:</label>
+                    <select id="alcohol-percentage" class="form-select" style="max-width: 100px;">
+                        <option value="0">0%</option>
+                        <option value="4">4%</option>
+                        <option value="5">5%</option>
+                        <option value="7">7%</option>
+                        <option value="12">12%</option>
+                        <option value="14">14%</option>
+                        <option value="20">20%</option>
+                        <option value="35">35%</option>
+                        <option value="40">40%</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                    <div id="custom-alcohol-container" style="display: none; align-items: center; gap: 5px;">
+                        <input type="number" id="custom-alcohol" class="form-control" style="max-width: 80px;" min="0" max="100" placeholder="%">
+                        <button class="btn btn-sm btn-primary" onclick="confirmCustomAlcohol()">OK</button>
+                    </div>
+                </div>
+            </div>
         </div>
+        
+
+
         
         <div style="margin: 20px auto; text-align: center;">
             <button type="button" class="btn btn-primary" style="min-width: 150px;" onclick="addDrink()">Add Drink</button>
@@ -126,6 +152,20 @@
                         }
                     });
                 });
+                
+                // Set up alcohol percentage select
+                const alcoholPercentageSelect = document.getElementById('alcohol-percentage');
+                if (alcoholPercentageSelect) {
+                    alcoholPercentageSelect.addEventListener('change', function() {
+                        const customAlcoholContainer = document.getElementById('custom-alcohol-container');
+                        if (alcoholPercentageSelect.value === 'custom' && customAlcoholContainer) {
+                            customAlcoholContainer.style.display = 'flex';
+                            document.getElementById('custom-alcohol').focus();
+                        } else {
+                            document.getElementById('custom-alcohol-container').style.display = 'none';
+                        }
+                    });
+                }
             });
             
             // Add event listener for custom amount input to handle Enter key
@@ -135,6 +175,16 @@
                     customAmountInput.addEventListener('keyup', function(event) {
                         if (event.key === "Enter") {
                             confirmCustomAmount();
+                        }
+                    });
+                }
+                
+                // Add event listener for custom alcohol input to handle Enter key
+                const customAlcoholInput = document.getElementById('custom-alcohol');
+                if (customAlcoholInput) {
+                    customAlcoholInput.addEventListener('keyup', function(event) {
+                        if (event.key === "Enter") {
+                            confirmCustomAlcohol();
                         }
                     });
                 }
@@ -158,9 +208,21 @@
                     return;
                 }
                 
+                // Get alcohol percentage if applicable
+                let alcoholPercentage = 0;
+                if (['Wine', 'Beer', 'Cocktail', 'Shot'].includes(drinkType) || 
+                     selectedDrink === "Alcohol") {
+                    alcoholPercentage = getSelectedAlcoholPercentage();
+                }
+                
                 // Here you would typically make an API call to save the drink
-                console.log(`Adding ${amount}ml of ${drinkType}`);
-                alert(`Added ${amount}ml of ${drinkType}!`);
+                if (alcoholPercentage > 0) {
+                    console.log(`Adding ${amount}ml of ${drinkType} (${alcoholPercentage}% alcohol)`);
+                    alert(`Added ${amount}ml of ${drinkType} (${alcoholPercentage}% alcohol)!`);
+                } else {
+                    console.log(`Adding ${amount}ml of ${drinkType}`);
+                    alert(`Added ${amount}ml of ${drinkType}!`);
+                }
                 
                 // Reset form
                 document.getElementById('amount').value = '';
@@ -199,6 +261,48 @@
                 alert(`Custom amount set to ${amount}ml`);
                 document.getElementById('amount').value = amount;
                 document.getElementById('custom-amount-container').style.display = 'none';
+            }
+
+            // Show/hide alcohol percentage selector based on drink selection
+            document.addEventListener('DOMContentLoaded', function() {
+                const drinkRadios = document.getElementsByName('drink');
+                const alcoholPercentageContainer = document.getElementById('alcohol-percentage-container');
+                const customAlcoholContainer = document.getElementById('custom-alcohol-container');
+                const alcoholSelect = document.getElementById('alcohol-percentage');
+
+                drinkRadios.forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        if (this.value === 'Wine' || this.value === 'Beer' || this.value === 'Cocktail' || this.value === 'Shot') {
+                            alcoholPercentageContainer.style.display = 'flex';
+                        } else {
+                            alcoholPercentageContainer.style.display = 'none';
+                            alcoholSelect.value = 0; // Reset to 0% if not an alcoholic drink
+                            customAlcoholContainer.style.display = 'none'; // Hide custom alcohol input
+                        }
+                    });
+                });
+
+                // Show/hide custom alcohol input
+                alcoholSelect.addEventListener('change', function() {
+                    if (this.value === 'custom') {
+                        customAlcoholContainer.style.display = 'flex';
+                        document.getElementById('custom-alcohol').focus();
+                    } else {
+                        customAlcoholContainer.style.display = 'none';
+                    }
+                });
+            });
+
+            function confirmCustomAlcohol() {
+                const customAlcoholInput = document.getElementById('custom-alcohol');
+                const alcoholPercentage = customAlcoholInput.value;
+                if (!alcoholPercentage || isNaN(alcoholPercentage) || alcoholPercentage < 0 || alcoholPercentage > 100) {
+                    alert("Please enter a valid alcohol percentage.");
+                    return;
+                }
+                alert(`Custom alcohol percentage set to ${alcoholPercentage}%`);
+                document.getElementById('alcohol-percentage').value = alcoholPercentage;
+                document.getElementById('custom-alcohol-container').style.display = 'none';
             }
         </script>
 </div>

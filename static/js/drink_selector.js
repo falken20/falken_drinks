@@ -14,6 +14,43 @@ function selectDrink(drinkType) {
     clickedIcon.style.transform = 'scale(1.1)';
     clickedIcon.querySelector('img').style.boxShadow = '0 0 10px rgba(255, 255, 255, 0.8)';
     
+    // Check if it's an alcoholic drink
+    const isAlcoholic = ['Wine', 'Beer', 'Cocktail', 'Shot'].includes(drinkType);
+    const alcoholPercentageContainer = document.getElementById('alcohol-percentage-container');
+    
+    // Show/hide alcohol percentage selector
+    if (alcoholPercentageContainer) {
+        if (isAlcoholic) {
+            alcoholPercentageContainer.style.display = 'flex';
+            
+            // Set default alcohol percentage based on drink type
+            const alcoholPercentageSelect = document.getElementById('alcohol-percentage');
+            if (alcoholPercentageSelect) {
+                switch(drinkType) {
+                    case 'Beer':
+                        alcoholPercentageSelect.value = '5';
+                        break;
+                    case 'Wine':
+                        alcoholPercentageSelect.value = '12';
+                        break;
+                    case 'Cocktail':
+                        alcoholPercentageSelect.value = '14';
+                        break;
+                    case 'Shot':
+                        alcoholPercentageSelect.value = '40';
+                        break;
+                }
+            }
+        } else {
+            alcoholPercentageContainer.style.display = 'none';
+            // Reset to 0 for non-alcoholic drinks
+            const alcoholPercentageSelect = document.getElementById('alcohol-percentage');
+            if (alcoholPercentageSelect) {
+                alcoholPercentageSelect.value = '0';
+            }
+        }
+    }
+    
     // Set the corresponding radio button
     let radioId;
     switch(drinkType) {
@@ -162,26 +199,52 @@ function selectCustomAmount() {
  */
 function confirmCustomAmount() {
     const customAmountInput = document.getElementById('custom-amount');
-    if (customAmountInput && customAmountInput.value) {
-        const amount = parseInt(customAmountInput.value);
-        if (amount > 0) {
-            console.log(`Confirmed custom amount: ${amount}ml`);
-            
-            // Set the amount input field value
-            const amountInput = document.getElementById('amount');
-            if (amountInput) {
-                amountInput.value = amount;
-            }
-            
-            // Hide custom amount container
-            const customAmountContainer = document.getElementById('custom-amount-container');
-            if (customAmountContainer) {
-                customAmountContainer.style.display = 'none';
-            }
-        } else {
-            alert("Please enter a valid amount greater than 0.");
-        }
+    const amount = customAmountInput.value;
+    if (!amount || isNaN(amount) || amount <= 0) {
+        alert("Please enter a valid amount.");
+        return;
+    }
+    selectedAmount = amount;
+    alert(`Custom amount set to ${amount}ml`);
+    document.getElementById('amount').value = amount;
+    document.getElementById('custom-amount-container').style.display = 'none';
+}
+
+/**
+ * Confirm and set a custom alcohol percentage
+ */
+function confirmCustomAlcohol() {
+    const customAlcoholInput = document.getElementById('custom-alcohol');
+    if (!customAlcoholInput || !customAlcoholInput.value) {
+        alert("Please enter an alcohol percentage.");
+        return;
+    }
+    
+    const alcoholPercentage = parseFloat(customAlcoholInput.value);
+    if (isNaN(alcoholPercentage) || alcoholPercentage < 0 || alcoholPercentage > 100) {
+        alert("Please enter a valid alcohol percentage between 0 and 100.");
+        return;
+    }
+    
+    console.log(`Custom alcohol percentage set to ${alcoholPercentage}%`);
+    
+    // Hide the custom input container
+    document.getElementById('custom-alcohol-container').style.display = 'none';
+    
+    // Store the custom value for retrieval when adding the drink
+    document.getElementById('alcohol-percentage').setAttribute('data-custom-value', alcoholPercentage);
+}
+
+/**
+ * Get the current alcohol percentage (either from dropdown or custom input)
+ */
+function getSelectedAlcoholPercentage() {
+    const alcoholPercentageSelect = document.getElementById('alcohol-percentage');
+    if (!alcoholPercentageSelect) return 0;
+    
+    if (alcoholPercentageSelect.value === 'custom') {
+        return parseFloat(alcoholPercentageSelect.getAttribute('data-custom-value') || 0);
     } else {
-        alert("Please enter an amount.");
+        return parseFloat(alcoholPercentageSelect.value);
     }
 }
