@@ -232,6 +232,7 @@
             let selectedAmount = 100; // Default amount
 
             function selectAmount(amount) {
+                console.log(`Selected amount: ${amount}ml`);
                 selectedAmount = amount;
                 document.querySelectorAll('.amount-option').forEach(option => {
                     option.querySelector('div').style.background = 'rgba(13, 110, 253, 0.2)';
