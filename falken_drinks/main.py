@@ -23,7 +23,7 @@ def index():
     # all_plants = ControllerPlant.list_all_plants(current_user.id)
 
     # return redirect(url_for('main.view_all_plants'))
-    return render_template('base.html')
+    return render_template('home.html')
 
 
 @main.route("/profile", methods=['GET'])

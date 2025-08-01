@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<script>
+    window.onload = function() {
+        activeVisibility('spray', 'spray_icon');
+    }
+</script>
+
+<div class="container" style="text-align: center;">    
+
+        <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px;">
+            <div style="border: 2px solid #fff; border-radius: 12px; padding: 16px 32px; background: rgba(0,0,0,0.3);">
+                <h1 style="color: white; margin: 0;">1800ml / 2560ml</h1>
+            </div>
+        </div>
+        <div class="progress progress-bar-style" style="max-width: 100%;">
+            <div class="progress-bar" style="width: 50%">50%
+            </div>
+            <div class="progress-bar bg-dark" style="width: 10%">10%
+            </div>
+            <div class="progress-bar bg-danger progress-bar-stripped" style="width: 12%">12%
+            </div>
+            <div class="progress-bar bg-success progress-bar-stripped" style="width: 8%">8%
+            </div>
+        </div>
+        <div style="color: #eee; font-size: 1rem; margin-bottom: 10px;">
+            <span style="color: #0d6efd;">&#9632;</span> Water
+            <span style="color: #212529; margin-left: 15px;">&#9632;</span> Coffee/Tea
+            <span style="color: #dc3545; margin-left: 15px;">&#9632;</span> Alcohol
+            <span style="color: #198754; margin-left: 15px;">&#9632;</span> Other
+        </div>
+
+        <!-- Drink icon carousel -->
+        <div style="margin: 10px auto; max-width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.069); border-radius: 15px;">
+            <!-- <h4 style="color: white; margin-bottom: 10px;">Select your drink</h4> -->
+            <div class="drink-carousel" style="display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 15px; padding: 10px 0; justify-content: left;">
+                <div class="drink-icon" onclick="selectDrink('Water')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-water-96.png') }}" alt="Water" style="height: 50px; background: rgba(13, 110, 253, 0.2); padding: 5px; border-radius: 50%;">
+                    <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Water</p>
+                </div>
+                <div class="drink-icon" onclick="selectDrink('Coffee')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-coffee-96.png') }}" alt="Coffee" style="height: 50px; background: rgba(33, 37, 41, 0.2); padding: 5px; border-radius: 50%;">
+                    <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Coffee</p>
+                </div>
+                <div class="drink-icon" onclick="selectDrink('Wine')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-wine-96.png') }}" alt="Wine" style="height: 50px; background: rgba(220, 53, 69, 0.2); padding: 5px; border-radius: 50%;">
+                    <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Wine</p>
+                </div>
+                <div class="drink-icon" onclick="selectDrink('Beer')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-beer-100.png') }}" alt="Beer" style="height: 50px; background: rgba(220, 53, 69, 0.2); padding: 5px; border-radius: 50%;">
+                    <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Beer</p>
+                </div>
+                <div class="drink-icon" onclick="selectDrink('Cocktail')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-alcohol-drink-96.png') }}" alt="Cocktail" style="height: 50px; background: rgba(220, 53, 69, 0.2); padding: 5px; border-radius: 50%;">
+                    <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Cocktail</p>
+                </div>
+                <div class="drink-icon" onclick="selectDrink('Shot')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-shot-100.png') }}" alt="Shot" style="height: 50px; background: rgba(220, 53, 69, 0.2); padding: 5px; border-radius: 50%;">
+                    <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Shot</p>
+                </div>
+                <div class="drink-icon" onclick="selectDrink('Soda')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-coke-96.png') }}" alt="Soda" style="height: 50px; background: rgba(25, 135, 84, 0.2); padding: 5px; border-radius: 50%;">
+                    <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Soda</p>
+                </div>
+                <div class="drink-icon" onclick="selectDrink('Milk')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-milk-96.png') }}" alt="Milk" style="height: 50px; background: rgba(25, 135, 84, 0.2); padding: 5px; border-radius: 50%;">
+                    <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Milk</p>
+                </div>
+                <div class="drink-icon" onclick="selectDrink('Energy')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                    <img src="{{ url_for('static', filename='images/drinks/icons8-energy-drink-96.png') }}" alt="Energy Drink" style="height: 50px; background: rgba(25, 135, 84, 0.2); padding: 5px; border-radius: 50%;">
+                    <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Energy</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Drink amount input carousel -->
+        <div style="margin: 10px auto; max-width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.069); border-radius: 15px;">
+            <!-- <h4 style="color: white; margin-bottom: 10px;">Select amount</h4> -->
+            <div class="amount-carousel" style="display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 15px; padding: 10px 0; justify-content: left;">
+                <div class="amount-option" onclick="selectAmount(100)" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
+                    <div style="height: 50px; width: 50px; display: flex; justify-content: center; align-items: center; background: rgba(13, 110, 253, 0.2); border-radius: 50%; font-size: 0.9rem; color: white; font-weight: bold;">100ml</div>
+                </div>
+                <div class="amount-option" onclick="selectAmount(200)" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
+                    <div style="height: 50px; width: 50px; display: flex; justify-content: center; align-items: center; background: rgba(13, 110, 253, 0.2); border-radius: 50%; font-size: 0.9rem; color: white; font-weight: bold;">200ml</div>
+                </div>
+                <div class="amount-option" onclick="selectAmount(250)" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
+                    <div style="height: 50px; width: 50px; display: flex; justify-content: center; align-items: center; background: rgba(13, 110, 253, 0.2); border-radius: 50%; font-size: 0.9rem; color: white; font-weight: bold;">250ml</div>
+                </div>
+                <div class="amount-option" onclick="selectAmount(330)" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
+                    <div style="height: 50px; width: 50px; display: flex; justify-content: center; align-items: center; background: rgba(13, 110, 253, 0.2); border-radius: 50%; font-size: 0.9rem; color: white; font-weight: bold;">330ml</div>
+                </div>
+                <div class="amount-option" onclick="selectAmount(500)" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
+                    <div style="height: 50px; width: 50px; display: flex; justify-content: center; align-items: center; background: rgba(13, 110, 253, 0.2); border-radius: 50%; font-size: 0.9rem; color: white; font-weight: bold;">500ml</div>
+                </div>
+                <div class="amount-option" onclick="selectCustomAmount()" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
+                    <div style="height: 50px; width: 50px; display: flex; justify-content: center; align-items: center; background: rgba(220, 53, 69, 0.2); border-radius: 50%; font-size: 0.9rem; color: white; font-weight: bold;">Other</div>
+                </div>
+            </div>
+            <div id="custom-amount-container" style="margin-top: 10px; display: none; justify-content: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="number" id="custom-amount" class="form-control" style="max-width: 120px;" placeholder="Enter ml">
+                    <button class="btn btn-sm btn-primary" onclick="confirmCustomAmount()">OK</button>
+                </div>
+            </div>
+            
+            <!-- Alcohol percentage selector - only shows for alcoholic drinks -->
+            <div id="alcohol-percentage-container" style="margin-top: 10px; display: none; justify-content: center;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label style="color: white; margin-bottom: 0; margin-right: 5px;">Alcohol %:</label>
+                    <select id="alcohol-percentage" class="form-select" style="max-width: 100px;">
+                        <option value="0">0%</option>
+                        <option value="4">4%</option>
+                        <option value="5">5%</option>
+                        <option value="7">7%</option>
+                        <option value="12">12%</option>
+                        <option value="14">14%</option>
+                        <option value="20">20%</option>
+                        <option value="35">35%</option>
+                        <option value="40">40%</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                    <div id="custom-alcohol-container" style="display: none; align-items: center; gap: 5px;">
+                        <input type="number" id="custom-alcohol" class="form-control" style="max-width: 80px;" min="0" max="100" placeholder="%">
+                        <button class="btn btn-sm btn-primary" onclick="confirmCustomAlcohol()">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+
+        
+        <div style="margin: 20px auto; text-align: center;">
+            <button type="button" class="btn btn-primary" style="min-width: 150px;" onclick="addDrink()">Add Drink</button>
+        </div>
+
+        <script src="{{ url_for('static', filename='js/drink_selector.js') }}"></script>
+</div>
+{% endblock content %}

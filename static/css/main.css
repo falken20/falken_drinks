@@ -27,7 +27,7 @@ small {
 }
 
 p {
-    font-size: 50% !important;
+    font-size: 50%;
     text-align: justify;
 }
 
@@ -56,6 +56,9 @@ p {
 .center_table {
     margin: 0px auto !important;
 }
+
+
+
 
 
 
@@ -142,4 +145,11 @@ th, td {
 
 .hero.is-fullheight {
     min-height: 100vh; 
+}
+
+.progress-bar-style {
+    font-size: 40% !important;
+    font-weight: bold;
+    margin-top: 30px !important;
+    margin-bottom: 10px !important;
 }
