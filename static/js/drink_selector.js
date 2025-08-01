@@ -1,4 +1,132 @@
-// Add this function to your existing falken.js file
+
+// Initialize all event listeners when the DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up the "Other" drink selection dropdown visibility
+    const otherRadio = document.getElementById('other');
+    const otherSelect = document.getElementById('other-drink-select');
+    const drinkRadios = document.getElementsByName('drink');
+    
+    if (drinkRadios && otherRadio && otherSelect) {
+        drinkRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (otherRadio.checked) {
+                    otherSelect.style.display = 'inline-block';
+                } else {
+                    otherSelect.style.display = 'none';
+                }
+            });
+        });
+    }
+    
+    // Set up alcohol percentage select change handler
+    const alcoholPercentageSelect = document.getElementById('alcohol-percentage');
+    if (alcoholPercentageSelect) {
+        alcoholPercentageSelect.addEventListener('change', function() {
+            const customAlcoholContainer = document.getElementById('custom-alcohol-container');
+            if (alcoholPercentageSelect.value === 'custom' && customAlcoholContainer) {
+                customAlcoholContainer.style.display = 'flex';
+                document.getElementById('custom-alcohol').focus();
+            } else {
+                document.getElementById('custom-alcohol-container').style.display = 'none';
+            }
+        });
+    }
+    
+    // Add event listener for custom amount input to handle Enter key
+    const customAmountInput = document.getElementById('custom-amount');
+    if (customAmountInput) {
+        customAmountInput.addEventListener('keyup', function(event) {
+            if (event.key === "Enter") {
+                confirmCustomAmount();
+            }
+        });
+    }
+    
+    // Add event listener for custom alcohol input to handle Enter key
+    const customAlcoholInput = document.getElementById('custom-alcohol');
+    if (customAlcoholInput) {
+        customAlcoholInput.addEventListener('keyup', function(event) {
+            if (event.key === "Enter") {
+                confirmCustomAlcohol();
+            }
+        });
+    }
+    
+    // Set up drink radio buttons to show/hide alcohol percentage selector
+    const alcoholPercentageContainer = document.getElementById('alcohol-percentage-container');
+    const customAlcoholContainer = document.getElementById('custom-alcohol-container');
+    
+    if (drinkRadios && alcoholPercentageContainer && alcoholPercentageSelect) {
+        drinkRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'Wine' || this.value === 'Beer' || this.value === 'Cocktail' || this.value === 'Shot') {
+                    alcoholPercentageContainer.style.display = 'flex';
+                } else {
+                    alcoholPercentageContainer.style.display = 'none';
+                    alcoholPercentageSelect.value = '0'; // Reset to 0% if not an alcoholic drink
+                    if (customAlcoholContainer) {
+                        customAlcoholContainer.style.display = 'none'; // Hide custom alcohol input
+                    }
+                }
+            });
+        });
+    }
+});
+
+// Global variable for selected amount
+let selectedAmount = 100; // Default amount
+
+/**
+ * Function to add a drink
+ */
+function addDrink() {
+    const drinkForm = document.getElementById('drink-form');
+    const selectedDrink = document.querySelector('input[name="drink"]:checked')?.value;
+    
+    if (!selectedDrink) {
+        alert("Please select a drink.");
+        return;
+    }
+    
+    const amount = document.getElementById('amount').value;
+    
+    // If "Other" is selected, get the specific drink type from the dropdown
+    let drinkType = selectedDrink;
+    if (selectedDrink === "Other") {
+        const otherSelect = document.getElementById('other-drink-select');
+        if (otherSelect && otherSelect.selectedIndex >= 0) {
+            drinkType = otherSelect.options[otherSelect.selectedIndex].value;
+        }
+    }
+    
+    if (!amount) {
+        alert("Please enter an amount.");
+        return;
+    }
+    
+    // Get alcohol percentage if applicable
+    let alcoholPercentage = 0;
+    if (['Wine', 'Beer', 'Cocktail', 'Shot'].includes(drinkType) || 
+         selectedDrink === "Alcohol") {
+        alcoholPercentage = getSelectedAlcoholPercentage();
+    }
+    
+    // Here you would typically make an API call to save the drink
+    if (alcoholPercentage > 0) {
+        console.log(`Adding ${amount}ml of ${drinkType} (${alcoholPercentage}% alcohol)`);
+        alert(`Added ${amount}ml of ${drinkType} (${alcoholPercentage}% alcohol)!`);
+    } else {
+        console.log(`Adding ${amount}ml of ${drinkType}`);
+        alert(`Added ${amount}ml of ${drinkType}!`);
+    }
+    
+    // Reset form
+    document.getElementById('amount').value = '';
+}
+
+/**
+ * Select a drink from the drink icon carousel
+ */
 function selectDrink(drinkType) {
     console.log("Selected drink: " + drinkType);
     
@@ -135,19 +263,17 @@ function selectDrink(drinkType) {
  * Handle selecting a predefined amount from the amount carousel
  */
 function selectAmount(amount) {
-    console.log("Selected amount: " + amount + "ml");
-    
-    // Highlight the selected amount option
-    const amountOptions = document.querySelectorAll('.amount-option');
-    amountOptions.forEach(option => {
-        option.style.transform = 'scale(1)';
-        option.querySelector('div').style.boxShadow = 'none';
+    console.log(`Selected amount: ${amount}ml`);
+    selectedAmount = amount;
+    document.querySelectorAll('.amount-option').forEach(option => {
+        option.querySelector('div').style.background = 'rgba(13, 110, 253, 0.2)';
+        option.querySelector('div').style.color = 'white';
     });
-    
-    // Find the clicked element and highlight it
-    const clickedOption = event.currentTarget;
-    clickedOption.style.transform = 'scale(1.1)';
-    clickedOption.querySelector('div').style.boxShadow = '0 0 10px rgba(255, 255, 255, 0.8)';
+    const activeOption = document.querySelector(`.amount-option[onclick="selectAmount(${amount})"]`);
+    if (activeOption) {
+        activeOption.querySelector('div').style.background = 'rgba(13, 110, 253, 0.5)';
+        activeOption.querySelector('div').style.color = 'white';
+    }
     
     // Hide custom amount input if it's visible
     const customAmountContainer = document.getElementById('custom-amount-container');
