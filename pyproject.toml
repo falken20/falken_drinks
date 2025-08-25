@@ -1,10 +1,14 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "falken-drinks"
 version = "0.1.0"
 title = "Falken Drinks"
 description = "Falken apps to manage daily drinks"
-authors = ["Falken"]
-license = "MIT"
+authors = [{ name = "Falken" }]
+license = { text = "MIT" }
 url_github = "https://github.com/falken20/"
 url_twitter = "https://twitter.com/richionline"
 url_linkedin = "https://www.linkedin.com/in/richionline/"
@@ -28,7 +32,15 @@ dependencies = [
     "psycopg2>=2.9.6", # PostgreSQL adapter
 ]
 
-[dependency-groups]
+[project.urls]
+Homepage = "https://github.com/falken20/"
+Twitter = "https://twitter.com/richionline"
+LinkedIn = "https://www.linkedin.com/in/richionline/"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[project.optional-dependencies]
 dev = [
     "coverage>=7.6.12",
     "mock>=5.2.0",
@@ -38,3 +50,5 @@ lint = [
     "autopep8>=2.3.2",
     "flake8>=7.1.2",
 ]
+
+

@@ -7,6 +7,15 @@ credentials.yaml
 .vscode
 **/*.iml
 .DS_Store
+*.egg-info/
+dist/
+build/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
