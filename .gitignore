@@ -1,7 +1,6 @@
 # Falken
 credentials.yaml
 *.db
-# IDEs
 .eclipse/
 .idea/
 .vscode
