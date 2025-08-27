@@ -14,6 +14,11 @@ function toggleVisibility(id) {
 function activeVisibility(id_status, id) {
     var elStatus = document.getElementById(id_status);
     var el = document.getElementById(id);
+    
+    if (elStatus == null || el == null) {
+        return;
+    }
+    
     console.log("This is a tests", elStatus.checked);
  
     if (elStatus.checked) {

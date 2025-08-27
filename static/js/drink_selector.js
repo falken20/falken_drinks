@@ -81,7 +81,13 @@ let selectedAmount = 100; // Default amount
  */
 function addDrink() {
     const drinkForm = document.getElementById('drink-form');
+    
     const selectedDrink = document.querySelector('input[name="drink"]:checked')?.value;
+    //const selectedDrinkElement = document.querySelector('input[name="drink"]:checked');
+    //const selectedDrink = selectedDrinkElement ? selectedDrinkElement.value : null;
+
+    console.log("Adding drink...");
+    console.log("Selected drink: " + selectedDrink);
     
     if (!selectedDrink) {
         alert("Please select a drink.");
