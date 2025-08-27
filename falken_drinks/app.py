@@ -21,8 +21,8 @@ settings = get_settings()
 Log.info("***** Environment vars:")
 Log.info_dict(settings.dict(), level_log="INFO")
 
-console.rule(settings.APP_DATA['title'] + " " +
-             settings.APP_DATA['version'] + " by " + settings.APP_DATA['author'])
+console.rule(settings.APP_DATA['title'] + " " 
+             + " " + settings.APP_DATA['version'] + " " + settings.APP_DATA['author'])
 
 # Cache info
 check_cache()

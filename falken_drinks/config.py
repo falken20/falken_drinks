@@ -111,7 +111,7 @@ class Settings(BaseSettings):
         self.APP_DATA = {
             'title': data_app['project']['title'],
             'version': data_app['project']['version'],
-            'author': data_app['project']['authors'][0],
+            'author': data_app['project']['authors'][0]['name'],
             'license': data_app['project']['license'],
             'url_github': data_app['project']['url_github'],
             'url_twitter': data_app['project']['url_twitter'],
