@@ -75,6 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Global variable for selected amount
 let selectedAmount = 100; // Default amount
+let radioId = 'water'; // Default drink type
 
 /**
  * Function to add a drink
@@ -82,13 +83,16 @@ let selectedAmount = 100; // Default amount
 function addDrink() {
     const drinkForm = document.getElementById('drink-form');
     
-    const selectedDrink = document.querySelector('input[name="drink"]:checked')?.value;
-    //const selectedDrinkElement = document.querySelector('input[name="drink"]:checked');
-    //const selectedDrink = selectedDrinkElement ? selectedDrinkElement.value : null;
+    // const selectedDrink = document.querySelector('input[name="drink"]:checked')?.value;
+    const selectedDrinkElement = document.querySelector('input[name="drink"]:checked');
+    const selectedDrink = selectedDrinkElement ? selectedDrinkElement.value : null;
 
     console.log("Adding drink...");
     console.log("Selected drink: " + selectedDrink);
-    
+    console.log("Selected amount: " + selectedAmount);
+    console.log("Selected alcohol percentage: " + getSelectedAlcoholPercentage());
+    console.log("Drink Type: " + radioId);
+
     if (!selectedDrink) {
         alert("Please select a drink.");
         return;
@@ -186,7 +190,7 @@ function selectDrink(drinkType) {
     }
     
     // Set the corresponding radio button
-    let radioId;
+    // let radioId;
     switch(drinkType) {
         case 'Water':
             radioId = 'water';
@@ -380,3 +384,4 @@ function getSelectedAlcoholPercentage() {
         return parseFloat(alcoholPercentageSelect.value);
     }
 }
+
