@@ -74,6 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Global variable for selected amount
+let selectedDrink = 'Water'; // Default drink selected
 let selectedAmount = 100; // Default amount
 let radioId = 'water'; // Default drink type
 
@@ -84,8 +85,8 @@ function addDrink() {
     const drinkForm = document.getElementById('drink-form');
     
     // const selectedDrink = document.querySelector('input[name="drink"]:checked')?.value;
-    const selectedDrinkElement = document.querySelector('input[name="drink"]:checked');
-    const selectedDrink = selectedDrinkElement ? selectedDrinkElement.value : null;
+    // const selectedDrinkElement = document.querySelector('input[name="drink"]:checked');
+    // const selectedDrink = selectedDrinkElement ? selectedDrinkElement.value : null;
 
     console.log("Adding drink...");
     console.log("Selected drink: " + selectedDrink);
@@ -98,7 +99,7 @@ function addDrink() {
         return;
     }
     
-    const amount = document.getElementById('amount').value;
+    const amount = selectedAmount;
     
     // If "Other" is selected, get the specific drink type from the dropdown
     let drinkType = selectedDrink;
@@ -139,7 +140,8 @@ function addDrink() {
  */
 function selectDrink(drinkType) {
     console.log("Selected drink: " + drinkType);
-    
+    selectedDrink = drinkType;
+
     // Highlight the selected icon
     const icons = document.querySelectorAll('.drink-icon');
     icons.forEach(icon => {
