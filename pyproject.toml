@@ -37,14 +37,18 @@ Homepage = "https://github.com/falken20/"
 Twitter = "https://twitter.com/richionline"
 LinkedIn = "https://www.linkedin.com/in/richionline/"
 
-[tool.setuptools.packages.find]
-where = ["."]
+[tool.setuptools]
+packages = ["falken_drinks"]
+
+[tool.setuptools.package-dir]
+"falken_drinks" = "falken_drinks"
 
 [project.optional-dependencies]
 dev = [
     "coverage>=7.6.12",
     "mock>=5.2.0",
     "pytest>=8.3.5",
+    "pre-commit>=4.0.1",
 ]
 lint = [
     "autopep8>=2.3.2",
