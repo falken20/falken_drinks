@@ -1,4 +1,3 @@
-
 // Initialize all event listeners when the DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     // Set up the "Other" drink selection dropdown visibility
@@ -84,10 +83,6 @@ let radioId = 'water'; // Default drink type
 function addDrink() {
     const drinkForm = document.getElementById('drink-form');
     
-    // const selectedDrink = document.querySelector('input[name="drink"]:checked')?.value;
-    // const selectedDrinkElement = document.querySelector('input[name="drink"]:checked');
-    // const selectedDrink = selectedDrinkElement ? selectedDrinkElement.value : null;
-
     console.log("Adding drink...");
     console.log("Selected drink: " + selectedDrink);
     console.log("Selected amount: " + selectedAmount);
@@ -122,17 +117,45 @@ function addDrink() {
         alcoholPercentage = getSelectedAlcoholPercentage();
     }
     
-    // Here you would typically make an API call to save the drink
-    if (alcoholPercentage > 0) {
-        console.log(`Adding ${amount}ml of ${drinkType} (${alcoholPercentage}% alcohol)`);
-        alert(`Added ${amount}ml of ${drinkType} (${alcoholPercentage}% alcohol)!`);
-    } else {
-        console.log(`Adding ${amount}ml of ${drinkType}`);
-        alert(`Added ${amount}ml of ${drinkType}!`);
-    }
+    // Prepare data for API call
+    const drinkData = {
+        drink_name: drinkType,
+        amount: amount,
+        alcohol_percentage: alcoholPercentage
+    };
     
-    // Reset form
-    document.getElementById('amount').value = '';
+    // Make API call to save drink log
+    fetch('/api/add_drink', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(drinkData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (alcoholPercentage > 0) {
+                console.log(`Added ${amount}ml of ${drinkType} (${alcoholPercentage}% alcohol)`);
+                alert(`Added ${amount}ml of ${drinkType} (${alcoholPercentage}% alcohol)!`);
+            } else {
+                console.log(`Added ${amount}ml of ${drinkType}`);
+                alert(`Added ${amount}ml of ${drinkType}!`);
+            }
+            
+            // Reset form
+            document.getElementById('amount').value = '';
+            
+            // Optionally refresh the page or update UI
+            // location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to save drink. Please try again.');
+    });
 }
 
 /**

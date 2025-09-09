@@ -61,7 +61,31 @@ class ControllerDrinks:
     def get_drink_name(name: str):
         Log.info(
             f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
-        return Drink.query.filter_by(name=name).first()
+        return Drink.query.filter_by(drink_name=name).first()
+
+    @staticmethod
+    def get_or_create_drink(drink_name: str, alcohol_percentage: float = 0):
+        """Get existing drink or create new one if it doesn't exist"""
+        Log.info(
+            f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
+        try:
+            # Try to find existing drink
+            drink = Drink.query.filter_by(drink_name=drink_name).first()
+            
+            if not drink:
+                # Create new drink if it doesn't exist
+                water_percentage = 100 - alcohol_percentage
+                drink_data = {
+                    'drink_name': drink_name,
+                    'drink_water_percentage': int(water_percentage),
+                    'drink_alcohol_percentage': int(alcohol_percentage)
+                }
+                drink = ControllerDrinks.add_drink(drink_data)
+            
+            return drink
+        except Exception as e:
+            Log.error("Error in ControllerDrinks.get_or_create_drink", err=e, sys=sys)
+            return None
 
     @staticmethod
     def get_drinks():
