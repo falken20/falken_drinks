@@ -82,10 +82,10 @@ def create_app(test_config=None):
         app.register_blueprint(main_blueprint)
         Log.info("Main blueprint registered successfully")
 
-        # blueprint for API urls
-        from .urls import urls as urls_blueprint
-        app.register_blueprint(urls_blueprint)
-        Log.info("URLs blueprint registered successfully")
+        # Blueprint for routes
+        from .routes import api_routes as routes_blueprint
+        app.register_blueprint(routes_blueprint)
+        Log.info("Routes blueprint registered successfully")
 
         # blueprint for swagger
         from .swagger import swagger_ui_blueprint, SWAGGER_URL

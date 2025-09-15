@@ -105,8 +105,8 @@ function addDrink() {
         }
     }
     
-    if (!amount) {
-        alert("Please enter an amount.");
+    if (!amount || isNaN(amount) || amount <= 0) {
+        alert("Please enter a valid amount.");
         return;
     }
     
@@ -115,14 +115,19 @@ function addDrink() {
     if (['Wine', 'Beer', 'Cocktail', 'Shot'].includes(drinkType) || 
          selectedDrink === "Alcohol") {
         alcoholPercentage = getSelectedAlcoholPercentage();
+        if (isNaN(alcoholPercentage) || alcoholPercentage < 0) {
+            alcoholPercentage = 0;
+        }
     }
     
     // Prepare data for API call
     const drinkData = {
         drink_name: drinkType,
-        amount: amount,
-        alcohol_percentage: alcoholPercentage
+        amount: parseInt(amount),
+        alcohol_percentage: parseFloat(alcoholPercentage)
     };
+    
+    console.log("Sending data to API:", drinkData);
     
     // Make API call to save drink log
     fetch('/api/add_drink', {
@@ -130,9 +135,24 @@ function addDrink() {
         headers: {
             'Content-Type': 'application/json',
         },
+        credentials: 'same-origin',
         body: JSON.stringify(drinkData)
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            // Try to get the error message from the response
+            return response.json().then(errorData => {
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }).catch(() => {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            });
+        }
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Response is not JSON');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             if (alcoholPercentage > 0) {
@@ -154,7 +174,13 @@ function addDrink() {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Failed to save drink. Please try again.');
+        if (error.message.includes('401')) {
+            alert('Please log in to add drinks.');
+        } else if (error.message.includes('500')) {
+            alert('Server error: ' + error.message + '. Please check the server logs.');
+        } else {
+            alert('Failed to save drink: ' + error.message);
+        }
     });
 }
 

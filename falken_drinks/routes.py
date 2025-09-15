@@ -1,8 +1,10 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
+import sys
+
 from .controllers import ControllerDrinks, ControllerDrinkLogs
 from .logger import Log
-import sys
+
 
 api_routes = Blueprint('api_routes', __name__)
 
@@ -11,11 +13,31 @@ api_routes = Blueprint('api_routes', __name__)
 def add_drink():
     try:
         data = request.get_json()
+        Log.info(f"Received data: {data}")
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'message': 'No data received'
+            }), 400
         
         # Extract data from request
         drink_name = data.get('drink_name')
-        drink_total_quantity = int(data.get('amount', 0))
-        alcohol_percentage = float(data.get('alcohol_percentage', 0))
+        drink_total_quantity = data.get('amount', 0)
+        alcohol_percentage = data.get('alcohol_percentage', 0)
+        
+        Log.info(f"Processing drink: {drink_name}, amount: {drink_total_quantity}, alcohol: {alcohol_percentage}")
+        
+        # Validate and convert data types
+        try:
+            drink_total_quantity = int(drink_total_quantity)
+            alcohol_percentage = float(alcohol_percentage)
+        except (ValueError, TypeError) as e:
+            Log.error(f"Data type conversion error: {e}")
+            return jsonify({
+                'success': False,
+                'message': f'Invalid data types: {str(e)}'
+            }), 400
         
         if not drink_name or drink_total_quantity <= 0:
             return jsonify({
