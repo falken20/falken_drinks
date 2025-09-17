@@ -32,6 +32,7 @@ def add_drink():
         try:
             drink_total_quantity = int(drink_total_quantity)
             alcohol_percentage = float(alcohol_percentage)
+            drink_total_quantity = int(drink_total_quantity)
         except (ValueError, TypeError) as e:
             Log.error(f"Data type conversion error: {e}")
             return jsonify({
@@ -46,7 +47,7 @@ def add_drink():
             }), 400
         
         # Get or create drink
-        drink = ControllerDrinks.get_or_create_drink(drink_name, alcohol_percentage)
+        drink = ControllerDrinks.get_or_create_drink(drink_name, alcohol_percentage, drink_total_quantity)
         if not drink:
             return jsonify({
                 'success': False,

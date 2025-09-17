@@ -64,7 +64,7 @@ class ControllerDrinks:
         return Drink.query.filter_by(drink_name=name).first()
 
     @staticmethod
-    def get_or_create_drink(drink_name: str, alcohol_percentage: float = 0):
+    def get_or_create_drink(drink_name: str, alcohol_percentage: float = 0, drink_total_quantity: int = 0):
         """Get existing drink or create new one if it doesn't exist"""
         Log.info(
             f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
@@ -135,6 +135,8 @@ class ControllerDrinkLogs:
     def add_drink_log(drink_log_data: dict):
         Log.info(
             f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
+        Log.debug(f"drink_log_data: {drink_log_data}")
+
         try:
             new_drink_log = DrinkLog(**drink_log_data)
             db.session.add(new_drink_log)

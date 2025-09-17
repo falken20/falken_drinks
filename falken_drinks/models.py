@@ -171,8 +171,9 @@ class DrinkLog(db.Model):
     
     @validates('drink_total_quantity', 'drink_water_quantity', 'drink_alcohol_quantity')
     def validate_quantity(self, key, value):
-        if not value:
-            raise ValueError("Drink quantity can't be empty")
+        Log.debug(f"Validating {key} with value {value} - {type(value)}")
+        if value is None:
+            raise ValueError(f"Drink quantity can't be empty: {key} - {value}")
         return value
     
     # Validations => https://flask-validator.readthedocs.io/en/latest/index.html
