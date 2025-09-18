@@ -163,8 +163,26 @@ function addDrink() {
                 alert(`Added ${amount}ml of ${drinkType}!`);
             }
             
-            // Reset form
-            document.getElementById('amount').value = '';
+            // Reset form elements
+            const amountInput = document.getElementById('amount');
+            if (amountInput) {
+                amountInput.value = '';
+            }
+            
+            // Reset selected amount variable
+            selectedAmount = 100;
+            
+            // Reset amount option highlights
+            document.querySelectorAll('.amount-option').forEach(option => {
+                option.querySelector('div').style.background = 'rgba(13, 110, 253, 0.2)';
+                option.querySelector('div').style.color = 'white';
+            });
+            
+            // Hide custom amount container if visible
+            const customAmountContainer = document.getElementById('custom-amount-container');
+            if (customAmountContainer) {
+                customAmountContainer.style.display = 'none';
+            }
             
             // Optionally refresh the page or update UI
             // location.reload();
