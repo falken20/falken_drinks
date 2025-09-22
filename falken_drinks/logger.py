@@ -27,9 +27,17 @@ LEVEL_LOG = os.getenv('LEVEL_LOG', "DEBUG, INFO, WARNING, ERROR")
 
 class Log():
     @staticmethod
-    def info_dict(dict_obj: dict = None, level_log: str = "INFO"):
+    def info_dict(message: str = "", dict_obj: dict = None, level_log: str = "INFO"):
         try:
             if level_log in LEVEL_LOG.upper():
+                if level_log == "INFO":
+                    Log.info(message)
+                elif level_log == "DEBUG":
+                    Log.debug(message)
+                elif level_log == "WARNING":
+                    Log.warning(message)
+                elif level_log == "ERROR":
+                    Log.error(message)
                 pprint.pprint(dict_obj)
 
         except Exception as err:
