@@ -153,3 +153,83 @@ class ControllerDrinkLogs:
             f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
         DrinkLog.query.filter_by(id=id).delete()
         db.session.commit()
+
+    @staticmethod
+    def get_daily_consumption(user_id: int, target_date: date = None):
+        """Get daily consumption totals for a user on a specific date (default today)"""
+        Log.info(
+            f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
+        
+        if target_date is None:
+            target_date = date.today()
+        
+        try:
+            # Query all drink logs for the user on the target date
+            logs = DrinkLog.query.filter_by(
+                user_id=user_id,
+                date_created=target_date
+            ).all()
+            
+            # Calculate totals
+            total_liquid = sum(log.drink_total_quantity for log in logs)
+            total_water = sum(log.drink_water_quantity for log in logs)
+            total_alcohol = sum(log.drink_alcohol_quantity for log in logs)
+            
+            # Calculate other beverages (non-water, non-alcohol)
+            total_other = total_liquid - total_water - total_alcohol
+            
+            # Calculate coffee/tea separately (approximate - drinks with 0% alcohol and less than 90% water)
+            total_coffee = 0
+            for log in logs:
+                if log.drink_alcohol_quantity == 0:
+                    # Get drink info to check if it's likely coffee/tea
+                    drink = Drink.query.filter_by(drink_id=log.drink_id).first()
+                    if drink and drink.drink_water_percentage < 90:
+                        total_coffee += log.drink_total_quantity
+            
+            # Adjust other beverages to exclude coffee
+            total_other = max(0, total_other - total_coffee)
+            
+            # Daily goal (you can make this configurable per user later)
+            daily_goal = 2560  # ml (approximately 8 glasses of water)
+            
+            # Calculate progress percentage
+            progress_percentage = min(100, (total_liquid / daily_goal * 100)) if daily_goal > 0 else 0
+            
+            # Calculate individual percentages for progress bar
+            water_percentage = (total_water / daily_goal * 100) if daily_goal > 0 else 0
+            coffee_percentage = (total_coffee / daily_goal * 100) if daily_goal > 0 else 0
+            alcohol_percentage = (total_alcohol / daily_goal * 100) if daily_goal > 0 else 0
+            other_percentage = (total_other / daily_goal * 100) if daily_goal > 0 else 0
+            
+            return {
+                'total_liquid': total_liquid,
+                'total_water': total_water,
+                'total_coffee': total_coffee,
+                'total_alcohol': total_alcohol,
+                'total_other': total_other,
+                'daily_goal': daily_goal,
+                'progress_percentage': progress_percentage,
+                'water_percentage': min(100, water_percentage),
+                'coffee_percentage': min(100, coffee_percentage),
+                'alcohol_percentage': min(100, alcohol_percentage),
+                'other_percentage': min(100, other_percentage),
+                'date': target_date
+            }
+            
+        except Exception as e:
+            Log.error("Error in ControllerDrinkLogs.get_daily_consumption", err=e, sys=sys)
+            return {
+                'total_liquid': 0,
+                'total_water': 0,
+                'total_coffee': 0,
+                'total_alcohol': 0,
+                'total_other': 0,
+                'daily_goal': 2560,
+                'progress_percentage': 0,
+                'water_percentage': 0,
+                'coffee_percentage': 0,
+                'alcohol_percentage': 0,
+                'other_percentage': 0,
+                'date': target_date
+            }

@@ -184,8 +184,10 @@ function addDrink() {
                 customAmountContainer.style.display = 'none';
             }
             
-            // Optionally refresh the page or update UI
-            // location.reload();
+            // Refresh the page to update consumption display
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
         } else {
             alert('Error: ' + data.message);
         }
