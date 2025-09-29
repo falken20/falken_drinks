@@ -151,8 +151,25 @@ class ControllerDrinkLogs:
     def delete_drink_log(id: int) -> None:
         Log.info(
             f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
-        DrinkLog.query.filter_by(id=id).delete()
+        DrinkLog.query.filter_by(log_id=id).delete()
         db.session.commit()
+
+    @staticmethod
+    def delete_drink_log_by_user(log_id: int, user_id: int):
+        """Delete a drink log only if it belongs to the specified user"""
+        Log.info(
+            f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
+        try:
+            log = DrinkLog.query.filter_by(log_id=log_id, user_id=user_id).first()
+            if log:
+                db.session.delete(log)
+                db.session.commit()
+                return True
+            return False
+        except Exception as e:
+            Log.error("Error in ControllerDrinkLogs.delete_drink_log_by_user", err=e, sys=sys)
+            db.session.rollback()
+            return False
 
     @staticmethod
     def get_daily_consumption(user_id: int, target_date: date = None):
@@ -232,4 +249,67 @@ class ControllerDrinkLogs:
                 'alcohol_percentage': 0,
                 'other_percentage': 0,
                 'date': target_date
+            }
+
+    @staticmethod
+    def get_daily_summary(user_id: int, target_date: date = None):
+        """Get detailed daily summary with all drink logs for a specific date"""
+        Log.info(
+            f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
+        
+        if target_date is None:
+            target_date = date.today()
+        
+        try:
+            # Query all drink logs for the user on the target date with drink information
+            logs = db.session.query(DrinkLog, Drink).join(
+                Drink, DrinkLog.drink_id == Drink.drink_id
+            ).filter(
+                DrinkLog.user_id == user_id,
+                DrinkLog.date_created == target_date
+            ).order_by(DrinkLog.log_id.desc()).all()
+            
+            # Process logs into a more readable format
+            drink_logs = []
+            total_liquid = 0
+            total_water = 0
+            total_alcohol = 0
+            
+            for log, drink in logs:
+                drink_data = {
+                    'log_id': log.log_id,
+                    'drink_name': drink.drink_name,
+                    'total_quantity': log.drink_total_quantity,
+                    'water_quantity': log.drink_water_quantity,
+                    'alcohol_quantity': log.drink_alcohol_quantity,
+                    'alcohol_percentage': drink.drink_alcohol_percentage,
+                    'drink_image': drink.drink_image,
+                    'time_logged': log.date_created  # You might want to add time field to model
+                }
+                drink_logs.append(drink_data)
+                
+                # Accumulate totals
+                total_liquid += log.drink_total_quantity
+                total_water += log.drink_water_quantity
+                total_alcohol += log.drink_alcohol_quantity
+            
+            # Get consumption data for progress
+            consumption_data = ControllerDrinkLogs.get_daily_consumption(user_id, target_date)
+            
+            return {
+                'date': target_date,
+                'drink_logs': drink_logs,
+                'total_logs': len(drink_logs),
+                'consumption_summary': consumption_data,
+                'has_logs': len(drink_logs) > 0
+            }
+            
+        except Exception as e:
+            Log.error("Error in ControllerDrinkLogs.get_daily_summary", err=e, sys=sys)
+            return {
+                'date': target_date,
+                'drink_logs': [],
+                'total_logs': 0,
+                'consumption_summary': ControllerDrinkLogs.get_daily_consumption(user_id, target_date),
+                'has_logs': False
             }

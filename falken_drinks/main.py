@@ -36,3 +36,15 @@ def profile():
     Log.debug(f"Current user: {current_user}")
 
     return render_template('profile.html', name=current_user.name, date_created=current_user.date_created)
+
+
+@main.route("/daily_summary", methods=['GET'])
+@login_required
+def daily_summary():
+    Log.info(
+        f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
+    Log.debug(f"Current user: {current_user}")
+
+    daily_summary = ControllerDrinkLogs.get_daily_summary(current_user.user_id)
+
+    return render_template('daily_summary.html', daily_summary=daily_summary)

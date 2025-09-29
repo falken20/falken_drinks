@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<script>
+    window.onload = function() {
+        activeVisibility('summary', 'summary_icon');
+    }
+</script>
+
+<div class="container" style="text-align: center;">    
+    
+    <!-- Daily Summary Header -->
+    <div style="margin-bottom: 30px;">
+        <h1 style="color: white; margin-bottom: 20px;">Daily Summary</h1>
+        <div style="color: #eee; font-size: 1.1rem;">
+            {{ daily_summary.date.strftime('%B %d, %Y') }}
+        </div>
+    </div>
+
+    <!-- Daily Progress Overview -->
+    <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 30px;">
+        <div style="border: 2px solid {% if daily_summary.consumption_summary.progress_percentage >= 100 %}#28a745{% else %}#fff{% endif %}; border-radius: 12px; padding: 16px 32px; background: rgba(0,0,0,0.3);">
+            <h2 style="color: {% if daily_summary.consumption_summary.progress_percentage >= 100 %}#28a745{% else %}white{% endif %}; margin: 0;">
+                {{ daily_summary.consumption_summary.total_liquid }}ml / {{ daily_summary.consumption_summary.daily_goal }}ml
+                {% if daily_summary.consumption_summary.progress_percentage >= 100 %}
+                <span style="font-size: 0.6em;"> ✓ GOAL REACHED!</span>
+                {% endif %}
+            </h2>
+            <div style="color: #ccc; font-size: 0.9rem; margin-top: 8px;">
+                {{ "%.1f"|format(daily_summary.consumption_summary.progress_percentage) }}% of daily goal
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress progress-bar-style" style="max-width: 100%; margin-bottom: 30px;">
+        {% if daily_summary.consumption_summary.water_percentage > 0 %}
+        <div class="progress-bar" style="width: {{ daily_summary.consumption_summary.water_percentage }}%">{{ "%.0f"|format(daily_summary.consumption_summary.water_percentage) }}%</div>
+        {% endif %}
+        {% if daily_summary.consumption_summary.coffee_percentage > 0 %}
+        <div class="progress-bar bg-dark" style="width: {{ daily_summary.consumption_summary.coffee_percentage }}%">{{ "%.0f"|format(daily_summary.consumption_summary.coffee_percentage) }}%</div>
+        {% endif %}
+        {% if daily_summary.consumption_summary.alcohol_percentage > 0 %}
+        <div class="progress-bar bg-danger progress-bar-stripped" style="width: {{ daily_summary.consumption_summary.alcohol_percentage }}%">{{ "%.0f"|format(daily_summary.consumption_summary.alcohol_percentage) }}%</div>
+        {% endif %}
+        {% if daily_summary.consumption_summary.other_percentage > 0 %}
+        <div class="progress-bar bg-success progress-bar-stripped" style="width: {{ daily_summary.consumption_summary.other_percentage }}%">{{ "%.0f"|format(daily_summary.consumption_summary.other_percentage) }}%</div>
+        {% endif %}
+        {% if daily_summary.consumption_summary.total_liquid == 0 %}
+        <div class="progress-bar bg-secondary" style="width: 100%; text-align: center;">No drinks logged today</div>
+        {% endif %}
+    </div>
+
+    <!-- Legend -->
+    <div style="color: #eee; font-size: 1rem; margin-bottom: 30px;">
+        <span style="color: #0d6efd;">&#9632;</span> Water
+        <span style="color: #212529; margin-left: 15px;">&#9632;</span> Coffee/Tea
+        <span style="color: #dc3545; margin-left: 15px;">&#9632;</span> Alcohol
+        <span style="color: #198754; margin-left: 15px;">&#9632;</span> Other
+    </div>
+
+    <!-- Drink Logs List -->
+    <div style="max-width: 600px; margin: 0 auto;">
+        <h3 style="color: white; margin-bottom: 20px;">Today's Drinks ({{ daily_summary.total_logs }} entries)</h3>
+        
+        {% if daily_summary.has_logs %}
+            {% for log in daily_summary.drink_logs %}
+            <div style="background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; margin-bottom: 15px; text-align: left;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center;">
+                        <!-- Drink Icon/Image -->
+                        {% if log.drink_image %}
+                        <img src="{{ url_for('static', filename='images/drinks/' + log.drink_image) }}" 
+                             alt="{{ log.drink_name }}" 
+                             style="height: 40px; width: 40px; border-radius: 50%; margin-right: 15px; background: rgba(255,255,255,0.1); padding: 5px;">
+                        {% else %}
+                        <div style="height: 40px; width: 40px; border-radius: 50%; margin-right: 15px; background: rgba(13, 110, 253, 0.3); display: flex; align-items: center; justify-content: center;">
+                            <span style="color: white; font-weight: bold; font-size: 0.8rem;">{{ log.drink_name[0] }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Drink Info -->
+                        <div>
+                            <div style="color: white; font-size: 1.1rem; font-weight: bold;">{{ log.drink_name }}</div>
+                            <div style="color: #ccc; font-size: 0.9rem;">
+                                {{ log.total_quantity }}ml
+                                {% if log.alcohol_percentage > 0 %}
+                                <span style="color: #dc3545;"> • {{ log.alcohol_percentage }}% alcohol</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Delete Button (Optional - you can implement delete functionality) -->
+                    <div>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteDrinkLog({{ log.log_id }})" style="opacity: 0.7;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Breakdown -->
+                {% if log.water_quantity > 0 or log.alcohol_quantity > 0 %}
+                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <div style="color: #aaa; font-size: 0.8rem;">
+                        {% if log.water_quantity > 0 %}
+                        <span style="color: #0d6efd;">Water: {{ log.water_quantity }}ml</span>
+                        {% endif %}
+                        {% if log.alcohol_quantity > 0 %}
+                        {% if log.water_quantity > 0 %} • {% endif %}
+                        <span style="color: #dc3545;">Alcohol: {{ log.alcohol_quantity }}ml</span>
+                        {% endif %}
+                        {% if log.total_quantity - log.water_quantity - log.alcohol_quantity > 0 %}
+                        • <span style="color: #198754;">Other: {{ log.total_quantity - log.water_quantity - log.alcohol_quantity }}ml</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <div style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 40px; color: #ccc; text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 15px;">🥤</div>
+                <h4 style="color: white; margin-bottom: 10px;">No drinks logged today</h4>
+                <p>Start tracking your hydration by <a href="{{ url_for('main.index') }}" style="color: #0d6efd; text-decoration: none;">adding your first drink</a>!</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Back to Home Button -->
+    <div style="margin: 30px auto; text-align: center;">
+        <a href="{{ url_for('main.index') }}" class="btn btn-primary" style="min-width: 150px;">Back to Home</a>
+    </div>
+
+</div>
+
+<script>
+// Function to delete a drink log (you can implement this functionality)
+function deleteDrinkLog(logId) {
+    if (confirm('Are you sure you want to delete this drink log?')) {
+        // Implement delete functionality here
+        fetch(`/api/delete_drink_log/${logId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload(); // Reload the page to update the list
+            } else {
+                alert('Error deleting drink log: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deleting drink log');
+        });
+    }
+}
+</script>
+
+{% endblock content %}

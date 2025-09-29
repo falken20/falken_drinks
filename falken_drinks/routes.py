@@ -88,3 +88,29 @@ def add_drink():
             'success': False,
             'message': 'An error occurred while saving the drink'
         }), 500
+
+
+@api_routes.route('/api/delete_drink_log/<int:log_id>', methods=['DELETE'])
+@login_required
+def delete_drink_log(log_id):
+    try:
+        # Delete the drink log only if it belongs to the current user
+        result = ControllerDrinkLogs.delete_drink_log_by_user(log_id, current_user.user_id)
+        
+        if result:
+            return jsonify({
+                'success': True,
+                'message': f'Drink log {log_id} deleted successfully'
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Drink log not found or unauthorized'
+            }), 404
+            
+    except Exception as e:
+        Log.error("Error in delete_drink_log route", err=e, sys=sys)
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred while deleting the drink log'
+        }), 500
