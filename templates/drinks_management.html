@@ -1,0 +1,439 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<script>
+    window.onload = function() {
+        activeVisibility('drinks', 'drinks_icon');
+    }
+</script>
+
+<div class="container" style="text-align: center;">    
+    
+    <!-- Drinks Management Header -->
+    <div style="margin-bottom: 30px;">
+        <h1 style="color: white; margin-bottom: 20px;">Drinks Management</h1>
+        <div style="color: #eee; font-size: 1.1rem;">
+            Create, edit, and manage drink types
+        </div>
+    </div>
+
+    <!-- Add/Edit Drink Form -->
+    <div style="max-width: 600px; margin: 0 auto 40px auto;">
+        <div style="background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 30px;">
+            <h3 style="color: white; margin-bottom: 25px;" id="form-title">Add New Drink</h3>
+            
+            <form id="drink-form">
+                <input type="hidden" id="drink-id" value="">
+                
+                <!-- Drink Name -->
+                <div style="margin-bottom: 20px;">
+                    <label for="drink-name" style="color: white; display: block; margin-bottom: 8px; text-align: left;">Drink Name *</label>
+                    <input type="text" id="drink-name" class="form-control" placeholder="e.g., Water, Coffee, Wine..." required maxlength="100">
+                </div>
+                
+                <!-- Water Percentage -->
+                <div style="margin-bottom: 20px;">
+                    <label for="water-percentage" style="color: white; display: block; margin-bottom: 8px; text-align: left;">Water Percentage *</label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="range" id="water-percentage" class="form-range" min="0" max="100" value="100" style="flex: 1;">
+                        <span id="water-value" style="color: white; min-width: 50px; text-align: right;">100%</span>
+                    </div>
+                </div>
+                
+                <!-- Alcohol Percentage -->
+                <div style="margin-bottom: 20px;">
+                    <label for="alcohol-percentage" style="color: white; display: block; margin-bottom: 8px; text-align: left;">Alcohol Percentage *</label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="range" id="alcohol-percentage" class="form-range" min="0" max="100" value="0" style="flex: 1;">
+                        <span id="alcohol-value" style="color: white; min-width: 50px; text-align: right;">0%</span>
+                    </div>
+                </div>
+                
+                <!-- Other Percentage (Read-only) -->
+                <div style="margin-bottom: 25px;">
+                    <label style="color: white; display: block; margin-bottom: 8px; text-align: left;">Other Percentage (Auto-calculated)</label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="flex: 1; background: rgba(255,255,255,0.1); border-radius: 6px; padding: 8px 12px;">
+                            <span id="other-value" style="color: #ccc;">0%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Drink Image (Optional) -->
+                <div style="margin-bottom: 25px;">
+                    <label for="drink-image" style="color: white; display: block; margin-bottom: 8px; text-align: left;">Image Filename (Optional)</label>
+                    <input type="text" id="drink-image" class="form-control" placeholder="e.g., icons8-water-96.png">
+                    <small style="color: #aaa; display: block; margin-top: 5px; text-align: left;">Leave empty for auto-generated icon</small>
+                </div>
+                
+                <!-- Form Actions -->
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button type="submit" class="btn btn-success" id="save-btn">
+                        <i class="bi bi-check-lg"></i> Save Drink
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="cancel-btn" onclick="resetForm()">
+                        <i class="bi bi-x-lg"></i> Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Drinks List -->
+    <div style="max-width: 800px; margin: 0 auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="color: white; margin: 0;">All Drinks</h3>
+            <button class="btn btn-primary btn-sm" onclick="refreshDrinks()">
+                <i class="bi bi-arrow-clockwise"></i> Refresh
+            </button>
+        </div>
+        
+        <div id="drinks-list">
+            <!-- Drinks will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Back to Home Button -->
+    <div style="margin: 40px auto; text-align: center;">
+        <a href="{{ url_for('main.index') }}" class="btn btn-primary" style="min-width: 150px;">Back to Home</a>
+    </div>
+
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content" style="background: rgba(0,0,0,0.8); border: 1px solid #333;">
+            <div class="modal-body text-center" style="color: white;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div style="margin-top: 15px;">Processing...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Global variables
+let isEditing = false;
+let editingDrinkId = null;
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    // Load drinks on page load
+    loadDrinks();
+    
+    // Setup form handlers
+    setupFormHandlers();
+    
+    // Setup percentage sliders
+    setupPercentageSliders();
+});
+
+// Setup form event handlers
+function setupFormHandlers() {
+    const form = document.getElementById('drink-form');
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveDrink();
+    });
+}
+
+// Setup percentage sliders with auto-calculation
+function setupPercentageSliders() {
+    const waterSlider = document.getElementById('water-percentage');
+    const alcoholSlider = document.getElementById('alcohol-percentage');
+    const waterValue = document.getElementById('water-value');
+    const alcoholValue = document.getElementById('alcohol-value');
+    const otherValue = document.getElementById('other-value');
+    
+    function updatePercentages() {
+        const water = parseInt(waterSlider.value);
+        const alcohol = parseInt(alcoholSlider.value);
+        const other = Math.max(0, 100 - water - alcohol);
+        
+        waterValue.textContent = water + '%';
+        alcoholValue.textContent = alcohol + '%';
+        otherValue.textContent = other + '%';
+        
+        // Validate total doesn't exceed 100%
+        if (water + alcohol > 100) {
+            otherValue.style.color = '#dc3545';
+            otherValue.textContent = 'Invalid: Total > 100%';
+        } else {
+            otherValue.style.color = '#ccc';
+        }
+    }
+    
+    waterSlider.addEventListener('input', updatePercentages);
+    alcoholSlider.addEventListener('input', updatePercentages);
+    
+    // Initial calculation
+    updatePercentages();
+}
+
+// Load all drinks
+function loadDrinks() {
+    showLoading();
+    
+    fetch('/api/drinks', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            displayDrinks(data.drinks);
+        } else {
+            alert('Error loading drinks: ' + data.message);
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        console.error('Error:', error);
+        alert('Error loading drinks');
+    });
+}
+
+// Display drinks in the list
+function displayDrinks(drinks) {
+    const drinksList = document.getElementById('drinks-list');
+    
+    if (drinks.length === 0) {
+        drinksList.innerHTML = `
+            <div style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 40px; color: #ccc; text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 15px;">🍹</div>
+                <h4 style="color: white; margin-bottom: 10px;">No drinks found</h4>
+                <p>Create your first drink type using the form above!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    drinks.forEach(drink => {
+        const hasImage = drink.drink_image && drink.drink_image.trim() !== '';
+        const otherPercentage = 100 - drink.drink_water_percentage - drink.drink_alcohol_percentage;
+        
+        html += `
+            <div class="drink-card" style="background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; margin-bottom: 15px;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; flex: 1;">
+                        <!-- Drink Icon -->
+                        <div style="margin-right: 20px;">
+                            ${hasImage ? 
+                                `<img src="/static/images/drinks/${drink.drink_image}" alt="${drink.drink_name}" style="height: 50px; width: 50px; border-radius: 50%; background: rgba(255,255,255,0.1); padding: 5px;">` :
+                                `<div style="height: 50px; width: 50px; border-radius: 50%; background: rgba(13, 110, 253, 0.3); display: flex; align-items: center; justify-content: center;">
+                                    <span style="color: white; font-weight: bold; font-size: 1.2rem;">${drink.drink_name.charAt(0).toUpperCase()}</span>
+                                </div>`
+                            }
+                        </div>
+                        
+                        <!-- Drink Info -->
+                        <div style="flex: 1;">
+                            <h5 style="color: white; margin: 0; margin-bottom: 8px;">${drink.drink_name}</h5>
+                            <div style="color: #ccc; font-size: 0.9rem;">
+                                <span style="color: #0d6efd;">💧 Water: ${drink.drink_water_percentage}%</span>
+                                ${drink.drink_alcohol_percentage > 0 ? `<span style="color: #dc3545; margin-left: 15px;">🍷 Alcohol: ${drink.drink_alcohol_percentage}%</span>` : ''}
+                                ${otherPercentage > 0 ? `<span style="color: #198754; margin-left: 15px;">🥤 Other: ${otherPercentage}%</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-sm btn-outline-primary" onclick="editDrink(${drink.drink_id})" title="Edit">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteDrink(${drink.drink_id}, '${drink.drink_name}')" title="Delete">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    drinksList.innerHTML = html;
+}
+
+// Save drink (create or update)
+function saveDrink() {
+    const drinkName = document.getElementById('drink-name').value.trim();
+    const waterPercentage = parseInt(document.getElementById('water-percentage').value);
+    const alcoholPercentage = parseInt(document.getElementById('alcohol-percentage').value);
+    const drinkImage = document.getElementById('drink-image').value.trim();
+    
+    // Validation
+    if (!drinkName) {
+        alert('Please enter a drink name');
+        return;
+    }
+    
+    if (waterPercentage + alcoholPercentage > 100) {
+        alert('Water and alcohol percentages cannot exceed 100% total');
+        return;
+    }
+    
+    const drinkData = {
+        drink_name: drinkName,
+        drink_water_percentage: waterPercentage,
+        drink_alcohol_percentage: alcoholPercentage,
+        drink_image: drinkImage || null
+    };
+    
+    const url = isEditing ? `/api/drinks/${editingDrinkId}` : '/api/drinks';
+    const method = isEditing ? 'PUT' : 'POST';
+    
+    showLoading();
+    
+    fetch(url, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify(drinkData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            alert(data.message);
+            resetForm();
+            loadDrinks(); // Refresh the list
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        console.error('Error:', error);
+        alert('Error saving drink');
+    });
+}
+
+// Edit drink
+function editDrink(drinkId) {
+    // Find the drink data from the current drinks list
+    fetch(`/api/drinks`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const drink = data.drinks.find(d => d.drink_id === drinkId);
+            if (drink) {
+                populateForm(drink);
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error loading drink data');
+    });
+}
+
+// Populate form with drink data for editing
+function populateForm(drink) {
+    isEditing = true;
+    editingDrinkId = drink.drink_id;
+    
+    document.getElementById('form-title').textContent = 'Edit Drink';
+    document.getElementById('drink-name').value = drink.drink_name;
+    document.getElementById('water-percentage').value = drink.drink_water_percentage;
+    document.getElementById('alcohol-percentage').value = drink.drink_alcohol_percentage;
+    document.getElementById('drink-image').value = drink.drink_image || '';
+    document.getElementById('save-btn').innerHTML = '<i class="bi bi-check-lg"></i> Update Drink';
+    
+    // Update percentage displays
+    document.getElementById('water-value').textContent = drink.drink_water_percentage + '%';
+    document.getElementById('alcohol-value').textContent = drink.drink_alcohol_percentage + '%';
+    const otherPercentage = 100 - drink.drink_water_percentage - drink.drink_alcohol_percentage;
+    document.getElementById('other-value').textContent = otherPercentage + '%';
+    
+    // Scroll to form
+    document.getElementById('drink-form').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Delete drink
+function deleteDrink(drinkId, drinkName) {
+    if (!confirm(`Are you sure you want to delete "${drinkName}"?\n\nThis action cannot be undone and will fail if the drink has associated logs.`)) {
+        return;
+    }
+    
+    showLoading();
+    
+    fetch(`/api/drinks/${drinkId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            alert(data.message);
+            loadDrinks(); // Refresh the list
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        console.error('Error:', error);
+        alert('Error deleting drink');
+    });
+}
+
+// Reset form to initial state
+function resetForm() {
+    isEditing = false;
+    editingDrinkId = null;
+    
+    document.getElementById('form-title').textContent = 'Add New Drink';
+    document.getElementById('drink-form').reset();
+    document.getElementById('water-percentage').value = 100;
+    document.getElementById('alcohol-percentage').value = 0;
+    document.getElementById('save-btn').innerHTML = '<i class="bi bi-check-lg"></i> Save Drink';
+    
+    // Reset percentage displays
+    document.getElementById('water-value').textContent = '100%';
+    document.getElementById('alcohol-value').textContent = '0%';
+    document.getElementById('other-value').textContent = '0%';
+    document.getElementById('other-value').style.color = '#ccc';
+}
+
+// Refresh drinks list
+function refreshDrinks() {
+    loadDrinks();
+}
+
+// Show loading modal
+function showLoading() {
+    const modal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    modal.show();
+}
+
+// Hide loading modal
+function hideLoading() {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('loadingModal'));
+    if (modal) {
+        modal.hide();
+    }
+}
+</script>
+
+{% endblock content %}

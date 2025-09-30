@@ -114,3 +114,242 @@ def delete_drink_log(log_id):
             'success': False,
             'message': 'An error occurred while deleting the drink log'
         }), 500
+
+
+@api_routes.route('/api/drinks', methods=['GET'])
+@login_required
+def get_drinks():
+    """Get all drinks"""
+    try:
+        drinks = ControllerDrinks.get_drinks()
+        drinks_data = [drink.serialize() for drink in drinks]
+        
+        return jsonify({
+            'success': True,
+            'drinks': drinks_data
+        }), 200
+        
+    except Exception as e:
+        Log.error("Error in get_drinks route", err=e, sys=sys)
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred while fetching drinks'
+        }), 500
+
+
+@api_routes.route('/api/drinks', methods=['POST'])
+@login_required
+def create_drink():
+    """Create a new drink"""
+    try:
+        data = request.get_json()
+        Log.info(f"Creating drink with data: {data}")
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'message': 'No data received'
+            }), 400
+        
+        # Extract and validate data
+        drink_name = data.get('drink_name', '').strip()
+        drink_water_percentage = data.get('drink_water_percentage', 100)
+        drink_alcohol_percentage = data.get('drink_alcohol_percentage', 0)
+        drink_image = data.get('drink_image', '').strip()
+        
+        if not drink_name:
+            return jsonify({
+                'success': False,
+                'message': 'Drink name is required'
+            }), 400
+        
+        # Convert percentages to integers
+        try:
+            drink_water_percentage = int(drink_water_percentage)
+            drink_alcohol_percentage = int(drink_alcohol_percentage)
+        except (ValueError, TypeError):
+            return jsonify({
+                'success': False,
+                'message': 'Percentages must be valid numbers'
+            }), 400
+        
+        # Validate percentages
+        if not (0 <= drink_water_percentage <= 100) or not (0 <= drink_alcohol_percentage <= 100):
+            return jsonify({
+                'success': False,
+                'message': 'Percentages must be between 0 and 100'
+            }), 400
+        
+        if drink_water_percentage + drink_alcohol_percentage > 100:
+            return jsonify({
+                'success': False,
+                'message': 'Water + alcohol percentages cannot exceed 100%'
+            }), 400
+        
+        # Check if drink already exists
+        existing_drink = ControllerDrinks.get_drink_name(drink_name)
+        if existing_drink:
+            return jsonify({
+                'success': False,
+                'message': f'Drink "{drink_name}" already exists'
+            }), 409
+        
+        # Create drink data
+        drink_data = {
+            'drink_name': drink_name,
+            'drink_water_percentage': drink_water_percentage,
+            'drink_alcohol_percentage': drink_alcohol_percentage,
+            'drink_image': drink_image if drink_image else None
+        }
+        
+        # Save to database
+        result = ControllerDrinks.add_drink(drink_data)
+        
+        if result:
+            return jsonify({
+                'success': True,
+                'message': f'Drink "{drink_name}" created successfully',
+                'drink': result.serialize()
+            }), 201
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Failed to create drink'
+            }), 500
+            
+    except Exception as e:
+        Log.error("Error in create_drink route", err=e, sys=sys)
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred while creating the drink'
+        }), 500
+
+
+@api_routes.route('/api/drinks/<int:drink_id>', methods=['PUT'])
+@login_required
+def update_drink(drink_id):
+    """Update an existing drink"""
+    try:
+        data = request.get_json()
+        Log.info(f"Updating drink {drink_id} with data: {data}")
+        
+        if not data:
+            return jsonify({
+                'success': False,
+                'message': 'No data received'
+            }), 400
+        
+        # Check if drink exists
+        drink = ControllerDrinks.get_drink(drink_id)
+        if not drink:
+            return jsonify({
+                'success': False,
+                'message': 'Drink not found'
+            }), 404
+        
+        # Extract and validate data
+        drink_name = data.get('drink_name', drink.drink_name).strip()
+        drink_water_percentage = data.get('drink_water_percentage', drink.drink_water_percentage)
+        drink_alcohol_percentage = data.get('drink_alcohol_percentage', drink.drink_alcohol_percentage)
+        drink_image = data.get('drink_image', drink.drink_image)
+        
+        if not drink_name:
+            return jsonify({
+                'success': False,
+                'message': 'Drink name is required'
+            }), 400
+        
+        # Convert percentages to integers
+        try:
+            drink_water_percentage = int(drink_water_percentage)
+            drink_alcohol_percentage = int(drink_alcohol_percentage)
+        except (ValueError, TypeError):
+            return jsonify({
+                'success': False,
+                'message': 'Percentages must be valid numbers'
+            }), 400
+        
+        # Validate percentages
+        if not (0 <= drink_water_percentage <= 100) or not (0 <= drink_alcohol_percentage <= 100):
+            return jsonify({
+                'success': False,
+                'message': 'Percentages must be between 0 and 100'
+            }), 400
+        
+        if drink_water_percentage + drink_alcohol_percentage > 100:
+            return jsonify({
+                'success': False,
+                'message': 'Water + alcohol percentages cannot exceed 100%'
+            }), 400
+        
+        # Check if new name conflicts with existing drink (excluding current drink)
+        if drink_name != drink.drink_name:
+            existing_drink = ControllerDrinks.get_drink_name(drink_name)
+            if existing_drink:
+                return jsonify({
+                    'success': False,
+                    'message': f'Another drink with name "{drink_name}" already exists'
+                }), 409
+        
+        # Update drink
+        drink.drink_name = drink_name
+        drink.drink_water_percentage = drink_water_percentage
+        drink.drink_alcohol_percentage = drink_alcohol_percentage
+        drink.drink_image = drink_image if drink_image else None
+        
+        from .models import db
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Drink "{drink_name}" updated successfully',
+            'drink': drink.serialize()
+        }), 200
+        
+    except Exception as e:
+        Log.error("Error in update_drink route", err=e, sys=sys)
+        from .models import db
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred while updating the drink'
+        }), 500
+
+
+@api_routes.route('/api/drinks/<int:drink_id>', methods=['DELETE'])
+@login_required
+def delete_drink(drink_id):
+    """Delete a drink"""
+    try:
+        # Check if drink exists
+        drink = ControllerDrinks.get_drink(drink_id)
+        if not drink:
+            return jsonify({
+                'success': False,
+                'message': 'Drink not found'
+            }), 404
+        
+        # Check if drink is being used in drink logs
+        from .models import DrinkLog
+        logs_count = DrinkLog.query.filter_by(drink_id=drink_id).count()
+        if logs_count > 0:
+            return jsonify({
+                'success': False,
+                'message': f'Cannot delete drink "{drink.drink_name}" because it has {logs_count} log entries. Delete the logs first.'
+            }), 409
+        
+        # Delete the drink
+        drink_name = drink.drink_name
+        ControllerDrinks.delete_drink(drink_id)
+        
+        return jsonify({
+            'success': True,
+            'message': f'Drink "{drink_name}" deleted successfully'
+        }), 200
+        
+    except Exception as e:
+        Log.error("Error in delete_drink route", err=e, sys=sys)
+        return jsonify({
+            'success': False,
+            'message': 'An error occurred while deleting the drink'
+        }), 500

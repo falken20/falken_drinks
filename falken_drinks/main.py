@@ -7,7 +7,7 @@ from datetime import date
 import sys
 
 from .logger import Log
-from .controllers import ControllerDrinkLogs
+from .controllers import ControllerDrinkLogs, ControllerDrinks
 
 Log.info("***** Loading app.py")
 
@@ -48,3 +48,16 @@ def daily_summary():
     daily_summary = ControllerDrinkLogs.get_daily_summary(current_user.user_id)
 
     return render_template('daily_summary.html', daily_summary=daily_summary)
+
+
+@main.route("/drinks_management", methods=['GET'])
+@login_required
+def drinks_management():
+    Log.info(
+        f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
+    Log.debug(f"Current user: {current_user}")
+
+    # Get all drinks for display
+    drinks = ControllerDrinks.get_drinks()
+
+    return render_template('drinks_management.html', drinks=drinks)

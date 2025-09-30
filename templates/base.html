@@ -37,8 +37,9 @@
                             <a href="{{ url_for('main.daily_summary') }}" class="button is-danger is-small buttons_app">
                                 <i class="bi bi-calendar" style="font-size: 20px" title="Daily Summary"></i>
                             </a>
-                            {% endif %}
-                            {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('main.drinks_management') }}" class="button is-warning is-small buttons_app">
+                                <i class="bi bi-cup-straw" style="font-size: 20px" title="Manage Drinks"></i>
+                            </a>
                             <a href="{{ url_for('main.profile') }}" class="button is-primary is-small buttons_app">
                                 <i class="bi bi-person-badge" style="font-size: 20px" title="Profile"></i>
                             </a>

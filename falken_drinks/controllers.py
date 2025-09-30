@@ -55,7 +55,7 @@ class ControllerDrinks:
     def get_drink(id: int):
         Log.info(
             f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
-        return Drink.query.filter_by(id=id).first()
+        return Drink.query.filter_by(drink_id=id).first()
 
     @staticmethod
     def get_drink_name(name: str):
@@ -111,7 +111,7 @@ class ControllerDrinks:
     def delete_drink(id: int) -> None:
         Log.info(
             f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
-        Drink.query.filter_by(id=id).delete()
+        Drink.query.filter_by(drink_id=id).delete()
         db.session.commit()
 
 
