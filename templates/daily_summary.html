@@ -61,29 +61,29 @@
     </div>
 
     <!-- Drink Logs List -->
-    <div style="max-width: 600px; margin: 0 auto;">
+    <div style="max-width: 450px; margin: 0 auto;">
         <h3 style="color: white; margin-bottom: 20px;">Today's Drinks ({{ daily_summary.total_logs }} entries)</h3>
         
         {% if daily_summary.has_logs %}
             {% for log in daily_summary.drink_logs %}
-            <div style="background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; margin-bottom: 15px; text-align: left;">
+            <div style="background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 12px 15px; margin-bottom: 8px; text-align: left;">
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                     <div style="display: flex; align-items: center;">
                         <!-- Drink Icon/Image -->
                         {% if log.drink_image %}
                         <img src="{{ url_for('static', filename='images/drinks/' + log.drink_image) }}" 
                              alt="{{ log.drink_name }}" 
-                             style="height: 40px; width: 40px; border-radius: 50%; margin-right: 15px; background: rgba(255,255,255,0.1); padding: 5px;">
+                             style="height: 35px; width: 35px; border-radius: 50%; margin-right: 12px; background: rgba(255,255,255,0.1); padding: 4px;">
                         {% else %}
-                        <div style="height: 40px; width: 40px; border-radius: 50%; margin-right: 15px; background: rgba(13, 110, 253, 0.3); display: flex; align-items: center; justify-content: center;">
+                        <div style="height: 35px; width: 35px; border-radius: 50%; margin-right: 12px; background: rgba(13, 110, 253, 0.3); display: flex; align-items: center; justify-content: center;">
                             <span style="color: white; font-weight: bold; font-size: 0.8rem;">{{ log.drink_name[0] }}</span>
                         </div>
                         {% endif %}
                         
                         <!-- Drink Info -->
                         <div>
-                            <div style="color: white; font-size: 1.1rem; font-weight: bold;">{{ log.drink_name }}</div>
-                            <div style="color: #ccc; font-size: 0.9rem;">
+                            <div style="color: white; font-size: 1rem; font-weight: bold;">{{ log.drink_name }}</div>
+                            <div style="color: #ccc; font-size: 0.85rem;">
                                 {{ log.total_quantity }}ml
                                 {% if log.alcohol_percentage > 0 %}
                                 <span style="color: #dc3545;"> • {{ log.alcohol_percentage }}% alcohol</span>
@@ -92,18 +92,19 @@
                         </div>
                     </div>
                     
-                    <!-- Delete Button (Optional - you can implement delete functionality) -->
+                    <!-- Delete Button -->
                     <div>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteDrinkLog({{ log.log_id }})" style="opacity: 0.7;">
+                        <button class="btn btn-sm btn-danger" onclick="deleteDrinkLog({{ log.log_id }})" style="display: flex; align-items: center; gap: 5px; font-size: 0.85rem;">
                             <i class="fas fa-trash"></i>
+                            <span>Delete</span>
                         </button>
                     </div>
                 </div>
                 
                 <!-- Breakdown -->
                 {% if log.water_quantity > 0 or log.alcohol_quantity > 0 %}
-                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
-                    <div style="color: #aaa; font-size: 0.8rem;">
+                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <div style="color: #aaa; font-size: 0.75rem;">
                         {% if log.water_quantity > 0 %}
                         <span style="color: #0d6efd;">Water: {{ log.water_quantity }}ml</span>
                         {% endif %}
