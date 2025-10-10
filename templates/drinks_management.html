@@ -13,66 +13,63 @@
     <!-- Drinks Management Header -->
     <div style="margin-bottom: 30px;">
         <h1 style="color: white; margin-bottom: 20px;">Drinks Management</h1>
-        <div style="color: #eee; font-size: 1.1rem;">
-            Create, edit, and manage drink types
-        </div>
     </div>
 
     <!-- Add/Edit Drink Form -->
-    <div style="max-width: 600px; margin: 0 auto 40px auto;">
-        <div style="background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 30px;">
-            <h3 style="color: white; margin-bottom: 25px;" id="form-title">Add New Drink</h3>
+    <div style="max-width: 500px; margin: 0 auto 30px auto;">
+        <div style="background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px;">
+            <h3 style="color: white; margin-bottom: 18px; font-size: 1.3rem;" id="form-title">Add New Drink</h3>
             
             <form id="drink-form">
                 <input type="hidden" id="drink-id" value="">
                 
                 <!-- Drink Name -->
-                <div style="margin-bottom: 20px;">
-                    <label for="drink-name" style="color: white; display: block; margin-bottom: 8px; text-align: left;">Drink Name *</label>
-                    <input type="text" id="drink-name" class="form-control" placeholder="e.g., Water, Coffee, Wine..." required maxlength="100">
+                <div style="margin-bottom: 15px;">
+                    <label for="drink-name" style="color: white; display: block; margin-bottom: 6px; text-align: left; font-size: 0.9rem;">Drink Name *</label>
+                    <input type="text" id="drink-name" class="form-control form-control-sm" placeholder="e.g., Water, Coffee, Wine..." required maxlength="100">
                 </div>
                 
                 <!-- Water Percentage -->
-                <div style="margin-bottom: 20px;">
-                    <label for="water-percentage" style="color: white; display: block; margin-bottom: 8px; text-align: left;">Water Percentage *</label>
+                <div style="margin-bottom: 15px;">
+                    <label for="water-percentage" style="color: white; display: block; margin-bottom: 6px; text-align: left; font-size: 0.9rem;">Water Percentage *</label>
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <input type="range" id="water-percentage" class="form-range" min="0" max="100" value="100" style="flex: 1;">
-                        <span id="water-value" style="color: white; min-width: 50px; text-align: right;">100%</span>
+                        <span id="water-value" style="color: white; min-width: 45px; text-align: right; font-size: 0.9rem;">100%</span>
                     </div>
                 </div>
                 
                 <!-- Alcohol Percentage -->
-                <div style="margin-bottom: 20px;">
-                    <label for="alcohol-percentage" style="color: white; display: block; margin-bottom: 8px; text-align: left;">Alcohol Percentage *</label>
+                <div style="margin-bottom: 15px;">
+                    <label for="alcohol-percentage" style="color: white; display: block; margin-bottom: 6px; text-align: left; font-size: 0.9rem;">Alcohol Percentage *</label>
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <input type="range" id="alcohol-percentage" class="form-range" min="0" max="100" value="0" style="flex: 1;">
-                        <span id="alcohol-value" style="color: white; min-width: 50px; text-align: right;">0%</span>
+                        <span id="alcohol-value" style="color: white; min-width: 45px; text-align: right; font-size: 0.9rem;">0%</span>
                     </div>
                 </div>
                 
                 <!-- Other Percentage (Read-only) -->
-                <div style="margin-bottom: 25px;">
-                    <label style="color: white; display: block; margin-bottom: 8px; text-align: left;">Other Percentage (Auto-calculated)</label>
+                <div style="margin-bottom: 15px;">
+                    <label style="color: white; display: block; margin-bottom: 6px; text-align: left; font-size: 0.9rem;">Other Percentage (Auto-calculated)</label>
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <div style="flex: 1; background: rgba(255,255,255,0.1); border-radius: 6px; padding: 8px 12px;">
-                            <span id="other-value" style="color: #ccc;">0%</span>
+                        <div style="flex: 1; background: rgba(255,255,255,0.1); border-radius: 6px; padding: 6px 10px;">
+                            <span id="other-value" style="color: #ccc; font-size: 0.9rem;">0%</span>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Drink Image (Optional) -->
-                <div style="margin-bottom: 25px;">
-                    <label for="drink-image" style="color: white; display: block; margin-bottom: 8px; text-align: left;">Image Filename (Optional)</label>
-                    <input type="text" id="drink-image" class="form-control" placeholder="e.g., icons8-water-96.png">
-                    <small style="color: #aaa; display: block; margin-top: 5px; text-align: left;">Leave empty for auto-generated icon</small>
+                <div style="margin-bottom: 18px;">
+                    <label for="drink-image" style="color: white; display: block; margin-bottom: 6px; text-align: left; font-size: 0.9rem;">Image Filename (Optional)</label>
+                    <input type="text" id="drink-image" class="form-control form-control-sm" placeholder="e.g., icons8-water-96.png">
+                    <small style="color: #aaa; display: block; margin-top: 4px; text-align: left; font-size: 0.75rem;">Leave empty for auto-generated icon</small>
                 </div>
                 
                 <!-- Form Actions -->
-                <div style="display: flex; gap: 15px; justify-content: center;">
-                    <button type="submit" class="btn btn-success" id="save-btn">
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button type="submit" class="btn btn-success btn-sm" id="save-btn">
                         <i class="bi bi-check-lg"></i> Save Drink
                     </button>
-                    <button type="button" class="btn btn-secondary" id="cancel-btn" onclick="resetForm()">
+                    <button type="button" class="btn btn-secondary btn-sm" id="cancel-btn" onclick="resetForm()">
                         <i class="bi bi-x-lg"></i> Cancel
                     </button>
                 </div>
@@ -81,9 +78,9 @@
     </div>
 
     <!-- Drinks List -->
-    <div style="max-width: 800px; margin: 0 auto;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 style="color: white; margin: 0;">All Drinks</h3>
+    <div style="max-width: 700px; margin: 0 auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="color: white; margin: 0; font-size: 1.3rem;">All Drinks</h3>
             <button class="btn btn-primary btn-sm" onclick="refreshDrinks()">
                 <i class="bi bi-arrow-clockwise"></i> Refresh
             </button>
@@ -185,7 +182,12 @@ function loadDrinks() {
         },
         credentials: 'same-origin'
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
         hideLoading();
         if (data.success) {
@@ -197,7 +199,11 @@ function loadDrinks() {
     .catch(error => {
         hideLoading();
         console.error('Error:', error);
-        alert('Error loading drinks');
+        alert('Error loading drinks: ' + error.message);
+    })
+    .finally(() => {
+        // Ensure loading modal is always hidden
+        hideLoading();
     });
 }
 
@@ -222,32 +228,32 @@ function displayDrinks(drinks) {
         const otherPercentage = 100 - drink.drink_water_percentage - drink.drink_alcohol_percentage;
         
         html += `
-            <div class="drink-card" style="background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; margin-bottom: 15px;">
+            <div class="drink-card" style="background: rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 12px 15px; margin-bottom: 8px;">
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                     <div style="display: flex; align-items: center; flex: 1;">
                         <!-- Drink Icon -->
-                        <div style="margin-right: 20px;">
+                        <div style="margin-right: 15px;">
                             ${hasImage ? 
-                                `<img src="/static/images/drinks/${drink.drink_image}" alt="${drink.drink_name}" style="height: 50px; width: 50px; border-radius: 50%; background: rgba(255,255,255,0.1); padding: 5px;">` :
-                                `<div style="height: 50px; width: 50px; border-radius: 50%; background: rgba(13, 110, 253, 0.3); display: flex; align-items: center; justify-content: center;">
-                                    <span style="color: white; font-weight: bold; font-size: 1.2rem;">${drink.drink_name.charAt(0).toUpperCase()}</span>
+                                `<img src="/static/images/drinks/${drink.drink_image}" alt="${drink.drink_name}" style="height: 40px; width: 40px; border-radius: 50%; background: rgba(255,255,255,0.1); padding: 4px;">` :
+                                `<div style="height: 40px; width: 40px; border-radius: 50%; background: rgba(13, 110, 253, 0.3); display: flex; align-items: center; justify-content: center;">
+                                    <span style="color: white; font-weight: bold; font-size: 1rem;">${drink.drink_name.charAt(0).toUpperCase()}</span>
                                 </div>`
                             }
                         </div>
                         
                         <!-- Drink Info -->
                         <div style="flex: 1;">
-                            <h5 style="color: white; margin: 0; margin-bottom: 8px;">${drink.drink_name}</h5>
-                            <div style="color: #ccc; font-size: 0.9rem;">
+                            <h5 style="color: white; margin: 0; margin-bottom: 5px; font-size: 1.1rem;">${drink.drink_name}</h5>
+                            <div style="color: #ccc; font-size: 0.85rem;">
                                 <span style="color: #0d6efd;">💧 Water: ${drink.drink_water_percentage}%</span>
-                                ${drink.drink_alcohol_percentage > 0 ? `<span style="color: #dc3545; margin-left: 15px;">🍷 Alcohol: ${drink.drink_alcohol_percentage}%</span>` : ''}
-                                ${otherPercentage > 0 ? `<span style="color: #198754; margin-left: 15px;">🥤 Other: ${otherPercentage}%</span>` : ''}
+                                ${drink.drink_alcohol_percentage > 0 ? `<span style="color: #dc3545; margin-left: 12px;">🍷 Alcohol: ${drink.drink_alcohol_percentage}%</span>` : ''}
+                                ${otherPercentage > 0 ? `<span style="color: #198754; margin-left: 12px;">🥤 Other: ${otherPercentage}%</span>` : ''}
                             </div>
                         </div>
                     </div>
                     
                     <!-- Actions -->
-                    <div style="display: flex; gap: 10px;">
+                    <div style="display: flex; gap: 8px;">
                         <button class="btn btn-sm btn-outline-primary" onclick="editDrink(${drink.drink_id})" title="Edit">
                             <i class="bi bi-pencil"></i>
                         </button>
@@ -301,7 +307,12 @@ function saveDrink() {
         credentials: 'same-origin',
         body: JSON.stringify(drinkData)
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
         hideLoading();
         if (data.success) {
@@ -315,7 +326,11 @@ function saveDrink() {
     .catch(error => {
         hideLoading();
         console.error('Error:', error);
-        alert('Error saving drink');
+        alert('Error saving drink: ' + error.message);
+    })
+    .finally(() => {
+        // Ensure loading modal is always hidden
+        hideLoading();
     });
 }
 
@@ -381,7 +396,12 @@ function deleteDrink(drinkId, drinkName) {
         },
         credentials: 'same-origin'
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
         hideLoading();
         if (data.success) {
@@ -394,7 +414,11 @@ function deleteDrink(drinkId, drinkName) {
     .catch(error => {
         hideLoading();
         console.error('Error:', error);
-        alert('Error deleting drink');
+        alert('Error deleting drink: ' + error.message);
+    })
+    .finally(() => {
+        // Ensure loading modal is always hidden
+        hideLoading();
     });
 }
 
@@ -423,15 +447,49 @@ function refreshDrinks() {
 
 // Show loading modal
 function showLoading() {
-    const modal = new bootstrap.Modal(document.getElementById('loadingModal'));
-    modal.show();
+    try {
+        const modalElement = document.getElementById('loadingModal');
+        if (modalElement) {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        }
+    } catch (error) {
+        console.error('Error showing loading modal:', error);
+    }
 }
 
 // Hide loading modal
 function hideLoading() {
-    const modal = bootstrap.Modal.getInstance(document.getElementById('loadingModal'));
-    if (modal) {
-        modal.hide();
+    try {
+        const modalElement = document.getElementById('loadingModal');
+        if (modalElement) {
+            const modal = bootstrap.Modal.getInstance(modalElement);
+            if (modal) {
+                modal.hide();
+            } else {
+                // If no instance exists, try to hide it directly
+                modalElement.classList.remove('show');
+                modalElement.style.display = 'none';
+                document.body.classList.remove('modal-open');
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error hiding loading modal:', error);
+        // Force hide the modal as fallback
+        const modalElement = document.getElementById('loadingModal');
+        if (modalElement) {
+            modalElement.classList.remove('show');
+            modalElement.style.display = 'none';
+        }
+        document.body.classList.remove('modal-open');
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.remove();
+        }
     }
 }
 </script>
