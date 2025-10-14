@@ -5,7 +5,7 @@ import sys
 import unittest
 from unittest.mock import patch
 
-from falken_plants import logger
+from falken_drinks import logger
 
 
 def redirect_stdout():

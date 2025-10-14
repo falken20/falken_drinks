@@ -2,7 +2,7 @@
 
 import unittest
 
-from falken_plants import config
+from falken_drinks import config
 
 
 class TestConfig(unittest.TestCase):

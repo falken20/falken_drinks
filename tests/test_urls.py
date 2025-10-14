@@ -1,7 +1,7 @@
 import unittest
 
 from . import basetest
-from falken_plants.controllers import ControllerPlant
+from falken_drinks.controllers import ControllerDrinks
 
 
 class TestUrls(basetest.BaseTestCase):

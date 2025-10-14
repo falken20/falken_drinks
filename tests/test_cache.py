@@ -5,7 +5,7 @@ from io import StringIO
 from unittest.mock import patch
 import time
 
-from falken_plants import cache
+from falken_drinks import cache
 
 class TestCache(unittest.TestCase):
 

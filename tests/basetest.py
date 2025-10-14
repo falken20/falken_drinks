@@ -6,9 +6,9 @@ from datetime import date
 from flask_sqlalchemy import SQLAlchemy
 
 
-from falken_plants.app import create_app, settings
-from falken_plants.models import db, User
-from falken_plants.logger import Log
+from falken_drinks.app import create_app, settings
+from falken_drinks.models import db, User
+from falken_drinks.logger import Log
 
 print("Loading basetest.py")
 
@@ -20,9 +20,9 @@ class BaseTestCase(unittest.TestCase):
                  'name': 'python', 'password': 'password'}
     mock_user_unknown = {'email': 'python@mail.com',
                          'name': 'python', 'password': 'error_password'}
-    MOCK_PLANT = {'id': 100, 'name': 'test_plant_mock', 'name_tech': 'test_plant_mock', 'comment': 'test_plant_mock',
-                  'watering_summer': 2, 'watering_winter': 2, 'spray': True, 'direct_sun': 2, 'image': '',
-                  '_method': 'POST'}
+    MOCK_DRINK = {'drink_name': 'Test Water', 'drink_water_percentage': 100, 
+                  'drink_alcohol_percentage': 0, 'drink_image': 'icons8-water-96.png'}
+    MOCK_DRINK_LOG = {'drink_name': 'Test Water', 'amount': 250, 'alcohol_percentage': 0}
 
     def setUp(self):
         Log.info("***** Setting up BaseTestCase...", style="red bold")
