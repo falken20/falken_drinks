@@ -58,10 +58,23 @@
                 </div>
                 
                 <!-- Drink Image (Optional) -->
-                <div style="margin-bottom: 18px;">
+                <div style="margin-bottom: 15px;">
                     <label for="drink-image" style="color: white; display: block; margin-bottom: 6px; text-align: left; font-size: 0.9rem;">Image Filename (Optional)</label>
                     <input type="text" id="drink-image" class="form-control form-control-sm" placeholder="e.g., icons8-water-96.png">
                     <small style="color: #aaa; display: block; margin-top: 4px; text-align: left; font-size: 0.75rem;">Leave empty for auto-generated icon</small>
+                </div>
+                
+                <!-- Counts as Water -->
+                <div style="margin-bottom: 18px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="counts-as-water" class="form-check-input" checked style="width: 20px; height: 20px; cursor: pointer;">
+                        <label for="counts-as-water" style="color: white; margin: 0; font-size: 0.9rem; cursor: pointer;">
+                            Count this drink towards daily water intake
+                        </label>
+                    </div>
+                    <small style="color: #aaa; display: block; margin-top: 4px; text-align: left; font-size: 0.75rem;">
+                        Alcoholic drinks are automatically unchecked by default
+                    </small>
                 </div>
                 
                 <!-- Form Actions -->
@@ -145,6 +158,7 @@ function setupPercentageSliders() {
     const waterValue = document.getElementById('water-value');
     const alcoholValue = document.getElementById('alcohol-value');
     const otherValue = document.getElementById('other-value');
+    const countsAsWaterCheckbox = document.getElementById('counts-as-water');
     
     function updatePercentages() {
         const water = parseInt(waterSlider.value);
@@ -154,6 +168,13 @@ function setupPercentageSliders() {
         waterValue.textContent = water + '%';
         alcoholValue.textContent = alcohol + '%';
         otherValue.textContent = other + '%';
+        
+        // Auto-uncheck counts_as_water if alcohol > 0
+        if (alcohol > 0) {
+            countsAsWaterCheckbox.checked = false;
+        } else {
+            countsAsWaterCheckbox.checked = true;
+        }
         
         // Validate total doesn't exceed 100%
         if (water + alcohol > 100) {
@@ -275,6 +296,7 @@ function saveDrink() {
     const waterPercentage = parseInt(document.getElementById('water-percentage').value);
     const alcoholPercentage = parseInt(document.getElementById('alcohol-percentage').value);
     const drinkImage = document.getElementById('drink-image').value.trim();
+    const countsAsWater = document.getElementById('counts-as-water').checked;
     
     // Validation
     if (!drinkName) {
@@ -291,7 +313,8 @@ function saveDrink() {
         drink_name: drinkName,
         drink_water_percentage: waterPercentage,
         drink_alcohol_percentage: alcoholPercentage,
-        drink_image: drinkImage || null
+        drink_image: drinkImage || null,
+        counts_as_water: countsAsWater
     };
     
     const url = isEditing ? `/api/drinks/${editingDrinkId}` : '/api/drinks';
@@ -369,6 +392,7 @@ function populateForm(drink) {
     document.getElementById('water-percentage').value = drink.drink_water_percentage;
     document.getElementById('alcohol-percentage').value = drink.drink_alcohol_percentage;
     document.getElementById('drink-image').value = drink.drink_image || '';
+    document.getElementById('counts-as-water').checked = drink.counts_as_water !== undefined ? drink.counts_as_water : true;
     document.getElementById('save-btn').innerHTML = '<i class="bi bi-check-lg"></i> Update Drink';
     
     // Update percentage displays
@@ -431,6 +455,7 @@ function resetForm() {
     document.getElementById('drink-form').reset();
     document.getElementById('water-percentage').value = 100;
     document.getElementById('alcohol-percentage').value = 0;
+    document.getElementById('counts-as-water').checked = true;
     document.getElementById('save-btn').innerHTML = '<i class="bi bi-check-lg"></i> Save Drink';
     
     // Reset percentage displays

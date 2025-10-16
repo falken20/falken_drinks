@@ -74,6 +74,7 @@ class Drink(db.Model):
     drink_water_percentage = db.Column(db.Integer, nullable=False, default=100)
     drink_alcohol_percentage = db.Column(db.Integer, nullable=False, default=0)
     drink_image = db.Column(db.String(100), nullable=True)
+    counts_as_water = db.Column(db.Boolean, nullable=False, default=True)
 
     def __repr__(self) -> str:
         return f"<Drink ({self.drink_name} - {self.drink_water_percentage}% - {self.drink_alcohol_percentage}%)>"
@@ -81,11 +82,16 @@ class Drink(db.Model):
     def __str__(self) -> str:
         return f"<Drink ({self.drink_name} - {self.drink_water_percentage}% - {self.drink_alcohol_percentage}%)>"
     
-    def __init__(self, drink_name=None, drink_water_percentage=None, drink_alcohol_percentage=None, drink_image=None):
+    def __init__(self, drink_name=None, drink_water_percentage=None, drink_alcohol_percentage=None, drink_image=None, counts_as_water=None):
         self.drink_name = drink_name
         self.drink_water_percentage = drink_water_percentage
         self.drink_alcohol_percentage = drink_alcohol_percentage
         self.drink_image = drink_image
+        # Default counts_as_water to False if drink has alcohol, otherwise True
+        if counts_as_water is not None:
+            self.counts_as_water = counts_as_water
+        else:
+            self.counts_as_water = False if (drink_alcohol_percentage and drink_alcohol_percentage > 0) else True
     
     def serialize(self):
         return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}

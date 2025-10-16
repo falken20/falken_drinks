@@ -156,6 +156,7 @@ def create_drink():
         drink_water_percentage = data.get('drink_water_percentage', 100)
         drink_alcohol_percentage = data.get('drink_alcohol_percentage', 0)
         drink_image = data.get('drink_image', '').strip()
+        counts_as_water = data.get('counts_as_water', True)
         
         if not drink_name:
             return jsonify({
@@ -199,7 +200,8 @@ def create_drink():
             'drink_name': drink_name,
             'drink_water_percentage': drink_water_percentage,
             'drink_alcohol_percentage': drink_alcohol_percentage,
-            'drink_image': drink_image if drink_image else None
+            'drink_image': drink_image if drink_image else None,
+            'counts_as_water': counts_as_water
         }
         
         # Save to database
@@ -252,6 +254,7 @@ def update_drink(drink_id):
         drink_water_percentage = data.get('drink_water_percentage', drink.drink_water_percentage)
         drink_alcohol_percentage = data.get('drink_alcohol_percentage', drink.drink_alcohol_percentage)
         drink_image = data.get('drink_image', drink.drink_image)
+        counts_as_water = data.get('counts_as_water', drink.counts_as_water if hasattr(drink, 'counts_as_water') else True)
         
         if not drink_name:
             return jsonify({
@@ -296,6 +299,7 @@ def update_drink(drink_id):
         drink.drink_water_percentage = drink_water_percentage
         drink.drink_alcohol_percentage = drink_alcohol_percentage
         drink.drink_image = drink_image if drink_image else None
+        drink.counts_as_water = counts_as_water
         
         from .models import db
         db.session.commit()
