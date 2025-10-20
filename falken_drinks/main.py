@@ -59,5 +59,6 @@ def drinks_management():
 
     # Get all drinks for display
     drinks = ControllerDrinks.get_drinks()
+    Log.debug(f"Drinks retrieved: {drinks}")
 
     return render_template('drinks_management.html', drinks=drinks)
