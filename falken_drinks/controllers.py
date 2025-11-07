@@ -203,23 +203,38 @@ class ControllerDrinkLogs:
                     drink = Drink.query.filter_by(drink_id=log.drink_id).first()
                     if drink and drink.drink_water_percentage < 90:
                         total_coffee += log.drink_total_quantity
-            
+            Log.debug(f"Total coffee/tea: {total_coffee} ml")
+
             # Adjust other beverages to exclude coffee
             total_other = max(0, total_other - total_coffee)
             
             # Daily goal (you can make this configurable per user later)
             daily_goal = 2560  # ml (approximately 8 glasses of water)
             
-            # Calculate progress percentage
-            progress_percentage = min(100, (total_liquid / daily_goal * 100)) if daily_goal > 0 else 0
+            # Calculate progress percentage based only on water content from drinks that count as water
+            total_water_for_progress = 0
+            for log in logs:
+                drink = Drink.query.filter_by(drink_id=log.drink_id).first()
+                if drink and drink.counts_as_water:
+                    total_water_for_progress += log.drink_water_quantity
+            Log.debug(f"Total water for progress: {total_water_for_progress} ml")
+            
+            progress_percentage = min(100, (total_water_for_progress / daily_goal * 100)) if daily_goal > 0 else 0
             
             # Calculate individual percentages for progress bar
             water_percentage = (total_water / daily_goal * 100) if daily_goal > 0 else 0
             coffee_percentage = (total_coffee / daily_goal * 100) if daily_goal > 0 else 0
             alcohol_percentage = (total_alcohol / daily_goal * 100) if daily_goal > 0 else 0
             other_percentage = (total_other / daily_goal * 100) if daily_goal > 0 else 0
-            
+
+            Log.debug(f"Total liquid: {total_liquid} ml, "
+                      f"Total water: {total_water} ml, "
+                      f"Total alcohol: {total_alcohol} ml, "
+                      f"Total other: {total_other} ml, "
+                      f"Total Water Progress: {total_water_for_progress} ml")
+
             return {
+                'total_water_for_progress': total_water_for_progress,
                 'total_liquid': total_liquid,
                 'total_water': total_water,
                 'total_coffee': total_coffee,
