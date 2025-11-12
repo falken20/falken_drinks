@@ -9,56 +9,6 @@
 </script>
 
 <div class="container" style="text-align: center;">    
-    
-    <!-- Daily Summary Header -->
-    <div style="margin-bottom: 30px;">
-        <h2 style="color: white; margin-bottom: 20px;">Daily Summary</h2>
-        <div style="color: #eee; font-size: 1.1rem;">
-            {{ daily_summary.date.strftime('%B %d, %Y') }}
-        </div>
-    </div>
-
-    <!-- Daily Progress Overview -->
-    <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 30px;">
-        <div style="border: 2px solid {% if daily_summary.consumption_summary.progress_percentage >= 100 %}#28a745{% else %}#fff{% endif %}; border-radius: 12px; padding: 16px 32px; background: rgba(0,0,0,0.3);">
-            <h2 style="color: {% if daily_summary.consumption_summary.progress_percentage >= 100 %}#28a745{% else %}white{% endif %}; margin: 0;">
-                {{ daily_summary.consumption_summary.total_liquid }}ml / {{ daily_summary.consumption_summary.daily_goal }}ml
-                {% if daily_summary.consumption_summary.progress_percentage >= 100 %}
-                <span style="font-size: 0.6em;"> ✓ GOAL REACHED!</span>
-                {% endif %}
-            </h2>
-            <div style="color: #ccc; font-size: 0.9rem; margin-top: 8px;">
-                {{ "%.1f"|format(daily_summary.consumption_summary.progress_percentage) }}% of daily goal
-            </div>
-        </div>
-    </div>
-
-    <!-- Progress Bar -->
-    <div class="progress progress-bar-style" style="max-width: 100%; margin-bottom: 30px;">
-        {% if daily_summary.consumption_summary.water_percentage > 0 %}
-        <div class="progress-bar" style="width: {{ daily_summary.consumption_summary.water_percentage }}%">{{ "%.0f"|format(daily_summary.consumption_summary.water_percentage) }}%</div>
-        {% endif %}
-        {% if daily_summary.consumption_summary.coffee_percentage > 0 %}
-        <div class="progress-bar bg-dark" style="width: {{ daily_summary.consumption_summary.coffee_percentage }}%">{{ "%.0f"|format(daily_summary.consumption_summary.coffee_percentage) }}%</div>
-        {% endif %}
-        {% if daily_summary.consumption_summary.alcohol_percentage > 0 %}
-        <div class="progress-bar bg-danger progress-bar-stripped" style="width: {{ daily_summary.consumption_summary.alcohol_percentage }}%">{{ "%.0f"|format(daily_summary.consumption_summary.alcohol_percentage) }}%</div>
-        {% endif %}
-        {% if daily_summary.consumption_summary.other_percentage > 0 %}
-        <div class="progress-bar bg-success progress-bar-stripped" style="width: {{ daily_summary.consumption_summary.other_percentage }}%">{{ "%.0f"|format(daily_summary.consumption_summary.other_percentage) }}%</div>
-        {% endif %}
-        {% if daily_summary.consumption_summary.total_liquid == 0 %}
-        <div class="progress-bar bg-secondary" style="width: 100%; text-align: center;">No drinks logged today</div>
-        {% endif %}
-    </div>
-
-    <!-- Legend -->
-    <div style="color: #eee; font-size: 1rem; margin-bottom: 30px;">
-        <span style="color: #0d6efd;">&#9632;</span> Water
-        <span style="color: #212529; margin-left: 15px;">&#9632;</span> Coffee/Tea
-        <span style="color: #dc3545; margin-left: 15px;">&#9632;</span> Alcohol
-        <span style="color: #198754; margin-left: 15px;">&#9632;</span> Other
-    </div>
 
     <!-- Drink Logs List -->
     <div style="max-width: 450px; margin: 0 auto;">
@@ -85,6 +35,7 @@
                             <div style="color: white; font-size: 1rem; font-weight: bold;">{{ log.drink_name }}</div>
                             <div style="color: #ccc; font-size: 0.85rem;">
                                 {{ log.total_quantity }}ml
+                                <span style="color: #0d6efd;"> • {{ log.water_percentage }}% water</span>
                                 {% if log.alcohol_percentage > 0 %}
                                 <span style="color: #dc3545;"> • {{ log.alcohol_percentage }}% alcohol</span>
                                 {% endif %}
@@ -114,6 +65,11 @@
                         {% endif %}
                         {% if log.total_quantity - log.water_quantity - log.alcohol_quantity > 0 %}
                         • <span style="color: #198754;">Other: {{ log.total_quantity - log.water_quantity - log.alcohol_quantity }}ml</span>
+                        {% endif %}
+                        {% if log.counts_as_water %}
+                        <span style="color: #28a745;">- ✓ Counts as water</span>
+                        {% else %}
+                        <span style="color: #dc3545;">- ✗ Does not count as water</span>
                         {% endif %}
                     </div>
                 </div>

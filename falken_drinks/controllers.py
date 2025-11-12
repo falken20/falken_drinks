@@ -298,6 +298,8 @@ class ControllerDrinkLogs:
                     'water_quantity': log.drink_water_quantity,
                     'alcohol_quantity': log.drink_alcohol_quantity,
                     'alcohol_percentage': drink.drink_alcohol_percentage,
+                    'water_percentage': drink.drink_water_percentage,
+                    'counts_as_water': drink.counts_as_water,
                     'drink_image': drink.drink_image,
                     'time_logged': log.date_created  # You might want to add time field to model
                 }
