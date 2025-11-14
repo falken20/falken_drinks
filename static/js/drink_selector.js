@@ -216,12 +216,14 @@ function selectDrink(drinkType) {
     icons.forEach(icon => {
         icon.style.transform = 'scale(1)';
         icon.querySelector('img').style.boxShadow = 'none';
+        icon.querySelector('img').style.border = 'none';
     });
     
     // Find the clicked element and highlight it
     const clickedIcon = event.currentTarget;
-    clickedIcon.style.transform = 'scale(1.1)';
-    clickedIcon.querySelector('img').style.boxShadow = '0 0 10px rgba(255, 255, 255, 0.8)';
+    clickedIcon.style.transform = 'scale(1.15)';
+    clickedIcon.querySelector('img').style.boxShadow = '0 0 20px rgba(255, 255, 255, 0.9)';
+    clickedIcon.querySelector('img').style.border = '3px solid #fff';
     
     // Check if it's an alcoholic drink
     const isAlcoholic = ['Wine', 'Beer', 'Cocktail', 'Shot'].includes(drinkType);
@@ -349,11 +351,17 @@ function selectAmount(amount) {
     document.querySelectorAll('.amount-option').forEach(option => {
         option.querySelector('div').style.background = 'rgba(13, 110, 253, 0.2)';
         option.querySelector('div').style.color = 'white';
+        option.querySelector('div').style.border = 'none';
+        option.querySelector('div').style.transform = 'scale(1)';
+        option.querySelector('div').style.boxShadow = 'none';
     });
     const activeOption = document.querySelector(`.amount-option[onclick="selectAmount(${amount})"]`);
     if (activeOption) {
-        activeOption.querySelector('div').style.background = 'rgba(13, 110, 253, 0.5)';
+        activeOption.querySelector('div').style.background = '#0d6efd';
         activeOption.querySelector('div').style.color = 'white';
+        activeOption.querySelector('div').style.border = '2px solid #fff';
+        activeOption.querySelector('div').style.transform = 'scale(1.15)';
+        activeOption.querySelector('div').style.boxShadow = '0 0 15px rgba(13, 110, 253, 0.8)';
     }
     
     // Hide custom amount input if it's visible
