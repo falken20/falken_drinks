@@ -16,7 +16,7 @@
         
         {% if daily_summary.has_logs %}
             {% for log in daily_summary.drink_logs %}
-            <div style="background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 12px 15px; margin-bottom: 8px; text-align: left;">
+            <div style="background: rgba(230, 230, 234, 0.47); border-radius: 12px; padding: 12px 15px; margin-bottom: 8px; text-align: left;">
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                     <div style="display: flex; align-items: center;">
                         <!-- Drink Icon/Image -->
@@ -32,8 +32,30 @@
                         
                         <!-- Drink Info -->
                         <div>
-                            <div style="color: white; font-size: 1rem; font-weight: bold;">{{ log.drink_name }}</div>
-                            <div style="color: #ccc; font-size: 0.85rem;">
+                            <div style="color: white; font-size: 1rem; font-weight: bold; position: relative;">
+                                {{ log.drink_name }}
+                                {% if log.counts_as_water %}
+                                <span style="color: #28a745; font-size: 0.85rem;">- ✓ Counts as water</span>
+                                {% else %}
+                                <span style="color: #dc3545; font-size: 0.85rem;">- ✗ Does not count as water</span>
+                                {% endif %}
+                                <!-- Info icon for tooltip -->
+                                <span class="breakdown-tooltip" style="cursor: help; color: #0d6efd; font-size: 0.8rem; margin-left: 5px;">ⓘ
+                                    <span class="breakdown-tooltiptext">
+                                        <strong>Breakdown:</strong><br>
+                                        {% if log.water_quantity > 0 %}
+                                        <span style="color: #6db3ff;">💧 Water: {{ log.water_quantity }}ml</span><br>
+                                        {% endif %}
+                                        {% if log.alcohol_quantity > 0 %}
+                                        <span style="color: #ff6b6b;">🍷 Alcohol: {{ log.alcohol_quantity }}ml</span><br>
+                                        {% endif %}
+                                        {% if log.total_quantity - log.water_quantity - log.alcohol_quantity > 0 %}
+                                        <span style="color: #51cf66;">🥤 Other: {{ log.total_quantity - log.water_quantity - log.alcohol_quantity }}ml</span>
+                                        {% endif %}
+                                    </span>
+                                </span>
+                            </div>
+                            <div style="color: #050505; font-size: 0.85rem;">
                                 {{ log.total_quantity }}ml
                                 <span style="color: #0d6efd;"> • {{ log.water_percentage }}% water</span>
                                 {% if log.alcohol_percentage > 0 %}
@@ -51,29 +73,6 @@
                         </button>
                     </div>
                 </div>
-                
-                <!-- Breakdown -->
-                {% if log.water_quantity > 0 or log.alcohol_quantity > 0 %}
-                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1);">
-                    <div style="color: #aaa; font-size: 0.75rem;">
-                        {% if log.water_quantity > 0 %}
-                        <span style="color: #0d6efd;">Water: {{ log.water_quantity }}ml</span>
-                        {% endif %}
-                        {% if log.alcohol_quantity > 0 %}
-                        {% if log.water_quantity > 0 %} • {% endif %}
-                        <span style="color: #dc3545;">Alcohol: {{ log.alcohol_quantity }}ml</span>
-                        {% endif %}
-                        {% if log.total_quantity - log.water_quantity - log.alcohol_quantity > 0 %}
-                        • <span style="color: #198754;">Other: {{ log.total_quantity - log.water_quantity - log.alcohol_quantity }}ml</span>
-                        {% endif %}
-                        {% if log.counts_as_water %}
-                        <span style="color: #28a745;">- ✓ Counts as water</span>
-                        {% else %}
-                        <span style="color: #dc3545;">- ✗ Does not count as water</span>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endif %}
             </div>
             {% endfor %}
         {% else %}

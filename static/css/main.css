@@ -153,3 +153,45 @@ th, td {
     margin-top: 30px !important;
     margin-bottom: 10px !important;
 }
+
+/* Tooltip styles for drink breakdown */
+.breakdown-tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.breakdown-tooltip .breakdown-tooltiptext {
+    visibility: hidden;
+    width: 200px;
+    background-color: #333;
+    color: #fff;
+    text-align: left;
+    border-radius: 6px;
+    padding: 8px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 0.75rem;
+    font-weight: normal;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.breakdown-tooltip .breakdown-tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+}
+
+.breakdown-tooltip:hover .breakdown-tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
