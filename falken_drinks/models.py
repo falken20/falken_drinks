@@ -7,7 +7,7 @@
 
 # import logging
 import sys
-from datetime import date
+from datetime import date, datetime
 from flask import Flask
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
@@ -151,7 +151,7 @@ class DrinkLog(db.Model):
     log_id = db.Column(db.Integer, primary_key=True)
     drink_id = db.Column(db.Integer, db.ForeignKey('drinks.drink_id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    date_created = db.Column(db.Date, nullable=False, default=date.today)
+    date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     drink_total_quantity = db.Column(db.Integer, nullable=False)
     drink_water_quantity = db.Column(db.Integer, nullable=False)
     drink_alcohol_quantity = db.Column(db.Integer, nullable=False)
