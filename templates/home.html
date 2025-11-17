@@ -10,7 +10,7 @@
 
 <div class="container" style="text-align: center;">    
 
-        <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 5px;">
             <div style="border: 2px solid {% if daily_consumption.progress_percentage >= 100 %}#28a745{% else %}#fff{% endif %}; border-radius: 12px; padding: 16px 32px; background: rgba(0,0,0,0.3);">
                 <h1 style="color: {% if daily_consumption.progress_percentage >= 100 %}#28a745{% else %}white{% endif %}; margin: 0;">
                     {{ daily_consumption.total_water_for_progress or 0 }}ml / {{ daily_consumption.daily_goal or 2560 }}ml
@@ -20,29 +20,45 @@
                 </h1>
             </div>
         </div>
-        <div style="margin-top: 10px;">Total Day Drink: {{ daily_consumption.total_liquid or 0 }}ml</div>
-        <div class="progress progress-bar-style" style="max-width: 100%;">
+        <div style="margin-top: 5px; font-size: 1rem; font-weight: bold;">Total Day Drink: {{ daily_consumption.total_liquid or 0 }}ml</div>
+        <div class="progress progress-bar-style" style="max-width: 100%; margin-top: 10px !important;">
             {% if daily_consumption.water_percentage > 0 %}
-            <div class="progress-bar" style="width: {{ daily_consumption.water_percentage }}%">{{ "%.0f"|format(daily_consumption.water_percentage) }}%</div>
+            <div class="progress-bar" style="width: {{ daily_consumption.water_percentage }}%">
+                {% if daily_consumption.water_percentage >= 5 %}
+                Water {{ "%.0f"|format(daily_consumption.water_percentage) }}%
+                {% endif %}
+            </div>
             {% endif %}
             {% if daily_consumption.coffee_percentage > 0 %}
-            <div class="progress-bar bg-dark" style="width: {{ daily_consumption.coffee_percentage }}%">{{ "%.0f"|format(daily_consumption.coffee_percentage) }}%</div>
+            <div class="progress-bar bg-dark" style="width: {{ daily_consumption.coffee_percentage }}%">
+                {% if daily_consumption.coffee_percentage >= 5 %}
+                Coffee {{ "%.0f"|format(daily_consumption.coffee_percentage) }}%
+                {% endif %}
+            </div>
             {% endif %}
             {% if daily_consumption.alcohol_percentage > 0 %}
-            <div class="progress-bar bg-danger progress-bar-stripped" style="width: {{ daily_consumption.alcohol_percentage }}%">{{ "%.0f"|format(daily_consumption.alcohol_percentage) }}%</div>
+            <div class="progress-bar bg-danger progress-bar-stripped" style="width: {{ daily_consumption.alcohol_percentage }}%">
+                {% if daily_consumption.alcohol_percentage >= 5 %}
+                Alcohol {{ "%.0f"|format(daily_consumption.alcohol_percentage) }}%
+                {% endif %}
+            </div>
             {% endif %}
             {% if daily_consumption.other_percentage > 0 %}
-            <div class="progress-bar bg-success progress-bar-stripped" style="width: {{ daily_consumption.other_percentage }}%">{{ "%.0f"|format(daily_consumption.other_percentage) }}%</div>
+            <div class="progress-bar bg-success progress-bar-stripped" style="width: {{ daily_consumption.other_percentage }}%">
+                {% if daily_consumption.other_percentage >= 5 %}
+                Other {{ "%.0f"|format(daily_consumption.other_percentage) }}%
+                {% endif %}
+            </div>
             {% endif %}
-            {% if daily_consumption.total_water_for_progress == 0 %}
+            {% if daily_consumption.total_liquid == 0 %}
             <div class="progress-bar bg-secondary" style="width: 100%; text-align: center;">No drinks logged today</div>
             {% endif %}
         </div>
-        <div style="color: #eee; font-size: 1rem; margin-bottom: 10px;">
-            <span style="color: #0d6efd;">&#9632;</span> Water
-            <span style="color: #212529; margin-left: 15px;">&#9632;</span> Coffee/Tea
-            <span style="color: #dc3545; margin-left: 15px;">&#9632;</span> Alcohol
-            <span style="color: #198754; margin-left: 15px;">&#9632;</span> Other
+        <div style="color: #eee; font-size: 0.8rem; margin-bottom: 10px;">
+            <span style="color: #0d6efd;">&#9632;</span> Water ({{ "%.0f"|format(daily_consumption.water_percentage or 0) }}%)
+            <span style="color: #212529; margin-left: 15px;">&#9632;</span> Coffee/Tea ({{ "%.0f"|format(daily_consumption.coffee_percentage or 0) }}%)
+            <span style="color: #dc3545; margin-left: 15px;">&#9632;</span> Alcohol ({{ "%.0f"|format(daily_consumption.alcohol_percentage or 0) }}%)
+            <span style="color: #198754; margin-left: 15px;">&#9632;</span> Other ({{ "%.0f"|format(daily_consumption.other_percentage or 0) }}%)
         </div>
 
         <!-- Drink icon carousel -->

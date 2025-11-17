@@ -1,5 +1,5 @@
 # by Richi Rod AKA @richionline / falken20
-from datetime import date
+from datetime import date, datetime, timedelta
 # import pprint
 import sys
 
@@ -182,9 +182,14 @@ class ControllerDrinkLogs:
         
         try:
             # Query all drink logs for the user on the target date
-            logs = DrinkLog.query.filter_by(
-                user_id=user_id,
-                date_created=target_date
+            # Since date_created is DateTime, filter by date range
+            start_datetime = datetime.combine(target_date, datetime.min.time())
+            end_datetime = datetime.combine(target_date, datetime.max.time())
+            
+            logs = DrinkLog.query.filter(
+                DrinkLog.user_id == user_id,
+                DrinkLog.date_created >= start_datetime,
+                DrinkLog.date_created <= end_datetime
             ).all()
             
             # Calculate totals
@@ -277,11 +282,16 @@ class ControllerDrinkLogs:
         
         try:
             # Query all drink logs for the user on the target date with drink information
+            # Since date_created is DateTime, filter by date range
+            start_datetime = datetime.combine(target_date, datetime.min.time())
+            end_datetime = datetime.combine(target_date, datetime.max.time())
+            
             logs = db.session.query(DrinkLog, Drink).join(
                 Drink, DrinkLog.drink_id == Drink.drink_id
             ).filter(
                 DrinkLog.user_id == user_id,
-                DrinkLog.date_created == target_date
+                DrinkLog.date_created >= start_datetime,
+                DrinkLog.date_created <= end_datetime
             ).order_by(DrinkLog.log_id.desc()).all()
             
             # Process logs into a more readable format

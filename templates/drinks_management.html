@@ -132,6 +132,9 @@ let editingDrinkId = null;
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
+    // Ensure modal is hidden initially
+    hideLoading();
+    
     // Load drinks on page load
     loadDrinks();
     
@@ -194,6 +197,7 @@ function setupPercentageSliders() {
 
 // Load all drinks
 function loadDrinks() {
+    console.log('Loading drinks...');
     showLoading();
     
     fetch('/api/drinks', {
@@ -204,13 +208,14 @@ function loadDrinks() {
         credentials: 'same-origin'
     })
     .then(response => {
+        console.log('Received response:', response.status);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();
     })
     .then(data => {
-        hideLoading();
+        console.log('Received data:', data);
         if (data.success) {
             displayDrinks(data.drinks);
         } else {
@@ -218,11 +223,11 @@ function loadDrinks() {
         }
     })
     .catch(error => {
-        hideLoading();
-        console.error('Error:', error);
+        console.error('Error loading drinks:', error);
         alert('Error loading drinks: ' + error.message);
     })
     .finally(() => {
+        console.log('Hiding loading modal...');
         // Ensure loading modal is always hidden
         hideLoading();
     });
@@ -485,36 +490,50 @@ function showLoading() {
 
 // Hide loading modal
 function hideLoading() {
+    console.log('Attempting to hide loading modal...');
     try {
         const modalElement = document.getElementById('loadingModal');
         if (modalElement) {
+            // Try to get Bootstrap modal instance
             const modal = bootstrap.Modal.getInstance(modalElement);
             if (modal) {
+                console.log('Hiding modal using Bootstrap instance');
                 modal.hide();
-            } else {
-                // If no instance exists, try to hide it directly
-                modalElement.classList.remove('show');
-                modalElement.style.display = 'none';
-                document.body.classList.remove('modal-open');
-                const backdrop = document.querySelector('.modal-backdrop');
-                if (backdrop) {
-                    backdrop.remove();
-                }
             }
+            
+            // Force hide the modal directly (in case Bootstrap instance doesn't exist)
+            modalElement.classList.remove('show');
+            modalElement.setAttribute('aria-hidden', 'true');
+            modalElement.setAttribute('style', 'display: none;');
+            
+            // Remove modal-open class from body
+            document.body.classList.remove('modal-open');
+            
+            // Remove all backdrops
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
+            
+            // Reset body padding
+            document.body.style.paddingRight = '';
+            document.body.style.overflow = '';
+            
+            console.log('Loading modal hidden successfully');
+        } else {
+            console.warn('Loading modal element not found');
         }
     } catch (error) {
         console.error('Error hiding loading modal:', error);
-        // Force hide the modal as fallback
+        // Last resort: force hide everything
         const modalElement = document.getElementById('loadingModal');
         if (modalElement) {
-            modalElement.classList.remove('show');
             modalElement.style.display = 'none';
+            modalElement.classList.remove('show');
         }
         document.body.classList.remove('modal-open');
-        const backdrop = document.querySelector('.modal-backdrop');
-        if (backdrop) {
-            backdrop.remove();
-        }
+        document.body.style.paddingRight = '';
+        document.body.style.overflow = '';
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(backdrop => backdrop.remove());
     }
 }
 </script>
