@@ -136,10 +136,10 @@
             </div>
             
             <!-- Alcohol percentage selector - only shows for alcoholic drinks -->
-            <div id="alcohol-percentage-container" style="margin-top: 10px; display: none; justify-content: center;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <label style="color: white; margin-bottom: 0; margin-right: 5px;">Alcohol %:</label>
-                    <select id="alcohol-percentage" class="form-select" style="max-width: 100px;">
+            <div id="alcohol-percentage-container" style="margin-top: 8px; display: none; justify-content: center;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <label style="color: white; margin-bottom: 0; font-size: 0.85rem;">Alcohol %:</label>
+                    <select id="alcohol-percentage" class="form-select form-select-sm" style="max-width: 90px; font-size: 0.85rem;">
                         <option value="0">0%</option>
                         <option value="4">4%</option>
                         <option value="5">5%</option>
@@ -152,8 +152,8 @@
                         <option value="custom">Custom</option>
                     </select>
                     <div id="custom-alcohol-container" style="display: none; align-items: center; gap: 5px;">
-                        <input type="number" id="custom-alcohol" class="form-control" style="max-width: 80px;" min="0" max="100" placeholder="%">
-                        <button class="btn btn-sm btn-primary" onclick="confirmCustomAlcohol()">OK</button>
+                        <input type="number" id="custom-alcohol" class="form-control form-control-sm" style="max-width: 70px; font-size: 0.85rem;" min="0" max="100" placeholder="%">
+                        <button class="btn btn-sm btn-primary" style="font-size: 0.8rem; padding: 4px 8px;" onclick="confirmCustomAlcohol()">OK</button>
                     </div>
                 </div>
             </div>
