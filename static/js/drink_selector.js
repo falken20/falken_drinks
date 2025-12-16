@@ -157,10 +157,10 @@ function addDrink() {
         if (data.success) {
             if (alcoholPercentage > 0) {
                 console.log(`Added ${amount}ml of ${drinkType} (${alcoholPercentage}% alcohol)`);
-                alert(`Added ${amount}ml of ${drinkType} (${alcoholPercentage}% alcohol)!`);
+                //alert(`Added ${amount}ml of ${drinkType} (${alcoholPercentage}% alcohol)!`);
             } else {
                 console.log(`Added ${amount}ml of ${drinkType}`);
-                alert(`Added ${amount}ml of ${drinkType}!`);
+                //alert(`Added ${amount}ml of ${drinkType}!`);
             }
             
             // Reset form elements
