@@ -5,6 +5,12 @@
 <script>
     window.onload = function() {
         activeVisibility('spray', 'spray_icon');
+        
+        // Initialize Bootstrap tooltips for progress bar
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
     }
 </script>
 
@@ -23,28 +29,36 @@
         <div style="margin-top: 5px; font-size: 1rem; font-weight: bold;">Total Day Drink: {{ daily_consumption.total_liquid or 0 }}ml</div>
         <div class="progress progress-bar-style" style="max-width: 100%; margin-top: 10px !important;">
             {% if daily_consumption.water_percentage > 0 %}
-            <div class="progress-bar" style="width: {{ daily_consumption.water_percentage }}%">
+            <div class="progress-bar" style="width: {{ daily_consumption.water_percentage }}%" 
+                 title="Water: {{ daily_consumption.total_water or 0 }}ml ({{ "%.1f"|format(daily_consumption.water_percentage) }}%)" 
+                 data-bs-toggle="tooltip" data-bs-placement="top">
                 {% if daily_consumption.water_percentage >= 5 %}
                 Water {{ "%.0f"|format(daily_consumption.water_percentage) }}%
                 {% endif %}
             </div>
             {% endif %}
             {% if daily_consumption.coffee_percentage > 0 %}
-            <div class="progress-bar bg-dark" style="width: {{ daily_consumption.coffee_percentage }}%">
+            <div class="progress-bar bg-dark" style="width: {{ daily_consumption.coffee_percentage }}%" 
+                 title="Coffee/Tea: {{ daily_consumption.total_coffee or 0 }}ml ({{ "%.1f"|format(daily_consumption.coffee_percentage) }}%)" 
+                 data-bs-toggle="tooltip" data-bs-placement="top">
                 {% if daily_consumption.coffee_percentage >= 5 %}
                 Coffee {{ "%.0f"|format(daily_consumption.coffee_percentage) }}%
                 {% endif %}
             </div>
             {% endif %}
             {% if daily_consumption.alcohol_percentage > 0 %}
-            <div class="progress-bar bg-danger progress-bar-stripped" style="width: {{ daily_consumption.alcohol_percentage }}%">
+            <div class="progress-bar bg-danger progress-bar-stripped" style="width: {{ daily_consumption.alcohol_percentage }}%" 
+                 title="Alcohol: {{ daily_consumption.total_alcohol or 0 }}ml ({{ "%.1f"|format(daily_consumption.alcohol_percentage) }}%)" 
+                 data-bs-toggle="tooltip" data-bs-placement="top">
                 {% if daily_consumption.alcohol_percentage >= 5 %}
                 Alcohol {{ "%.0f"|format(daily_consumption.alcohol_percentage) }}%
                 {% endif %}
             </div>
             {% endif %}
             {% if daily_consumption.other_percentage > 0 %}
-            <div class="progress-bar bg-success progress-bar-stripped" style="width: {{ daily_consumption.other_percentage }}%">
+            <div class="progress-bar bg-success progress-bar-stripped" style="width: {{ daily_consumption.other_percentage }}%" 
+                 title="Other: {{ daily_consumption.total_other or 0 }}ml ({{ "%.1f"|format(daily_consumption.other_percentage) }}%)" 
+                 data-bs-toggle="tooltip" data-bs-placement="top">
                 {% if daily_consumption.other_percentage >= 5 %}
                 Other {{ "%.0f"|format(daily_consumption.other_percentage) }}%
                 {% endif %}
