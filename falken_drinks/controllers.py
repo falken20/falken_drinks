@@ -192,26 +192,36 @@ class ControllerDrinkLogs:
                 DrinkLog.date_created <= end_datetime
             ).all()
             
-            # Calculate totals
-            total_liquid = sum(log.drink_total_quantity for log in logs)
-            total_water = sum(log.drink_water_quantity for log in logs)
-            total_alcohol = sum(log.drink_alcohol_quantity for log in logs)
+            # Calculate totals by drink type (entire drink amount, not just content)
+            total_liquid = 0
+            total_water = 0  # Only pure water drinks
+            total_coffee = 0  # Coffee/tea drinks (full amount)
+            total_alcohol = 0  # Alcoholic drinks (full amount)
+            total_other = 0  # Other drinks (full amount)
             
-            # Calculate other beverages (non-water, non-alcohol)
-            total_other = total_liquid - total_water - total_alcohol
-            
-            # Calculate coffee/tea separately (approximate - drinks with 0% alcohol and less than 90% water)
-            total_coffee = 0
             for log in logs:
-                if log.drink_alcohol_quantity == 0:
-                    # Get drink info to check if it's likely coffee/tea
-                    drink = Drink.query.filter_by(drink_id=log.drink_id).first()
-                    if drink and drink.drink_water_percentage < 90:
+                drink = Drink.query.filter_by(drink_id=log.drink_id).first()
+                if drink:
+                    total_liquid += log.drink_total_quantity
+                    
+                    # Categorize by drink type
+                    if drink.drink_alcohol_percentage > 0:
+                        # Any drink with alcohol counts as alcohol (full amount)
+                        total_alcohol += log.drink_total_quantity
+                    elif drink.drink_water_percentage >= 98:
+                        # Pure water (98%+ water)
+                        total_water += log.drink_total_quantity
+                    elif drink.drink_water_percentage < 90:
+                        # Coffee/tea (less than 90% water, no alcohol)
                         total_coffee += log.drink_total_quantity
-            Log.debug(f"Total coffee/tea: {total_coffee} ml")
-
-            # Adjust other beverages to exclude coffee
-            total_other = max(0, total_other - total_coffee)
+                    else:
+                        # Other beverages
+                        total_other += log.drink_total_quantity
+            
+            Log.debug(f"Total water: {total_water} ml, "
+                      f"Total coffee/tea: {total_coffee} ml, "
+                      f"Total alcohol: {total_alcohol} ml, "
+                      f"Total other: {total_other} ml")
             
             # Daily goal (you can make this configurable per user later)
             daily_goal = 2560  # ml (approximately 8 glasses of water)
