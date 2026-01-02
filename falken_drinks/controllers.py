@@ -91,7 +91,9 @@ class ControllerDrinks:
     def get_drinks():
         Log.info(
             f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
-        return Drink.query.all()
+        all_drinks = Drink.query.all()
+        Log.debug(f"Drinks found: {len(all_drinks)}")
+        return all_drinks
     
     @staticmethod
     def add_drink(drink_data: dict):

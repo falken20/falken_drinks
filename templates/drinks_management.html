@@ -112,7 +112,7 @@
 </div>
 
 <!-- Loading Modal -->
-<div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+<div class="modal" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true" style="display: none !important;">
     <div class="modal-dialog modal-sm modal-dialog-centered">
         <div class="modal-content" style="background: rgba(0,0,0,0.8); border: 1px solid #333;">
             <div class="modal-body text-center" style="color: white;">
@@ -270,10 +270,8 @@ function displayDrinks(drinks) {
                         <!-- Drink Info -->
                         <div style="flex: 1;">
                             <h5 style="color: white; margin: 0; margin-bottom: 5px; font-size: 1.1rem;">${drink.drink_name}</h5>
-                            <div style="color: #ccc; font-size: 0.85rem;">
-                                <span style="color: #0d6efd;">💧 Water: ${drink.drink_water_percentage}%</span>
-                                ${drink.drink_alcohol_percentage > 0 ? `<span style="color: #dc3545; margin-left: 12px;">🍷 Alcohol: ${drink.drink_alcohol_percentage}%</span>` : ''}
-                                ${otherPercentage > 0 ? `<span style="color: #198754; margin-left: 12px;">🥤 Other: ${otherPercentage}%</span>` : ''}
+                            <div style="color: #ccc; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                <span style="color: #0d6efd;">💧 Water: ${drink.drink_water_percentage}%</span>${drink.drink_alcohol_percentage > 0 ? ` <span style="color: #dc3545;">🍷 Alcohol: ${drink.drink_alcohol_percentage}%</span>` : ''}${otherPercentage > 0 ? ` <span style="color: #198754;">🥤 Other: ${otherPercentage}%</span>` : ''}
                             </div>
                         </div>
                     </div>
