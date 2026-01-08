@@ -77,7 +77,7 @@
 
         <!-- Drink icon carousel -->
         <div style="margin: 1px auto; max-width: 100%; padding: 1px; background: rgba(255, 255, 255, 0.069); border-radius: 15px;">
-            <div class="drink-carousel" style="display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 15px; padding: 2px 0; justify-content: left;">
+            <div class="drink-carousel" style="display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 1px; padding: 2px 0; justify-content: left;">
                 <div class="drink-icon" onclick="selectDrink('Water')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
                     <img src="{{ url_for('static', filename='images/drinks/icons8-water-96.png') }}" alt="Water" style="height: 50px; background: rgba(13, 110, 253, 0.2); padding: 5px; border-radius: 50%;">
                     <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Water</p>
@@ -119,15 +119,15 @@
 
         <!-- Drink amount input carousel -->
         <div style="margin: 10px auto; max-width: 100%; padding: 1px; background: rgba(255, 255, 255, 0.069); border-radius: 15px;">
-            <div class="amount-carousel" style="display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 15px; padding: 10px 10px; justify-content: left;">
+            <div class="amount-carousel" style="display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 1px; padding: 10px 10px; justify-content: left;">
                 <div class="amount-option" onclick="selectAmount(30)" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
                     <div style="height: 50px; width: 50px; display: flex; justify-content: center; align-items: center; background: rgba(13, 110, 253, 0.2); border-radius: 50%; font-size: 0.9rem; color: white; font-weight: bold;">30ml</div>
                 </div>
                 <div class="amount-option" onclick="selectAmount(100)" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
                     <div style="height: 50px; width: 50px; display: flex; justify-content: center; align-items: center; background: rgba(13, 110, 253, 0.2); border-radius: 50%; font-size: 0.9rem; color: white; font-weight: bold;">100ml</div>
                 </div>
-                <div class="amount-option" onclick="selectAmount(200)" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
-                    <div style="height: 50px; width: 50px; display: flex; justify-content: center; align-items: center; background: rgba(13, 110, 253, 0.2); border-radius: 50%; font-size: 0.9rem; color: white; font-weight: bold;">200ml</div>
+                <div class="amount-option" onclick="selectAmount(150)" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
+                    <div style="height: 50px; width: 50px; display: flex; justify-content: center; align-items: center; background: rgba(13, 110, 253, 0.2); border-radius: 50%; font-size: 0.9rem; color: white; font-weight: bold;">150ml</div>
                 </div>
                 <div class="amount-option" onclick="selectAmount(250)" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
                     <div style="height: 50px; width: 50px; display: flex; justify-content: center; align-items: center; background: rgba(13, 110, 253, 0.2); border-radius: 50%; font-size: 0.9rem; color: white; font-weight: bold;">250ml</div>
