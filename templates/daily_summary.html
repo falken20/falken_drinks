@@ -16,17 +16,17 @@
         
         {% if daily_summary.has_logs %}
             {% for log in daily_summary.drink_logs %}
-            <div style="background: rgba(230, 230, 234, 0.47); border-radius: 12px; padding: 12px 15px; margin-bottom: 8px; text-align: left;">
+            <div style="background: rgba(230, 230, 234, 0.47); border-radius: 12px; padding: 8px 12px; margin-bottom: 6px; text-align: left;">
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                     <div style="display: flex; align-items: center;">
                         <!-- Drink Icon/Image -->
                         {% if log.drink_image %}
                         <img src="{{ url_for('static', filename='images/drinks/' + log.drink_image) }}" 
                              alt="{{ log.drink_name }}" 
-                             style="height: 35px; width: 35px; border-radius: 50%; margin-right: 12px; background: rgba(255,255,255,0.1); padding: 4px;">
+                             style="height: 30px; width: 30px; border-radius: 50%; margin-right: 10px; background: rgba(255,255,255,0.1); padding: 3px;">
                         {% else %}
-                        <div style="height: 35px; width: 35px; border-radius: 50%; margin-right: 12px; background: rgba(13, 110, 253, 0.3); display: flex; align-items: center; justify-content: center;">
-                            <span style="color: white; font-weight: bold; font-size: 0.8rem;">{{ log.drink_name[0] }}</span>
+                        <div style="height: 30px; width: 30px; border-radius: 50%; margin-right: 10px; background: rgba(13, 110, 253, 0.3); display: flex; align-items: center; justify-content: center;">
+                            <span style="color: white; font-weight: bold; font-size: 0.75rem;">{{ log.drink_name[0] }}</span>
                         </div>
                         {% endif %}
                         
