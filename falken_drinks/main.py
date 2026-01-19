@@ -50,6 +50,45 @@ def daily_summary():
     return render_template('daily_summary.html', daily_summary=daily_summary)
 
 
+@main.route("/analytics", methods=['GET', 'POST'])
+@login_required
+def analytics():
+    Log.info(
+        f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
+    Log.debug(f"Current user: {current_user}")
+    
+    from datetime import datetime, timedelta
+    
+    # Get filter parameters from request
+    if request.method == 'POST':
+        start_date_str = request.form.get('start_date')
+        end_date_str = request.form.get('end_date')
+        group_by = request.form.get('group_by', 'day')
+        
+        # Parse dates
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date() if start_date_str else None
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date() if end_date_str else None
+        except ValueError:
+            start_date = None
+            end_date = None
+    else:
+        # Default: last 30 days, grouped by day
+        end_date = date.today()
+        start_date = end_date - timedelta(days=30)
+        group_by = 'day'
+    
+    # Get analytics data
+    analytics_data = ControllerDrinkLogs.get_filtered_analytics(
+        current_user.user_id,
+        start_date=start_date,
+        end_date=end_date,
+        group_by=group_by
+    )
+    
+    return render_template('analytics.html', analytics=analytics_data)
+
+
 @main.route("/drinks_management", methods=['GET'])
 @login_required
 def drinks_management():

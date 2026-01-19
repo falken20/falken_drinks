@@ -352,3 +352,151 @@ class ControllerDrinkLogs:
                 'consumption_summary': ControllerDrinkLogs.get_daily_consumption(user_id, target_date),
                 'has_logs': False
             }
+
+    @staticmethod
+    def get_filtered_analytics(user_id: int, start_date: date = None, end_date: date = None, group_by: str = 'day'):
+        """Get analytics data with date filters and grouping options
+        
+        Args:
+            user_id: User ID
+            start_date: Start date for filter (default: 30 days ago)
+            end_date: End date for filter (default: today)
+            group_by: Grouping option - 'day', 'week', 'month', 'year'
+        """
+        Log.info(f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
+        
+        from datetime import timedelta
+        
+        if end_date is None:
+            end_date = date.today()
+        if start_date is None:
+            start_date = end_date - timedelta(days=30)
+        
+        try:
+            # Convert dates to datetime range
+            start_datetime = datetime.combine(start_date, datetime.min.time())
+            end_datetime = datetime.combine(end_date, datetime.max.time())
+            
+            # Get all logs in date range
+            logs = db.session.query(DrinkLog, Drink).join(
+                Drink, DrinkLog.drink_id == Drink.drink_id
+            ).filter(
+                DrinkLog.user_id == user_id,
+                DrinkLog.date_created >= start_datetime,
+                DrinkLog.date_created <= end_datetime
+            ).order_by(DrinkLog.date_created.desc()).all()
+            
+            # Process logs by grouping
+            grouped_data = {}
+            all_logs_detail = []
+            total_water = 0
+            total_liquid = 0
+            total_alcohol = 0
+            
+            for log, drink in logs:
+                log_date = log.date_created.date()
+                
+                # Determine group key based on group_by parameter
+                if group_by == 'day':
+                    group_key = log_date.strftime('%Y-%m-%d')
+                    group_label = log_date.strftime('%b %d, %Y')
+                elif group_by == 'week':
+                    week_start = log_date - timedelta(days=log_date.weekday())
+                    group_key = week_start.strftime('%Y-W%U')
+                    group_label = f"Week of {week_start.strftime('%b %d, %Y')}"
+                elif group_by == 'month':
+                    group_key = log_date.strftime('%Y-%m')
+                    group_label = log_date.strftime('%B %Y')
+                elif group_by == 'year':
+                    group_key = log_date.strftime('%Y')
+                    group_label = log_date.strftime('%Y')
+                else:
+                    group_key = log_date.strftime('%Y-%m-%d')
+                    group_label = log_date.strftime('%b %d, %Y')
+                
+                # Initialize group if not exists
+                if group_key not in grouped_data:
+                    grouped_data[group_key] = {
+                        'label': group_label,
+                        'total_liquid': 0,
+                        'total_water': 0,
+                        'total_alcohol': 0,
+                        'total_coffee': 0,
+                        'total_other': 0,
+                        'log_count': 0,
+                        'logs': []
+                    }
+                
+                # Add to group totals
+                grouped_data[group_key]['total_liquid'] += log.drink_total_quantity
+                grouped_data[group_key]['total_water'] += log.drink_water_quantity
+                grouped_data[group_key]['total_alcohol'] += log.drink_alcohol_quantity
+                grouped_data[group_key]['log_count'] += 1
+                
+                # Categorize drink type for group
+                if drink.drink_alcohol_percentage > 0:
+                    grouped_data[group_key]['total_alcohol'] += log.drink_total_quantity
+                elif drink.drink_water_percentage >= 98:
+                    grouped_data[group_key]['total_water'] += log.drink_total_quantity
+                elif drink.drink_water_percentage < 90:
+                    grouped_data[group_key]['total_coffee'] += log.drink_total_quantity
+                else:
+                    grouped_data[group_key]['total_other'] += log.drink_total_quantity
+                
+                # Add log detail to group
+                log_detail = {
+                    'log_id': log.log_id,
+                    'drink_name': drink.drink_name,
+                    'total_quantity': log.drink_total_quantity,
+                    'water_quantity': log.drink_water_quantity,
+                    'alcohol_quantity': log.drink_alcohol_quantity,
+                    'date_created': log.date_created,
+                    'drink_image': drink.drink_image
+                }
+                grouped_data[group_key]['logs'].append(log_detail)
+                all_logs_detail.append(log_detail)
+                
+                # Overall totals
+                total_liquid += log.drink_total_quantity
+                total_water += log.drink_water_quantity
+                total_alcohol += log.drink_alcohol_quantity
+            
+            # Convert to sorted list
+            grouped_list = [
+                {'key': k, **v} for k, v in grouped_data.items()
+            ]
+            grouped_list.sort(key=lambda x: x['key'], reverse=True)
+            
+            return {
+                'start_date': start_date,
+                'end_date': end_date,
+                'group_by': group_by,
+                'grouped_data': grouped_list,
+                'all_logs': all_logs_detail,
+                'total_logs': len(all_logs_detail),
+                'summary': {
+                    'total_liquid': total_liquid,
+                    'total_water': total_water,
+                    'total_alcohol': total_alcohol,
+                    'avg_daily_liquid': total_liquid / max(1, (end_date - start_date).days + 1),
+                    'avg_daily_water': total_water / max(1, (end_date - start_date).days + 1)
+                }
+            }
+            
+        except Exception as e:
+            Log.error("Error in ControllerDrinkLogs.get_filtered_analytics", err=e, sys=sys)
+            return {
+                'start_date': start_date,
+                'end_date': end_date,
+                'group_by': group_by,
+                'grouped_data': [],
+                'all_logs': [],
+                'total_logs': 0,
+                'summary': {
+                    'total_liquid': 0,
+                    'total_water': 0,
+                    'total_alcohol': 0,
+                    'avg_daily_liquid': 0,
+                    'avg_daily_water': 0
+                }
+            }

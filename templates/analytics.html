@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<script>
+    window.onload = function() {
+        activeVisibility('analytics', 'analytics_icon');
+    }
+</script>
+
+<div class="container" style="text-align: center;">    
+    
+    <h2 style="color: white; margin-bottom: 20px;">Drinks Analytics & Reports</h2>
+
+    <!-- Filter Form -->
+    <div style="max-width: 700px; margin: 0 auto 30px auto;">
+        <div style="background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px;">
+            <form method="POST" action="{{ url_for('main.analytics') }}">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <!-- Start Date -->
+                    <div style="text-align: left;">
+                        <label style="color: white; display: block; margin-bottom: 5px; font-size: 0.9rem;">Start Date</label>
+                        <input type="date" name="start_date" class="form-control" value="{{ analytics.start_date }}" required>
+                    </div>
+                    
+                    <!-- End Date -->
+                    <div style="text-align: left;">
+                        <label style="color: white; display: block; margin-bottom: 5px; font-size: 0.9rem;">End Date</label>
+                        <input type="date" name="end_date" class="form-control" value="{{ analytics.end_date }}" max="{{ analytics.end_date }}" required>
+                    </div>
+                </div>
+                
+                <!-- Group By -->
+                <div style="text-align: left; margin-bottom: 15px;">
+                    <label style="color: white; display: block; margin-bottom: 5px; font-size: 0.9rem;">Group By</label>
+                    <select name="group_by" class="form-select">
+                        <option value="day" {% if analytics.group_by == 'day' %}selected{% endif %}>Daily</option>
+                        <option value="week" {% if analytics.group_by == 'week' %}selected{% endif %}>Weekly</option>
+                        <option value="month" {% if analytics.group_by == 'month' %}selected{% endif %}>Monthly</option>
+                        <option value="year" {% if analytics.group_by == 'year' %}selected{% endif %}>Yearly</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Apply Filters</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div style="max-width: 700px; margin: 0 auto 30px auto;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+            <div style="background: rgba(13, 110, 253, 0.3); border-radius: 10px; padding: 15px;">
+                <div style="color: #ccc; font-size: 0.85rem;">Total Liquid</div>
+                <div style="color: white; font-size: 1.5rem; font-weight: bold;">{{ analytics.summary.total_liquid }}ml</div>
+            </div>
+            <div style="background: rgba(13, 110, 253, 0.3); border-radius: 10px; padding: 15px;">
+                <div style="color: #ccc; font-size: 0.85rem;">Total Water</div>
+                <div style="color: white; font-size: 1.5rem; font-weight: bold;">{{ analytics.summary.total_water }}ml</div>
+            </div>
+            <div style="background: rgba(13, 110, 253, 0.3); border-radius: 10px; padding: 15px;">
+                <div style="color: #ccc; font-size: 0.85rem;">Avg Daily Liquid</div>
+                <div style="color: white; font-size: 1.5rem; font-weight: bold;">{{ "%.0f"|format(analytics.summary.avg_daily_liquid) }}ml</div>
+            </div>
+            <div style="background: rgba(13, 110, 253, 0.3); border-radius: 10px; padding: 15px;">
+                <div style="color: #ccc; font-size: 0.85rem;">Total Logs</div>
+                <div style="color: white; font-size: 1.5rem; font-weight: bold;">{{ analytics.total_logs }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grouped Data -->
+    <div style="max-width: 700px; margin: 0 auto;">
+        <h3 style="color: white; margin-bottom: 15px; text-align: left;">Data by {{ analytics.group_by|title }}</h3>
+        
+        {% if analytics.grouped_data %}
+            {% for group in analytics.grouped_data %}
+            <div style="background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 15px; margin-bottom: 15px; text-align: left;">
+                <h4 style="color: white; margin-bottom: 10px;">{{ group.label }}</h4>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 10px;">
+                    <div>
+                        <span style="color: #ccc; font-size: 0.85rem;">Liquid:</span>
+                        <span style="color: white; font-weight: bold;">{{ group.total_liquid }}ml</span>
+                    </div>
+                    <div>
+                        <span style="color: #0d6efd; font-size: 0.85rem;">💧 Water:</span>
+                        <span style="color: white; font-weight: bold;">{{ group.total_water }}ml</span>
+                    </div>
+                    <div>
+                        <span style="color: #dc3545; font-size: 0.85rem;">🍷 Alcohol:</span>
+                        <span style="color: white; font-weight: bold;">{{ group.total_alcohol }}ml</span>
+                    </div>
+                    <div>
+                        <span style="color: #ccc; font-size: 0.85rem;">Logs:</span>
+                        <span style="color: white; font-weight: bold;">{{ group.log_count }}</span>
+                    </div>
+                </div>
+                
+                <!-- Collapsible Logs Detail -->
+                <details style="margin-top: 10px;">
+                    <summary style="color: #0d6efd; cursor: pointer; font-size: 0.9rem;">View {{ group.log_count }} drink logs</summary>
+                    <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px;">
+                        {% for log in group.logs %}
+                        <div style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <span style="color: white; font-weight: bold;">{{ log.drink_name }}</span>
+                            <span style="color: #ccc; margin-left: 10px;">{{ log.total_quantity }}ml</span>
+                            <span style="color: #999; font-size: 0.8rem; margin-left: 10px;">{{ log.date_created.strftime('%I:%M %p') }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </details>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 40px; color: #ccc; text-align: center;">
+                <div style="font-size: 2rem; margin-bottom: 15px;">📊</div>
+                <h4 style="color: white; margin-bottom: 10px;">No data found</h4>
+                <p>Try adjusting your date range or filters</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Back to Home Button -->
+    <div style="margin: 30px auto; text-align: center;">
+        <a href="{{ url_for('main.index') }}" class="btn btn-primary" style="min-width: 150px;">Back to Home</a>
+    </div>
+
+</div>
+
+{% endblock content %}
