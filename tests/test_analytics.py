@@ -1,0 +1,241 @@
+# by Richi Rod AKA @richionline / falken20
+
+from datetime import date, timedelta
+
+from .basetest import BaseTestCase
+from falken_drinks.models import db, Drink, DrinkLog
+from falken_drinks.controllers import ControllerDrinkLogs
+
+
+class TestAnalyticsController(BaseTestCase):
+    """Test analytics functionality in controllers"""
+
+    def test_get_filtered_analytics_default(self):
+        """Test analytics with default parameters"""
+        user = self.create_user()
+        
+        # Create drinks
+        water = Drink(drink_name='Water', drink_water_percentage=100, drink_alcohol_percentage=0, counts_as_water=True)
+        coffee = Drink(drink_name='Coffee', drink_water_percentage=98, drink_alcohol_percentage=0, counts_as_water=True)
+        db.session.add_all([water, coffee])
+        db.session.commit()
+        
+        # Add logs for today
+        log1 = DrinkLog(drink_id=water.drink_id, user_id=user.user_id,
+                       drink_total_quantity=500, drink_water_quantity=500, drink_alcohol_quantity=0)
+        log2 = DrinkLog(drink_id=coffee.drink_id, user_id=user.user_id,
+                       drink_total_quantity=250, drink_water_quantity=245, drink_alcohol_quantity=0)
+        db.session.add_all([log1, log2])
+        db.session.commit()
+        
+        # Get analytics
+        result = ControllerDrinkLogs.get_filtered_analytics(user.user_id)
+        
+        self.assertIsNotNone(result)
+        self.assertIn('grouped_data', result)
+        self.assertIn('summary', result)
+        self.assertGreater(result['summary']['total_liquid'], 0)
+
+    def test_get_filtered_analytics_date_range(self):
+        """Test analytics with specific date range"""
+        user = self.create_user()
+        
+        water = Drink(drink_name='Water', drink_water_percentage=100, drink_alcohol_percentage=0, counts_as_water=True)
+        db.session.add(water)
+        db.session.commit()
+        
+        # Add log for today
+        log = DrinkLog(drink_id=water.drink_id, user_id=user.user_id,
+                      drink_total_quantity=500, drink_water_quantity=500, drink_alcohol_quantity=0)
+        db.session.add(log)
+        db.session.commit()
+        
+        # Test date range
+        start_date = date.today() - timedelta(days=7)
+        end_date = date.today()
+        
+        result = ControllerDrinkLogs.get_filtered_analytics(user.user_id, start_date, end_date, 'day')
+        
+        self.assertIsNotNone(result)
+        self.assertIn('summary', result)
+
+    def test_get_filtered_analytics_grouping_week(self):
+        """Test analytics grouped by week"""
+        user = self.create_user()
+        
+        water = Drink(drink_name='Water', drink_water_percentage=100, drink_alcohol_percentage=0, counts_as_water=True)
+        db.session.add(water)
+        db.session.commit()
+        
+        # Add multiple logs
+        for i in range(5):
+            log = DrinkLog(drink_id=water.drink_id, user_id=user.user_id,
+                          drink_total_quantity=500, drink_water_quantity=500, drink_alcohol_quantity=0)
+            db.session.add(log)
+        db.session.commit()
+        
+        result = ControllerDrinkLogs.get_filtered_analytics(user.user_id, group_by='week')
+        
+        self.assertIsNotNone(result)
+        self.assertIn('grouped_data', result)
+
+    def test_get_filtered_analytics_grouping_month(self):
+        """Test analytics grouped by month"""
+        user = self.create_user()
+        
+        water = Drink(drink_name='Water', drink_water_percentage=100, drink_alcohol_percentage=0, counts_as_water=True)
+        db.session.add(water)
+        db.session.commit()
+        
+        log = DrinkLog(drink_id=water.drink_id, user_id=user.user_id,
+                      drink_total_quantity=500, drink_water_quantity=500, drink_alcohol_quantity=0)
+        db.session.add(log)
+        db.session.commit()
+        
+        result = ControllerDrinkLogs.get_filtered_analytics(user.user_id, group_by='month')
+        
+        self.assertIsNotNone(result)
+        self.assertIn('summary', result)
+
+    def test_get_filtered_analytics_grouping_year(self):
+        """Test analytics grouped by year"""
+        user = self.create_user()
+        
+        water = Drink(drink_name='Water', drink_water_percentage=100, drink_alcohol_percentage=0, counts_as_water=True)
+        db.session.add(water)
+        db.session.commit()
+        
+        log = DrinkLog(drink_id=water.drink_id, user_id=user.user_id,
+                      drink_total_quantity=500, drink_water_quantity=500, drink_alcohol_quantity=0)
+        db.session.add(log)
+        db.session.commit()
+        
+        result = ControllerDrinkLogs.get_filtered_analytics(user.user_id, group_by='year')
+        
+        self.assertIsNotNone(result)
+        self.assertEqual(len(result['grouped_data']), 1)
+
+    def test_get_filtered_analytics_no_logs(self):
+        """Test analytics with no logs"""
+        user = self.create_user()
+        
+        result = ControllerDrinkLogs.get_filtered_analytics(user.user_id)
+        
+        self.assertIsNotNone(result)
+        self.assertEqual(result['summary']['total_liquid'], 0)
+        self.assertEqual(len(result['grouped_data']), 0)
+
+    def test_get_filtered_analytics_multiple_drink_types(self):
+        """Test analytics with multiple drink types"""
+        user = self.create_user()
+        
+        # Create different drinks
+        water = Drink(drink_name='Water', drink_water_percentage=100, drink_alcohol_percentage=0, counts_as_water=True)
+        beer = Drink(drink_name='Beer', drink_water_percentage=95, drink_alcohol_percentage=5, counts_as_water=False)
+        coffee = Drink(drink_name='Coffee', drink_water_percentage=98, drink_alcohol_percentage=0, counts_as_water=True)
+        
+        db.session.add_all([water, beer, coffee])
+        db.session.commit()
+        
+        # Add logs
+        log1 = DrinkLog(drink_id=water.drink_id, user_id=user.user_id,
+                       drink_total_quantity=500, drink_water_quantity=500, drink_alcohol_quantity=0)
+        log2 = DrinkLog(drink_id=beer.drink_id, user_id=user.user_id,
+                       drink_total_quantity=330, drink_water_quantity=313, drink_alcohol_quantity=17)
+        log3 = DrinkLog(drink_id=coffee.drink_id, user_id=user.user_id,
+                       drink_total_quantity=250, drink_water_quantity=245, drink_alcohol_quantity=0)
+        
+        db.session.add_all([log1, log2, log3])
+        db.session.commit()
+        
+        result = ControllerDrinkLogs.get_filtered_analytics(user.user_id)
+        
+        self.assertIsNotNone(result)
+        self.assertEqual(result['summary']['total_liquid'], 1080)
+        self.assertGreater(result['summary']['total_alcohol'], 0)
+
+
+class TestAnalyticsRoute(BaseTestCase):
+    """Test analytics route"""
+
+    def test_analytics_route_get(self):
+        """Test GET request to analytics route"""
+        user = self.create_user()
+        self.login_http(self)
+        
+        response = self.client.get('/analytics')
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Analytics', response.data)
+
+    def test_analytics_route_post(self):
+        """Test POST request to analytics route with filters"""
+        user = self.create_user()
+        self.login_http(self)
+        
+        # Create test data
+        water = Drink(drink_name='Water', drink_water_percentage=100, drink_alcohol_percentage=0, counts_as_water=True)
+        db.session.add(water)
+        db.session.commit()
+        
+        log = DrinkLog(drink_id=water.drink_id, user_id=user.user_id,
+                      drink_total_quantity=500, drink_water_quantity=500, drink_alcohol_quantity=0)
+        db.session.add(log)
+        db.session.commit()
+        
+        # Post with filters
+        data = {
+            'start_date': (date.today() - timedelta(days=7)).strftime('%Y-%m-%d'),
+            'end_date': date.today().strftime('%Y-%m-%d'),
+            'group_by': 'day'
+        }
+        
+        response = self.client.post('/analytics', data=data)
+        
+        self.assertEqual(response.status_code, 200)
+
+    def test_analytics_route_unauthorized(self):
+        """Test analytics route without authentication"""
+        response = self.client.get('/analytics')
+        
+        # Should redirect to login
+        self.assertEqual(response.status_code, 302)
+
+    def test_analytics_route_post_invalid_dates(self):
+        """Test POST with invalid date format"""
+        user = self.create_user()
+        self.login_http(self)
+        
+        data = {
+            'start_date': 'invalid-date',
+            'end_date': date.today().strftime('%Y-%m-%d'),
+            'group_by': 'day'
+        }
+        
+        # Should handle gracefully and use defaults
+        response = self.client.post('/analytics', data=data)
+        
+        self.assertEqual(response.status_code, 200)
+
+    def test_analytics_route_different_groupings(self):
+        """Test analytics with different grouping options"""
+        user = self.create_user()
+        self.login_http(self)
+        
+        groupings = ['day', 'week', 'month', 'year']
+        
+        for group_by in groupings:
+            data = {
+                'start_date': (date.today() - timedelta(days=30)).strftime('%Y-%m-%d'),
+                'end_date': date.today().strftime('%Y-%m-%d'),
+                'group_by': group_by
+            }
+            
+            response = self.client.post('/analytics', data=data)
+            
+            self.assertEqual(response.status_code, 200, f"Failed for grouping: {group_by}")
+
+
+if __name__ == '__main__':
+    import unittest
+    unittest.main()

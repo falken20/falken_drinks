@@ -21,7 +21,7 @@ class TestControllerUser(BaseTestCase):
         user = self.create_user()
         self.assertTrue(user.user_id)
         ControllerUser.delete_user(user.user_id)
-        self.assertFalse(User.query.filter_by(user_id=user.user_id).first())
+        self.assertFalse(User.query.filter_by(id=user.user_id).first())
 
     def test_get_user(self):
         user = self.create_user()
@@ -201,14 +201,14 @@ class TestControllerDrinkLogs(BaseTestCase):
         db.session.add(drink)
         db.session.commit()
         
-        log = DrinkLog(drink_id=drink.drink_id, user_id=user1.user_id,
+        log = DrinkLog(drink_id=drink.drink_id, user_id=user1.id,
                       drink_total_quantity=250, drink_water_quantity=250,
                       drink_alcohol_quantity=0)
         db.session.add(log)
         db.session.commit()
         
         # Try to delete with wrong user
-        result = ControllerDrinkLogs.delete_drink_log_by_user(log.log_id, user2.user_id)
+        result = ControllerDrinkLogs.delete_drink_log_by_user(log.log_id, user2.id)
         self.assertFalse(result)
 
     def test_get_daily_consumption_with_multiple_drinks(self):

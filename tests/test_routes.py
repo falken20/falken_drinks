@@ -278,7 +278,7 @@ class TestDeleteDrinkRoute(BaseTestCase):
         db.session.add(drink)
         db.session.commit()
         
-        drink_log = DrinkLog(drink_id=drink.drink_id, user_id=user.user_id,
+        drink_log = DrinkLog(drink_id=drink.drink_id, user_id=user.id,
                             drink_total_quantity=250, drink_water_quantity=250,
                             drink_alcohol_quantity=0)
         db.session.add(drink_log)
@@ -310,7 +310,7 @@ class TestDeleteDrinkLogRoute(BaseTestCase):
         db.session.add(drink)
         db.session.commit()
         
-        drink_log = DrinkLog(drink_id=drink.drink_id, user_id=user.user_id,
+        drink_log = DrinkLog(drink_id=drink.drink_id, user_id=user.id,
                             drink_total_quantity=250, drink_water_quantity=250,
                             drink_alcohol_quantity=0)
         db.session.add(drink_log)

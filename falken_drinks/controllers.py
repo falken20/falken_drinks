@@ -22,7 +22,7 @@ class ControllerUser:
         try:
             Log.info(
                 f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
-            return User.query.filter_by(id=id).first()
+            return User.query.filter_by(user_id=id).first()
         except Exception as e:
             Log.error("Error in ControllerUser.get_user", err=e, sys=sys)
             return None
@@ -43,7 +43,7 @@ class ControllerUser:
     def delete_user(id: int) -> None:
         Log.info(
             f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
-        User.query.filter_by(id=id).delete()
+        User.query.filter_by(user_id=id).delete()
         db.session.commit()
 
 
