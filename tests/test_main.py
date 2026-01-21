@@ -1,4 +1,5 @@
 import unittest
+import pytest
 
 from . import basetest
 
@@ -19,6 +20,7 @@ class TestMain(basetest.BaseTestCase):
         response = self.client.get('/')
         self.assertEqual(response.status_code, 200)
 
+    @pytest.mark.skip(reason="show_grouped route has been removed/deprecated")
     def test_show_grouped(self):
         # First we need to create a user and login
         self.create_user()

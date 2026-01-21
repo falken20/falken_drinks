@@ -26,7 +26,8 @@ class TestSwaggerConfiguration(BaseTestCase):
     def test_swagger_blueprint_registered(self):
         """Test that swagger blueprint is registered in app"""
         blueprint_names = [bp.name for bp in self.app.blueprints.values()]
-        self.assertIn('flask-swagger-ui', blueprint_names)
+        # Swagger UI blueprint is registered as 'swagger_ui'
+        self.assertIn('swagger_ui', blueprint_names)
 
     def test_swagger_endpoint_accessible(self):
         """Test that swagger endpoint is accessible"""

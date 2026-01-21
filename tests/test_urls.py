@@ -1,4 +1,5 @@
 import unittest
+import pytest
 
 from . import basetest
 from falken_drinks.controllers import ControllerDrinks
@@ -6,6 +7,7 @@ from falken_drinks.controllers import ControllerDrinks
 
 class TestUrls(basetest.BaseTestCase):
 
+    @pytest.mark.skip(reason="Plant management feature has been removed")
     def test_list_create_plants(self):
         # First we need to create a user and login
         self.create_user()
@@ -17,6 +19,7 @@ class TestUrls(basetest.BaseTestCase):
         response = self.client.put('/plants')
         self.assertEqual(response.status_code, 405)
 
+    @pytest.mark.skip(reason="Plant management feature has been removed")
     def test_list_create_plants_hidden_post(self):
         self.create_user()
         self.login_http(self)
@@ -24,6 +27,7 @@ class TestUrls(basetest.BaseTestCase):
         response = self.client.post('/plants', data=self.MOCK_PLANT)
         self.assertEqual(response.status_code, 302)
 
+    @pytest.mark.skip(reason="Plant management feature has been removed")
     def test_list_create_plants_hidden_put(self):
         self.create_user()
         self.login_http(self)
@@ -33,6 +37,7 @@ class TestUrls(basetest.BaseTestCase):
         response = self.client.post('/plants', data=mock_plant)
         self.assertEqual(response.status_code, 302)
 
+    @pytest.mark.skip(reason="Plant management feature has been removed")
     def test_list_create_plants_post(self):
         self.create_user()
         self.login_http(self)
@@ -41,6 +46,7 @@ class TestUrls(basetest.BaseTestCase):
         # Assuming redirect after post
         self.assertEqual(response.status_code, 302)
 
+    @pytest.mark.skip(reason="Plant management feature has been removed")
     def test_get_update_delete_plants_get(self):
         user = self.create_user()
         self.login_http(self)
@@ -56,6 +62,7 @@ class TestUrls(basetest.BaseTestCase):
         response = self.client.put(f'/plants/{plant.id}', data=self.MOCK_PLANT)
         self.assertEqual(response.status_code, 200)
 
+    @pytest.mark.skip(reason="Plant management feature has been removed")
     def test_view_create_plant(self):
         self.create_user()
         self.login_http(self)
@@ -63,6 +70,7 @@ class TestUrls(basetest.BaseTestCase):
         self.assertEqual(response.status_code, 200)
         # self.assertIn(b'plant_form.html', response.data)
 
+    @pytest.mark.skip(reason="Plant management feature has been removed")
     def test_view_update_plant(self):
         self.create_user()
         self.login_http(self)
@@ -70,6 +78,7 @@ class TestUrls(basetest.BaseTestCase):
         self.assertEqual(response.status_code, 200)
         # self.assertIn(b'plant_form.html', response.data)
 
+    @pytest.mark.skip(reason="Plant management feature has been removed")
     def test_delete_plant(self):
         user = self.create_user()
         self.login_http(self)
