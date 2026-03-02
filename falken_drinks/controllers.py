@@ -125,7 +125,7 @@ class ControllerDrinkLogs:
     def get_drink_log(id: int):
         Log.info(
             f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
-        return DrinkLog.query.filter_by(id=id).first()
+        return DrinkLog.query.filter_by(log_id=id).first()
 
     @staticmethod
     def get_drink_logs():

@@ -1,0 +1,24 @@
+{
+  "name": "falken-drinks-frontend-tests",
+  "version": "1.0.0",
+  "description": "Frontend unit tests for Falken Drinks JS components",
+  "scripts": {
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "testMatch": [
+      "**/tests/js/**/*.test.js"
+    ],
+    "coverageDirectory": "coverage/js",
+    "collectCoverageFrom": [
+      "static/js/**/*.js"
+    ]
+  }
+}

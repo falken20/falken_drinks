@@ -241,16 +241,117 @@ class TestControllerDrinkLogs(BaseTestCase):
         self.assertGreater(consumption['total_water_for_progress'], 0)
 
 
+class TestControllerDrinkLogsExtra(BaseTestCase):
+    """Additional tests for controller methods not yet covered"""
+
+    def test_get_drink_log_by_id(self):
+        """Test getting a single drink log by ID"""
+        user = self.create_user()
+        drink = Drink(drink_name='Water', drink_water_percentage=100, drink_alcohol_percentage=0)
+        db.session.add(drink)
+        db.session.commit()
+
+        log = DrinkLog(drink_id=drink.drink_id, user_id=user.user_id,
+                       drink_total_quantity=300, drink_water_quantity=300,
+                       drink_alcohol_quantity=0)
+        db.session.add(log)
+        db.session.commit()
+
+        result = ControllerDrinkLogs.get_drink_log(log.log_id)
+        self.assertIsNotNone(result)
+        self.assertEqual(result.drink_total_quantity, 300)
+
+    def test_get_drink_log_not_found(self):
+        """Test getting a drink log that does not exist returns None"""
+        result = ControllerDrinkLogs.get_drink_log(99999)
+        self.assertIsNone(result)
+
+    def test_get_all_drink_logs(self):
+        """Test getting all drink logs returns a list"""
+        user = self.create_user()
+        drink = Drink(drink_name='Water', drink_water_percentage=100, drink_alcohol_percentage=0)
+        db.session.add(drink)
+        db.session.commit()
+
+        for qty in [100, 200, 300]:
+            log = DrinkLog(drink_id=drink.drink_id, user_id=user.user_id,
+                           drink_total_quantity=qty, drink_water_quantity=qty,
+                           drink_alcohol_quantity=0)
+            db.session.add(log)
+        db.session.commit()
+
+        logs = ControllerDrinkLogs.get_drink_logs()
+        self.assertGreaterEqual(len(logs), 3)
+
+    def test_get_daily_consumption_empty(self):
+        """Test daily consumption with no logs returns zeroed totals"""
+        user = self.create_user()
+
+        consumption = ControllerDrinkLogs.get_daily_consumption(user.user_id, date.today())
+        self.assertIsNotNone(consumption)
+        self.assertEqual(consumption['total_liquid'], 0)
+
+    def test_delete_drink_log_direct(self):
+        """Test the direct delete_drink_log method (not user-scoped)"""
+        user = self.create_user()
+        drink = Drink(drink_name='Water', drink_water_percentage=100, drink_alcohol_percentage=0)
+        db.session.add(drink)
+        db.session.commit()
+
+        log = DrinkLog(drink_id=drink.drink_id, user_id=user.user_id,
+                       drink_total_quantity=250, drink_water_quantity=250,
+                       drink_alcohol_quantity=0)
+        db.session.add(log)
+        db.session.commit()
+
+        log_id = log.log_id
+        ControllerDrinkLogs.delete_drink_log(log_id)
+        self.assertIsNone(DrinkLog.query.filter_by(log_id=log_id).first())
+
+
+class TestControllerDrinksExtra(BaseTestCase):
+    """Additional tests for ControllerDrinks not yet covered"""
+
+    def test_add_drink_with_counts_as_water_false(self):
+        """Test adding a drink with counts_as_water=False"""
+        drink_data = {
+            'drink_name': 'Wine',
+            'drink_water_percentage': 87,
+            'drink_alcohol_percentage': 13,
+            'counts_as_water': False
+        }
+        drink = ControllerDrinks.add_drink(drink_data)
+
+        self.assertIsNotNone(drink)
+        self.assertEqual(drink.drink_name, 'Wine')
+        self.assertFalse(drink.counts_as_water)
+
+    def test_add_drink_with_counts_as_water_true(self):
+        """Test adding a drink with counts_as_water=True"""
+        drink_data = {
+            'drink_name': 'Herbal Tea',
+            'drink_water_percentage': 99,
+            'drink_alcohol_percentage': 0,
+            'counts_as_water': True
+        }
+        drink = ControllerDrinks.add_drink(drink_data)
+
+        self.assertIsNotNone(drink)
+        self.assertTrue(drink.counts_as_water)
+
+    def test_get_or_create_drink_calculates_water_percentage(self):
+        """Test that get_or_create correctly calculates water percentage from alcohol"""
+        result = ControllerDrinks.get_or_create_drink('Whisky', 40, 50)
+        self.assertIsNotNone(result)
+        self.assertEqual(result.drink_alcohol_percentage, 40)
+        self.assertEqual(result.drink_water_percentage, 60)
+
+    def test_get_drink_name_not_found(self):
+        """Test get_drink_name returns None when drink doesn't exist"""
+        result = ControllerDrinks.get_drink_name('NonExistentDrink')
+        self.assertIsNone(result)
+
+
 if __name__ == '__main__':
     import unittest
     unittest.main()
-
-
-
-
-
-
-class TestControllerUser(BaseTestCase):
-
-    def test_create_user(self):
-        user = self.create_user()

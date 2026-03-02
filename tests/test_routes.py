@@ -241,6 +241,87 @@ class TestUpdateDrinkRoute(BaseTestCase):
         # Flask-Login redirects to login page (302) instead of returning 401
         self.assertEqual(response.status_code, 302)
 
+    def test_update_drink_invalid_percentages(self):
+        """Test updating drink with percentages that exceed 100%"""
+        user = self.create_user()
+        self.client.post('/login', data=self.mock_user, follow_redirects=True)
+
+        drink = Drink(drink_name='Test Water', drink_water_percentage=100, drink_alcohol_percentage=0)
+        db.session.add(drink)
+        db.session.commit()
+
+        invalid_data = {'drink_name': 'Test', 'drink_water_percentage': 70, 'drink_alcohol_percentage': 60}
+        response = self.client.put(f'/api/drinks/{drink.drink_id}',
+                                   data=json.dumps(invalid_data),
+                                   content_type='application/json')
+
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.data)
+        self.assertFalse(data['success'])
+        self.assertIn('cannot exceed 100%', data['message'])
+
+    def test_update_drink_duplicate_name(self):
+        """Test updating drink to a name that already exists in another drink"""
+        user = self.create_user()
+        self.client.post('/login', data=self.mock_user, follow_redirects=True)
+
+        drink1 = Drink(drink_name='Water', drink_water_percentage=100, drink_alcohol_percentage=0)
+        drink2 = Drink(drink_name='Coffee', drink_water_percentage=98, drink_alcohol_percentage=0)
+        db.session.add_all([drink1, drink2])
+        db.session.commit()
+
+        # Try to rename drink2 to an existing name
+        update_data = {'drink_name': 'Water', 'drink_water_percentage': 98, 'drink_alcohol_percentage': 0}
+        response = self.client.put(f'/api/drinks/{drink2.drink_id}',
+                                   data=json.dumps(update_data),
+                                   content_type='application/json')
+
+        self.assertEqual(response.status_code, 409)
+        data = json.loads(response.data)
+        self.assertFalse(data['success'])
+
+    def test_update_drink_no_data(self):
+        """Test updating drink without sending any data body"""
+        user = self.create_user()
+        self.client.post('/login', data=self.mock_user, follow_redirects=True)
+
+        drink = Drink(drink_name='Test Water', drink_water_percentage=100, drink_alcohol_percentage=0)
+        db.session.add(drink)
+        db.session.commit()
+
+        # Send explicit JSON null so Flask's get_json() returns None → 400
+        response = self.client.put(f'/api/drinks/{drink.drink_id}',
+                                   data='null',
+                                   content_type='application/json')
+
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.data)
+        self.assertFalse(data['success'])
+
+    def test_update_drink_counts_as_water_false(self):
+        """Test updating drink with counts_as_water=False (alcoholic drink)"""
+        user = self.create_user()
+        self.client.post('/login', data=self.mock_user, follow_redirects=True)
+
+        drink = Drink(drink_name='Beer', drink_water_percentage=95, drink_alcohol_percentage=5)
+        db.session.add(drink)
+        db.session.commit()
+
+        update_data = {
+            'drink_name': 'Beer Updated',
+            'drink_water_percentage': 93,
+            'drink_alcohol_percentage': 7,
+            'counts_as_water': False
+        }
+        response = self.client.put(f'/api/drinks/{drink.drink_id}',
+                                   data=json.dumps(update_data),
+                                   content_type='application/json')
+
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.data)
+        self.assertTrue(data['success'])
+        self.assertFalse(data['drink']['counts_as_water'])
+
 
 class TestDeleteDrinkRoute(BaseTestCase):
     """Test /api/drinks/<id> DELETE endpoint"""
@@ -301,6 +382,67 @@ class TestDeleteDrinkRoute(BaseTestCase):
         response = self.client.delete('/api/drinks/1')
         # Flask-Login redirects to login page (302) instead of returning 401
         self.assertEqual(response.status_code, 302)
+
+
+class TestCreateDrinkCountsAsWaterRoute(BaseTestCase):
+    """Test counts_as_water field behavior in drink creation"""
+
+    def test_create_drink_counts_as_water_explicit_false(self):
+        """Test creating an alcoholic drink with counts_as_water=False"""
+        user = self.create_user()
+        self.client.post('/login', data=self.mock_user, follow_redirects=True)
+
+        data = {
+            'drink_name': 'Beer',
+            'drink_water_percentage': 95,
+            'drink_alcohol_percentage': 5,
+            'counts_as_water': False
+        }
+        response = self.client.post('/api/drinks',
+                                    data=json.dumps(data),
+                                    content_type='application/json')
+
+        self.assertEqual(response.status_code, 201)
+        result = json.loads(response.data)
+        self.assertTrue(result['success'])
+        self.assertFalse(result['drink']['counts_as_water'])
+
+    def test_create_drink_counts_as_water_default_true(self):
+        """Test creating a non-alcoholic drink defaults counts_as_water to True"""
+        user = self.create_user()
+        self.client.post('/login', data=self.mock_user, follow_redirects=True)
+
+        data = {
+            'drink_name': 'Herbal Tea',
+            'drink_water_percentage': 99,
+            'drink_alcohol_percentage': 0
+        }
+        response = self.client.post('/api/drinks',
+                                    data=json.dumps(data),
+                                    content_type='application/json')
+
+        self.assertEqual(response.status_code, 201)
+        result = json.loads(response.data)
+        self.assertTrue(result['success'])
+        self.assertTrue(result['drink']['counts_as_water'])
+
+    def test_create_drink_out_of_range_percentage(self):
+        """Test creating drink with a single percentage > 100"""
+        user = self.create_user()
+        self.client.post('/login', data=self.mock_user, follow_redirects=True)
+
+        data = {
+            'drink_name': 'Invalid Drink',
+            'drink_water_percentage': 150,
+            'drink_alcohol_percentage': 0
+        }
+        response = self.client.post('/api/drinks',
+                                    data=json.dumps(data),
+                                    content_type='application/json')
+
+        self.assertEqual(response.status_code, 400)
+        result = json.loads(response.data)
+        self.assertFalse(result['success'])
 
 
 class TestDeleteDrinkLogRoute(BaseTestCase):
