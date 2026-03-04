@@ -16,18 +16,18 @@
 
 <div class="container" style="text-align: center;">    
 
-        <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 5px;">
-            <div style="border: 2px solid {% if daily_consumption.progress_percentage >= 100 %}#28a745{% else %}#fff{% endif %}; border-radius: 12px; padding: 16px 32px; background: rgba(0,0,0,0.3);">
-                <h1 style="color: {% if daily_consumption.progress_percentage >= 100 %}#28a745{% else %}white{% endif %}; margin: 0;">
+        <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 4px;">
+            <div style="border: 1px solid {% if daily_consumption.progress_percentage >= 100 %}#28a745{% else %}rgba(255,255,255,0.4){% endif %}; border-radius: 10px; padding: 7px 18px; background: rgba(0,0,0,0.25);">
+                <h4 style="color: {% if daily_consumption.progress_percentage >= 100 %}#6ee387{% else %}white{% endif %}; margin: 0; font-size: 1.15rem; font-weight: 700; letter-spacing: 0.01em;">
                     {{ daily_consumption.total_water_for_progress or 0 }}ml / {{ daily_consumption.daily_goal or 2560 }}ml
                     {% if daily_consumption.progress_percentage >= 100 %}
-                    <span style="font-size: 0.6em;"> ✓ GOAL REACHED!</span>
+                    <span style="font-size: 0.65em;"> ✓ GOAL!</span>
                     {% endif %}
-                </h1>
-                <div style="font-size: 0.75rem; color: #ccc; margin-top: 8px;">Water consumed (calculated from drink water content)</div>
+                </h4>
+                <div style="font-size: 0.68rem; color: #adb5bd; margin-top: 3px;">Water consumed from drink content</div>
             </div>
         </div>
-        <div style="margin-top: 5px; font-size: 1rem; font-weight: bold;">Total Day Drink: {{ daily_consumption.total_liquid or 0 }}ml</div>
+        <div style="margin-top: 3px; font-size: 0.8rem; font-weight: 600; color: #ddd;">Total Day Drink: {{ daily_consumption.total_liquid or 0 }}ml</div>
         <div class="progress progress-bar-style" style="max-width: 100%; margin-top: 10px !important;">
             {% if daily_consumption.water_percentage > 0 %}
             <div class="progress-bar" style="width: {{ daily_consumption.water_percentage }}%" 

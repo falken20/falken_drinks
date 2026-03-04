@@ -2,91 +2,170 @@
 
 {% block content %}
 
+<style>
+    .ds-card {
+        background: rgba(230, 230, 234, 0.42);
+        border-radius: 10px;
+        padding: 6px 10px;
+        margin-bottom: 5px;
+        text-align: left;
+    }
+    .ds-icon {
+        height: 26px;
+        width: 26px;
+        border-radius: 50%;
+        margin-right: 8px;
+        flex-shrink: 0;
+    }
+    .ds-avatar {
+        background: rgba(13, 110, 253, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .ds-name {
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+    .ds-meta {
+        color: #ddd;
+        font-size: 0.65rem;
+        line-height: 1.2;
+    }
+    .ds-badge {
+        font-size: 0.58rem;
+        padding: 1px 4px;
+        border-radius: 7px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .ds-badge-water  { background: rgba(40,167,69,0.25);  color: #6ee387; }
+    .ds-badge-nowater{ background: rgba(220,53,69,0.25);  color: #f08080; }
+    .ds-delete {
+        background: transparent;
+        border: 1px solid rgba(220,53,69,0.5);
+        color: #f08080;
+        border-radius: 7px;
+        padding: 2px 6px;
+        font-size: 0.62rem;
+        line-height: 1;
+        flex-shrink: 0;
+        transition: background .15s;
+    }
+    .ds-delete:hover { background: rgba(220,53,69,0.3); color: white; }
+
+    /* Tooltip */
+    .breakdown-tooltip { position: relative; display: inline-block; cursor: help; }
+    .breakdown-tooltiptext {
+        visibility: hidden;
+        background: rgba(30,30,40,0.97);
+        color: #fff;
+        text-align: left;
+        border-radius: 8px;
+        padding: 5px 8px;
+        font-size: 0.65rem;
+        line-height: 1.5;
+        white-space: nowrap;
+        position: absolute;
+        z-index: 100;
+        bottom: 130%;
+        left: 50%;
+        transform: translateX(-50%);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+    .breakdown-tooltip:hover .breakdown-tooltiptext { visibility: visible; }
+</style>
+
 <script>
     window.onload = function() {
         activeVisibility('summary', 'summary_icon');
     }
 </script>
 
-<div class="container" style="text-align: center;">    
+<div class="container px-2" style="max-width: 480px; text-align: center;">
+
+    <!-- Title -->
+    <h6 style="color: white; margin-bottom: 8px; font-size: 0.82rem; font-weight: 600;">
+        Today's Drinks
+        <span style="color: #adb5bd; font-weight: 400;">({{ daily_summary.total_logs }})</span>
+    </h6>
 
     <!-- Drink Logs List -->
-    <div style="max-width: 450px; margin: 0 auto;">
-        <h3 style="color: white; margin-bottom: 20px;">Today's Drinks ({{ daily_summary.total_logs }} entries)</h3>
-        
-        {% if daily_summary.has_logs %}
-            {% for log in daily_summary.drink_logs %}
-            <div style="background: rgba(230, 230, 234, 0.47); border-radius: 12px; padding: 8px 12px; margin-bottom: 6px; text-align: left;">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <div style="display: flex; align-items: center;">
-                        <!-- Drink Icon/Image -->
-                        {% if log.drink_image %}
-                        <img src="{{ url_for('static', filename='images/drinks/' + log.drink_image) }}" 
-                             alt="{{ log.drink_name }}" 
-                             style="height: 30px; width: 30px; border-radius: 50%; margin-right: 10px; background: rgba(255,255,255,0.1); padding: 3px;">
-                        {% else %}
-                        <div style="height: 30px; width: 30px; border-radius: 50%; margin-right: 10px; background: rgba(13, 110, 253, 0.3); display: flex; align-items: center; justify-content: center;">
-                            <span style="color: white; font-weight: bold; font-size: 0.75rem;">{{ log.drink_name[0] }}</span>
-                        </div>
-                        {% endif %}
-                        
-                        <!-- Drink Info -->
-                        <div>
-                            <div style="color: white; font-size: 1rem; font-weight: bold; position: relative;">
-                                {{ log.drink_name }}
-                                {% if log.counts_as_water %}
-                                <span style="color: #28a745; font-size: 0.85rem;">- ✓ Counts as water</span>
-                                {% else %}
-                                <span style="color: #dc3545; font-size: 0.85rem;">- ✗ Does not count as water</span>
-                                {% endif %}
-                                <!-- Info icon for tooltip -->
-                                <span class="breakdown-tooltip" style="cursor: help; color: #0d6efd; font-size: 0.8rem; margin-left: 5px;">ⓘ
-                                    <span class="breakdown-tooltiptext">
-                                        <strong>Breakdown:</strong><br>
-                                        {% if log.water_quantity > 0 %}
-                                        <span style="color: #6db3ff;">💧 Water: {{ log.water_quantity }}ml</span><br>
-                                        {% endif %}
-                                        {% if log.alcohol_quantity > 0 %}
-                                        <span style="color: #ff6b6b;">🍷 Alcohol: {{ log.alcohol_quantity }}ml</span><br>
-                                        {% endif %}
-                                        {% if log.total_quantity - log.water_quantity - log.alcohol_quantity > 0 %}
-                                        <span style="color: #51cf66;">🥤 Other: {{ log.total_quantity - log.water_quantity - log.alcohol_quantity }}ml</span>
-                                        {% endif %}
-                                    </span>
-                                </span>
-                            </div>
-                            <div style="color: #050505; font-size: 0.85rem; font-weight: bold;">
-                                {{ log.total_quantity }}ml
-                                <span style="color: #0d6efd;"> • {{ log.water_percentage }}% water</span>
-                                {% if log.alcohol_percentage > 0 %}
-                                <span style="color: #dc3545;"> • {{ log.alcohol_percentage }}% alcohol</span>
-                                {% endif %}
-                            </div>
-                        </div>
+    {% if daily_summary.has_logs %}
+        {% for log in daily_summary.drink_logs %}
+        <div class="ds-card">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px;">
+
+                <!-- Icon + Info -->
+                <div style="display: flex; align-items: center; min-width: 0;">
+                    {% if log.drink_image %}
+                    <img src="{{ url_for('static', filename='images/drinks/' + log.drink_image) }}"
+                         alt="{{ log.drink_name }}"
+                         class="ds-icon" style="padding: 2px; background: rgba(255,255,255,0.1);">
+                    {% else %}
+                    <div class="ds-icon ds-avatar">
+                        <span style="color: white; font-weight: bold; font-size: 0.7rem;">{{ log.drink_name[0] }}</span>
                     </div>
-                    
-                    <!-- Delete Button -->
-                    <div>
-                        <button class="btn btn-sm btn-danger" onclick="deleteDrinkLog({{ log.log_id }})" style="display: flex; align-items: center; gap: 5px; font-size: 0.85rem;">
-                            <i class="fas fa-trash"></i>
-                            <span>Delete</span>
-                        </button>
+                    {% endif %}
+
+                    <div style="min-width: 0;">
+                        <!-- Name row -->
+                        <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                            <span class="ds-name">{{ log.drink_name }}</span>
+                            {% if log.counts_as_water %}
+                            <span class="ds-badge ds-badge-water">✓ water</span>
+                            {% else %}
+                            <span class="ds-badge ds-badge-nowater">✗ no water</span>
+                            {% endif %}
+                            <!-- Breakdown tooltip -->
+                            <span class="breakdown-tooltip" style="color: #6ea8fe; font-size: 0.62rem;">ⓘ
+                                <span class="breakdown-tooltiptext">
+                                    {% if log.water_quantity > 0 %}
+                                    💧 Water: {{ log.water_quantity }}ml<br>
+                                    {% endif %}
+                                    {% if log.alcohol_quantity > 0 %}
+                                    🍷 Alcohol: {{ log.alcohol_quantity }}ml<br>
+                                    {% endif %}
+                                    {% set other = log.total_quantity - log.water_quantity - log.alcohol_quantity %}
+                                    {% if other > 0 %}
+                                    🥤 Other: {{ other }}ml
+                                    {% endif %}
+                                </span>
+                            </span>
+                        </div>
+                        <!-- Meta row -->
+                        <div class="ds-meta">
+                            <span style="color: #e9ecef; font-weight: 600;">{{ log.total_quantity }}ml</span>
+                            <span style="color: #6ea8fe;"> · {{ log.water_percentage }}% 💧</span>
+                            {% if log.alcohol_percentage > 0 %}
+                            <span style="color: #f08080;"> · {{ log.alcohol_percentage }}% 🍷</span>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-            </div>
-            {% endfor %}
-        {% else %}
-            <div style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 40px; color: #ccc; text-align: center;">
-                <div style="font-size: 3rem; margin-bottom: 15px;">🥤</div>
-                <h4 style="color: white; margin-bottom: 10px;">No drinks logged today</h4>
-                <!--<p>Start tracking by <a href="{{ url_for('main.index') }}" style="color: #0d6efd; text-decoration: none;">adding your first drink</a>!</p>-->
-            </div>
-        {% endif %}
-    </div>
 
-    <!-- Back to Home Button -->
-    <div style="margin: 30px auto; text-align: center;">
-        <a href="{{ url_for('main.index') }}" class="btn btn-primary" style="min-width: 150px;">Back to Home</a>
+                <!-- Delete -->
+                <button class="ds-delete" onclick="deleteDrinkLog({{ log.log_id }})" title="Delete">
+                    <i class="bi bi-trash3"></i>
+                </button>
+
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div style="background: rgba(255,255,255,0.05); border-radius: 10px; padding: 28px 16px; color: #ccc; text-align: center;">
+            <div style="font-size: 2.2rem; margin-bottom: 8px;">🥤</div>
+            <p style="color: white; font-size: 0.75rem; margin: 0;">No drinks logged today</p>
+        </div>
+    {% endif %}
+
+    <!-- Back to Home -->
+    <div style="margin: 16px auto 0;">
+        <a href="{{ url_for('main.index') }}" class="btn btn-primary btn-sm" style="min-width: 110px; font-size: 0.72rem; padding: 3px 10px;">
+            ← Back to Home
+        </a>
     </div>
 
 </div>
