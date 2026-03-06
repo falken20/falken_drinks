@@ -5,7 +5,6 @@ import sys
 
 from .models import db, Drink, DrinkLog, User
 from .logger import Log
-from .config import shorten_url
 
 Log.info("***** Loading controllers.py")
 
@@ -71,7 +70,7 @@ class ControllerDrinks:
         try:
             # Try to find existing drink
             drink = Drink.query.filter_by(drink_name=drink_name).first()
-            
+
             if not drink:
                 # Create new drink if it doesn't exist
                 water_percentage = 100 - alcohol_percentage
@@ -81,7 +80,7 @@ class ControllerDrinks:
                     'drink_alcohol_percentage': int(alcohol_percentage)
                 }
                 drink = ControllerDrinks.add_drink(drink_data)
-            
+
             return drink
         except Exception as e:
             Log.error("Error in ControllerDrinks.get_or_create_drink", err=e, sys=sys)
@@ -94,7 +93,7 @@ class ControllerDrinks:
         all_drinks = Drink.query.all()
         Log.debug(f"Drinks found: {len(all_drinks)}")
         return all_drinks
-    
+
     @staticmethod
     def add_drink(drink_data: dict):
         Log.info(
@@ -174,38 +173,38 @@ class ControllerDrinkLogs:
             return False
 
     @staticmethod
-    def get_daily_consumption(user_id: int, target_date: date = None):
+    def get_daily_consumption(user_id: int, target_date: date = None):  # noqa: C901
         """Get daily consumption totals for a user on a specific date (default today)"""
         Log.info(
             f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
-        
+
         if target_date is None:
             target_date = date.today()
-        
+
         try:
             # Query all drink logs for the user on the target date
             # Since date_created is DateTime, filter by date range
             start_datetime = datetime.combine(target_date, datetime.min.time())
             end_datetime = datetime.combine(target_date, datetime.max.time())
-            
+
             logs = DrinkLog.query.filter(
                 DrinkLog.user_id == user_id,
                 DrinkLog.date_created >= start_datetime,
                 DrinkLog.date_created <= end_datetime
             ).all()
-            
+
             # Calculate totals by drink type (entire drink amount, not just content)
             total_liquid = 0
             total_water = 0  # Only pure water drinks
             total_coffee = 0  # Coffee/tea drinks (full amount)
             total_alcohol = 0  # Alcoholic drinks (full amount)
             total_other = 0  # Other drinks (full amount)
-            
+
             for log in logs:
                 drink = Drink.query.filter_by(drink_id=log.drink_id).first()
                 if drink:
                     total_liquid += log.drink_total_quantity
-                    
+
                     # Categorize by drink type
                     if drink.drink_alcohol_percentage > 0:
                         # Any drink with alcohol counts as alcohol (full amount)
@@ -219,15 +218,15 @@ class ControllerDrinkLogs:
                     else:
                         # Other beverages
                         total_other += log.drink_total_quantity
-            
+
             Log.debug(f"Total water: {total_water} ml, "
                       f"Total coffee/tea: {total_coffee} ml, "
                       f"Total alcohol: {total_alcohol} ml, "
                       f"Total other: {total_other} ml")
-            
+
             # Daily goal (you can make this configurable per user later)
             daily_goal = 2560  # ml (approximately 8 glasses of water)
-            
+
             # Calculate progress percentage based only on water content from drinks that count as water
             total_water_for_progress = 0
             for log in logs:
@@ -235,9 +234,9 @@ class ControllerDrinkLogs:
                 if drink and drink.counts_as_water:
                     total_water_for_progress += log.drink_water_quantity
             Log.debug(f"Total water for progress: {total_water_for_progress} ml")
-            
+
             progress_percentage = min(100, (total_water_for_progress / daily_goal * 100)) if daily_goal > 0 else 0
-            
+
             # Calculate individual percentages for progress bar
             water_percentage = (total_water / daily_goal * 100) if daily_goal > 0 else 0
             coffee_percentage = (total_coffee / daily_goal * 100) if daily_goal > 0 else 0
@@ -265,7 +264,7 @@ class ControllerDrinkLogs:
                 'other_percentage': min(100, other_percentage),
                 'date': target_date
             }
-            
+
         except Exception as e:
             Log.error("Error in ControllerDrinkLogs.get_daily_consumption", err=e, sys=sys)
             return {
@@ -288,16 +287,16 @@ class ControllerDrinkLogs:
         """Get detailed daily summary with all drink logs for a specific date"""
         Log.info(
             f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
-        
+
         if target_date is None:
             target_date = date.today()
-        
+
         try:
             # Query all drink logs for the user on the target date with drink information
             # Since date_created is DateTime, filter by date range
             start_datetime = datetime.combine(target_date, datetime.min.time())
             end_datetime = datetime.combine(target_date, datetime.max.time())
-            
+
             logs = db.session.query(DrinkLog, Drink).join(
                 Drink, DrinkLog.drink_id == Drink.drink_id
             ).filter(
@@ -305,13 +304,13 @@ class ControllerDrinkLogs:
                 DrinkLog.date_created >= start_datetime,
                 DrinkLog.date_created <= end_datetime
             ).order_by(DrinkLog.log_id.desc()).all()
-            
+
             # Process logs into a more readable format
             drink_logs = []
             total_liquid = 0
             total_water = 0
             total_alcohol = 0
-            
+
             for log, drink in logs:
                 drink_data = {
                     'log_id': log.log_id,
@@ -326,15 +325,15 @@ class ControllerDrinkLogs:
                     'time_logged': log.date_created  # You might want to add time field to model
                 }
                 drink_logs.append(drink_data)
-                
+
                 # Accumulate totals
                 total_liquid += log.drink_total_quantity
                 total_water += log.drink_water_quantity
                 total_alcohol += log.drink_alcohol_quantity
-            
+
             # Get consumption data for progress
             consumption_data = ControllerDrinkLogs.get_daily_consumption(user_id, target_date)
-            
+
             return {
                 'date': target_date,
                 'drink_logs': drink_logs,
@@ -342,7 +341,7 @@ class ControllerDrinkLogs:
                 'consumption_summary': consumption_data,
                 'has_logs': len(drink_logs) > 0
             }
-            
+
         except Exception as e:
             Log.error("Error in ControllerDrinkLogs.get_daily_summary", err=e, sys=sys)
             return {
@@ -354,9 +353,14 @@ class ControllerDrinkLogs:
             }
 
     @staticmethod
-    def get_filtered_analytics(user_id: int, start_date: date = None, end_date: date = None, group_by: str = 'day'):
+    def get_filtered_analytics(  # noqa: C901
+        user_id: int,
+        start_date: date = None,
+        end_date: date = None,
+        group_by: str = 'day'
+    ):
         """Get analytics data with date filters and grouping options
-        
+
         Args:
             user_id: User ID
             start_date: Start date for filter (default: 30 days ago)
@@ -364,19 +368,17 @@ class ControllerDrinkLogs:
             group_by: Grouping option - 'day', 'week', 'month', 'year'
         """
         Log.info(f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
-        
-        from datetime import timedelta
-        
+
         if end_date is None:
             end_date = date.today()
         if start_date is None:
             start_date = end_date - timedelta(days=30)
-        
+
         try:
             # Convert dates to datetime range
             start_datetime = datetime.combine(start_date, datetime.min.time())
             end_datetime = datetime.combine(end_date, datetime.max.time())
-            
+
             # Get all logs in date range
             logs = db.session.query(DrinkLog, Drink).join(
                 Drink, DrinkLog.drink_id == Drink.drink_id
@@ -385,24 +387,24 @@ class ControllerDrinkLogs:
                 DrinkLog.date_created >= start_datetime,
                 DrinkLog.date_created <= end_datetime
             ).order_by(DrinkLog.date_created.desc()).all()
-            
+
             # Process logs by grouping
             grouped_data = {}
             all_logs_detail = []
             total_water = 0
             total_liquid = 0
             total_alcohol = 0
-            
+
             for log, drink in logs:
                 log_date = log.date_created.date()
-                
+
                 # Determine group key based on group_by parameter
                 if group_by == 'day':
                     group_key = log_date.strftime('%Y-%m-%d')
                     group_label = log_date.strftime('%b %d, %Y')
                 elif group_by == 'week':
                     week_start = log_date - timedelta(days=log_date.weekday())
-                    group_key = week_start.strftime('%Y-W%U')
+                    group_key = week_start.strftime('%Y-%m-%d')
                     group_label = f"Week of {week_start.strftime('%b %d, %Y')}"
                 elif group_by == 'month':
                     group_key = log_date.strftime('%Y-%m')
@@ -413,7 +415,7 @@ class ControllerDrinkLogs:
                 else:
                     group_key = log_date.strftime('%Y-%m-%d')
                     group_label = log_date.strftime('%b %d, %Y')
-                
+
                 # Initialize group if not exists
                 if group_key not in grouped_data:
                     grouped_data[group_key] = {
@@ -426,23 +428,13 @@ class ControllerDrinkLogs:
                         'log_count': 0,
                         'logs': []
                     }
-                
+
                 # Add to group totals
                 grouped_data[group_key]['total_liquid'] += log.drink_total_quantity
                 grouped_data[group_key]['total_water'] += log.drink_water_quantity
                 grouped_data[group_key]['total_alcohol'] += log.drink_alcohol_quantity
                 grouped_data[group_key]['log_count'] += 1
-                
-                # Categorize drink type for group
-                if drink.drink_alcohol_percentage > 0:
-                    grouped_data[group_key]['total_alcohol'] += log.drink_total_quantity
-                elif drink.drink_water_percentage >= 98:
-                    grouped_data[group_key]['total_water'] += log.drink_total_quantity
-                elif drink.drink_water_percentage < 90:
-                    grouped_data[group_key]['total_coffee'] += log.drink_total_quantity
-                else:
-                    grouped_data[group_key]['total_other'] += log.drink_total_quantity
-                
+
                 # Add log detail to group
                 log_detail = {
                     'log_id': log.log_id,
@@ -455,18 +447,18 @@ class ControllerDrinkLogs:
                 }
                 grouped_data[group_key]['logs'].append(log_detail)
                 all_logs_detail.append(log_detail)
-                
+
                 # Overall totals
                 total_liquid += log.drink_total_quantity
                 total_water += log.drink_water_quantity
                 total_alcohol += log.drink_alcohol_quantity
-            
+
             # Convert to sorted list
             grouped_list = [
                 {'key': k, **v} for k, v in grouped_data.items()
             ]
             grouped_list.sort(key=lambda x: x['key'], reverse=True)
-            
+
             return {
                 'start_date': start_date,
                 'end_date': end_date,
@@ -482,7 +474,7 @@ class ControllerDrinkLogs:
                     'avg_daily_water': total_water / max(1, (end_date - start_date).days + 1)
                 }
             }
-            
+
         except Exception as e:
             Log.error("Error in ControllerDrinkLogs.get_filtered_analytics", err=e, sys=sys)
             return {

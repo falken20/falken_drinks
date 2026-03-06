@@ -8,26 +8,27 @@ from .logger import Log
 
 api_routes = Blueprint('api_routes', __name__)
 
+
 @api_routes.route('/api/add_drink', methods=['POST'])
 @login_required
 def add_drink():
     try:
         data = request.get_json()
         Log.info(f"Received data: {data}")
-        
+
         if not data:
             return jsonify({
                 'success': False,
                 'message': 'No data received'
             }), 400
-        
+
         # Extract data from request
         drink_name = data.get('drink_name')
         drink_total_quantity = data.get('amount', 0)
         alcohol_percentage = data.get('alcohol_percentage', 0)
-        
+
         Log.info(f"Processing drink: {drink_name}, amount: {drink_total_quantity}, alcohol: {alcohol_percentage}")
-        
+
         # Validate and convert data types
         try:
             drink_total_quantity = int(drink_total_quantity)
@@ -39,13 +40,13 @@ def add_drink():
                 'success': False,
                 'message': f'Invalid data types: {str(e)}'
             }), 400
-        
+
         if not drink_name or drink_total_quantity <= 0:
             return jsonify({
                 'success': False,
                 'message': 'Invalid drink name or amount'
             }), 400
-        
+
         # Get or create drink
         drink = ControllerDrinks.get_or_create_drink(drink_name, alcohol_percentage, drink_total_quantity)
         if not drink:
@@ -53,11 +54,11 @@ def add_drink():
                 'success': False,
                 'message': 'Failed to create or find drink'
             }), 500
-        
+
         # Calculate quantities based on drink percentages
         drink_water_quantity = int((drink.drink_water_percentage / 100) * drink_total_quantity)
         drink_alcohol_quantity = int((drink.drink_alcohol_percentage / 100) * drink_total_quantity)
-        
+
         # Prepare drink log data
         drink_log_data = {
             'drink_id': drink.drink_id,
@@ -66,10 +67,10 @@ def add_drink():
             'drink_water_quantity': drink_water_quantity,
             'drink_alcohol_quantity': drink_alcohol_quantity
         }
-        
+
         # Save to database using the controller method
         result = ControllerDrinkLogs.add_drink_log(drink_log_data)
-        
+
         if result:
             return jsonify({
                 'success': True,
@@ -81,7 +82,7 @@ def add_drink():
                 'success': False,
                 'message': 'Failed to save drink log'
             }), 500
-            
+
     except Exception as e:
         Log.error("Error in add_drink route", err=e, sys=sys)
         return jsonify({
@@ -96,7 +97,7 @@ def delete_drink_log(log_id):
     try:
         # Delete the drink log only if it belongs to the current user
         result = ControllerDrinkLogs.delete_drink_log_by_user(log_id, current_user.user_id)
-        
+
         if result:
             return jsonify({
                 'success': True,
@@ -107,7 +108,7 @@ def delete_drink_log(log_id):
                 'success': False,
                 'message': 'Drink log not found or unauthorized'
             }), 404
-            
+
     except Exception as e:
         Log.error("Error in delete_drink_log route", err=e, sys=sys)
         return jsonify({
@@ -123,12 +124,12 @@ def get_drinks():
     try:
         drinks = ControllerDrinks.get_drinks()
         drinks_data = [drink.serialize() for drink in drinks]
-        
+
         return jsonify({
             'success': True,
             'drinks': drinks_data
         }), 200
-        
+
     except Exception as e:
         Log.error("Error in get_drinks route", err=e, sys=sys)
         return jsonify({
@@ -139,31 +140,31 @@ def get_drinks():
 
 @api_routes.route('/api/drinks', methods=['POST'])
 @login_required
-def create_drink():
+def create_drink():  # noqa: C901
     """Create a new drink"""
     try:
         data = request.get_json()
         Log.info(f"Creating drink with data: {data}")
-        
+
         if not data:
             return jsonify({
                 'success': False,
                 'message': 'No data received'
             }), 400
-        
+
         # Extract and validate data
         drink_name = data.get('drink_name', '').strip()
         drink_water_percentage = data.get('drink_water_percentage', 100)
         drink_alcohol_percentage = data.get('drink_alcohol_percentage', 0)
         drink_image = data.get('drink_image', '').strip()
         counts_as_water = data.get('counts_as_water', True)
-        
+
         if not drink_name:
             return jsonify({
                 'success': False,
                 'message': 'Drink name is required'
             }), 400
-        
+
         # Convert percentages to integers
         try:
             drink_water_percentage = int(drink_water_percentage)
@@ -173,20 +174,20 @@ def create_drink():
                 'success': False,
                 'message': 'Percentages must be valid numbers'
             }), 400
-        
+
         # Validate percentages
         if not (0 <= drink_water_percentage <= 100) or not (0 <= drink_alcohol_percentage <= 100):
             return jsonify({
                 'success': False,
                 'message': 'Percentages must be between 0 and 100'
             }), 400
-        
+
         if drink_water_percentage + drink_alcohol_percentage > 100:
             return jsonify({
                 'success': False,
                 'message': 'Water + alcohol percentages cannot exceed 100%'
             }), 400
-        
+
         # Check if drink already exists
         existing_drink = ControllerDrinks.get_drink_name(drink_name)
         if existing_drink:
@@ -194,7 +195,7 @@ def create_drink():
                 'success': False,
                 'message': f'Drink "{drink_name}" already exists'
             }), 409
-        
+
         # Create drink data
         drink_data = {
             'drink_name': drink_name,
@@ -203,10 +204,10 @@ def create_drink():
             'drink_image': drink_image if drink_image else None,
             'counts_as_water': counts_as_water
         }
-        
+
         # Save to database
         result = ControllerDrinks.add_drink(drink_data)
-        
+
         if result:
             return jsonify({
                 'success': True,
@@ -218,7 +219,7 @@ def create_drink():
                 'success': False,
                 'message': 'Failed to create drink'
             }), 500
-            
+
     except Exception as e:
         Log.error("Error in create_drink route", err=e, sys=sys)
         return jsonify({
@@ -229,18 +230,18 @@ def create_drink():
 
 @api_routes.route('/api/drinks/<int:drink_id>', methods=['PUT'])
 @login_required
-def update_drink(drink_id):
+def update_drink(drink_id):  # noqa: C901
     """Update an existing drink"""
     try:
         data = request.get_json()
         Log.info(f"Updating drink {drink_id} with data: {data}")
-        
+
         if not data:
             return jsonify({
                 'success': False,
                 'message': 'No data received'
             }), 400
-        
+
         # Check if drink exists
         drink = ControllerDrinks.get_drink(drink_id)
         if not drink:
@@ -248,20 +249,20 @@ def update_drink(drink_id):
                 'success': False,
                 'message': 'Drink not found'
             }), 404
-        
+
         # Extract and validate data
         drink_name = data.get('drink_name', drink.drink_name).strip()
         drink_water_percentage = data.get('drink_water_percentage', drink.drink_water_percentage)
         drink_alcohol_percentage = data.get('drink_alcohol_percentage', drink.drink_alcohol_percentage)
         drink_image = data.get('drink_image', drink.drink_image)
         counts_as_water = data.get('counts_as_water', drink.counts_as_water if hasattr(drink, 'counts_as_water') else True)
-        
+
         if not drink_name:
             return jsonify({
                 'success': False,
                 'message': 'Drink name is required'
             }), 400
-        
+
         # Convert percentages to integers
         try:
             drink_water_percentage = int(drink_water_percentage)
@@ -271,20 +272,20 @@ def update_drink(drink_id):
                 'success': False,
                 'message': 'Percentages must be valid numbers'
             }), 400
-        
+
         # Validate percentages
         if not (0 <= drink_water_percentage <= 100) or not (0 <= drink_alcohol_percentage <= 100):
             return jsonify({
                 'success': False,
                 'message': 'Percentages must be between 0 and 100'
             }), 400
-        
+
         if drink_water_percentage + drink_alcohol_percentage > 100:
             return jsonify({
                 'success': False,
                 'message': 'Water + alcohol percentages cannot exceed 100%'
             }), 400
-        
+
         # Check if new name conflicts with existing drink (excluding current drink)
         if drink_name != drink.drink_name:
             existing_drink = ControllerDrinks.get_drink_name(drink_name)
@@ -293,23 +294,23 @@ def update_drink(drink_id):
                     'success': False,
                     'message': f'Another drink with name "{drink_name}" already exists'
                 }), 409
-        
+
         # Update drink
         drink.drink_name = drink_name
         drink.drink_water_percentage = drink_water_percentage
         drink.drink_alcohol_percentage = drink_alcohol_percentage
         drink.drink_image = drink_image if drink_image else None
         drink.counts_as_water = counts_as_water
-        
+
         from .models import db
         db.session.commit()
-        
+
         return jsonify({
             'success': True,
             'message': f'Drink "{drink_name}" updated successfully',
             'drink': drink.serialize()
         }), 200
-        
+
     except Exception as e:
         Log.error("Error in update_drink route", err=e, sys=sys)
         from .models import db
@@ -332,25 +333,29 @@ def delete_drink(drink_id):
                 'success': False,
                 'message': 'Drink not found'
             }), 404
-        
+
         # Check if drink is being used in drink logs
         from .models import DrinkLog
         logs_count = DrinkLog.query.filter_by(drink_id=drink_id).count()
         if logs_count > 0:
+            message = (
+                f'Cannot delete drink "{drink.drink_name}" because it has '
+                f'{logs_count} log entries. Delete the logs first.'
+            )
             return jsonify({
                 'success': False,
-                'message': f'Cannot delete drink "{drink.drink_name}" because it has {logs_count} log entries. Delete the logs first.'
+                'message': message
             }), 409
-        
+
         # Delete the drink
         drink_name = drink.drink_name
         ControllerDrinks.delete_drink(drink_id)
-        
+
         return jsonify({
             'success': True,
             'message': f'Drink "{drink_name}" deleted successfully'
         }), 200
-        
+
     except Exception as e:
         Log.error("Error in delete_drink route", err=e, sys=sys)
         return jsonify({

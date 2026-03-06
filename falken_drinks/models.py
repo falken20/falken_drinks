@@ -60,12 +60,12 @@ class User(UserMixin, db.Model):
     # How to serialize SqlAlchemy PostgreSQL query to JSON => https://stackoverflow.com/a/46180522
     def serialize(self):
         return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
-    
+
     # We have to override the method get_id() to return the user_id because we use
     # the user_id instead of the id field. And Flask-Login uses the id field by default.
     def get_id(self):
         return str(self.user_id)
-    
+
 
 class Drink(db.Model):
     __tablename__ = "drinks"
@@ -78,11 +78,18 @@ class Drink(db.Model):
 
     def __repr__(self) -> str:
         return f"<Drink ({self.drink_name} - {self.drink_water_percentage}% - {self.drink_alcohol_percentage}%)>"
-    
+
     def __str__(self) -> str:
         return f"<Drink ({self.drink_name} - {self.drink_water_percentage}% - {self.drink_alcohol_percentage}%)>"
-    
-    def __init__(self, drink_name=None, drink_water_percentage=None, drink_alcohol_percentage=None, drink_image=None, counts_as_water=None):
+
+    def __init__(
+        self,
+        drink_name=None,
+        drink_water_percentage=None,
+        drink_alcohol_percentage=None,
+        drink_image=None,
+        counts_as_water=None
+    ):
         self.drink_name = drink_name
         self.drink_water_percentage = drink_water_percentage
         self.drink_alcohol_percentage = drink_alcohol_percentage
@@ -92,14 +99,14 @@ class Drink(db.Model):
             self.counts_as_water = counts_as_water
         else:
             self.counts_as_water = False if (drink_alcohol_percentage and drink_alcohol_percentage > 0) else True
-    
+
     def serialize(self):
         return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
-    
+
     # Validations => https://flask-validator.readthedocs.io/en/latest/index.html
     # The __declare_last__() hook allows definition of a class level function that is
     # automatically called by the MapperEvents.after_configured() event, which occurs
-    # after mappings are assumed to be completed and the ‘configure’ step has finished.    
+    # after mappings are assumed to be completed and the ‘configure’ step has finished.
     @classmethod
     def __declare_last__(cls):
         ValidateString(cls.drink_name, False, True,
@@ -122,14 +129,14 @@ class Drink(db.Model):
         if not value:
             raise ValueError("Drink name can't be empty")
         return value
-    
+
     @validates('drink_image')
     def validate_empty_string(self, key, value):
         if isinstance(value, str) and value == '':
             return None
         else:
             return value
-        
+
     @validates('drink_water_percentage', 'drink_alcohol_percentage')
     def validate_percentage(self, key, value):
         if value is None:
@@ -137,14 +144,7 @@ class Drink(db.Model):
         if not (0 <= value <= 100):
             raise ValueError(f"{key} must be between 0 and 100")
         return value
-    
-    @validates('drink_image')
-    def validate_empty_string(self, key, value):
-        if isinstance(value, str) and value == '':
-            return None
-        else:
-            return value
-    
+
 
 class DrinkLog(db.Model):
     __tablename__ = "drinks_logs"
@@ -157,12 +157,25 @@ class DrinkLog(db.Model):
     drink_alcohol_quantity = db.Column(db.Integer, nullable=False)
 
     def __repr__(self) -> str:
-        return f"<DrinkLog ({self.date_created} - {self.drink_total_quantity} - {self.drink_water_quantity} - {self.drink_alcohol_quantity})>"
-    
+        return (
+            f"<DrinkLog ({self.date_created} - {self.drink_total_quantity} "
+            f"- {self.drink_water_quantity} - {self.drink_alcohol_quantity})>"
+        )
+
     def __str__(self) -> str:
-        return f"<DrinkLog ({self.date_created} - {self.drink_total_quantity} - {self.drink_water_quantity} - {self.drink_alcohol_quantity})>"
-    
-    def __init__(self, drink_id=None, user_id=None, drink_total_quantity=None, drink_water_quantity=None, drink_alcohol_quantity=None):
+        return (
+            f"<DrinkLog ({self.date_created} - {self.drink_total_quantity} "
+            f"- {self.drink_water_quantity} - {self.drink_alcohol_quantity})>"
+        )
+
+    def __init__(
+        self,
+        drink_id=None,
+        user_id=None,
+        drink_total_quantity=None,
+        drink_water_quantity=None,
+        drink_alcohol_quantity=None
+    ):
         self.drink_id = drink_id
         self.user_id = user_id
         self.drink_total_quantity = drink_total_quantity
@@ -174,14 +187,14 @@ class DrinkLog(db.Model):
         if not value:
             raise ValueError("Drink ID or User ID can't be empty")
         return value
-    
+
     @validates('drink_total_quantity', 'drink_water_quantity', 'drink_alcohol_quantity')
     def validate_quantity(self, key, value):
         Log.debug(f"Validating {key} with value {value} - {type(value)}")
         if value is None:
             raise ValueError(f"Drink quantity can't be empty: {key} - {value}")
         return value
-    
+
     # Validations => https://flask-validator.readthedocs.io/en/latest/index.html
     # The __declare_last__() hook allows definition of a class level function that is
     # automatically called by the MapperEvents.after_configured() event, which occurs
@@ -193,7 +206,7 @@ class DrinkLog(db.Model):
                         "Drink water quantity should be a number")
         ValidateInteger(cls.drink_alcohol_quantity, False, True,
                         "Drink alcohol quantity should be a number")
-    
+
     def serialize(self):
         return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
 

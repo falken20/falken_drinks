@@ -1,7 +1,7 @@
 # by Richi Rod AKA @richionline / falken20
 # ./falken_plants/main.py
 
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
 from datetime import date
 import sys
@@ -24,7 +24,7 @@ def index():
 
     # Get daily consumption data for the current user
     daily_consumption = ControllerDrinkLogs.get_daily_consumption(current_user.user_id)
-    
+
     return render_template('home.html', daily_consumption=daily_consumption)
 
 
@@ -56,15 +56,15 @@ def analytics():
     Log.info(
         f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
     Log.debug(f"Current user: {current_user}")
-    
+
     from datetime import datetime, timedelta
-    
+
     # Get filter parameters from request
     if request.method == 'POST':
         start_date_str = request.form.get('start_date')
         end_date_str = request.form.get('end_date')
         group_by = request.form.get('group_by', 'day')
-        
+
         # Parse dates
         try:
             start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date() if start_date_str else None
@@ -73,11 +73,26 @@ def analytics():
             start_date = None
             end_date = None
     else:
-        # Default: last 30 days, grouped by day
-        end_date = date.today()
-        start_date = end_date - timedelta(days=30)
-        group_by = 'day'
-    
+        # Check query args first (for pagination links), then default to last 30 days
+        start_date_str = request.args.get('start_date')
+        end_date_str = request.args.get('end_date')
+        group_by = request.args.get('group_by', 'day')
+
+        if start_date_str and end_date_str:
+            try:
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                end_date = date.today()
+                start_date = end_date - timedelta(days=30)
+        else:
+            end_date = date.today()
+            start_date = end_date - timedelta(days=30)
+
+    # Pagination
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+
     # Get analytics data
     analytics_data = ControllerDrinkLogs.get_filtered_analytics(
         current_user.user_id,
@@ -85,8 +100,23 @@ def analytics():
         end_date=end_date,
         group_by=group_by
     )
-    
-    return render_template('analytics.html', analytics=analytics_data)
+
+    # Paginate grouped_data
+    all_groups = analytics_data.get('grouped_data', [])
+    total_groups = len(all_groups)
+    total_pages = max(1, (total_groups + per_page - 1) // per_page)
+    page = max(1, min(page, total_pages))
+    analytics_data['grouped_data'] = all_groups[(page - 1) * per_page: page * per_page]
+
+    return render_template(
+        'analytics.html',
+        analytics=analytics_data,
+        page=page,
+        total_pages=total_pages,
+        start_date=start_date,
+        end_date=end_date,
+        group_by=group_by
+    )
 
 
 @main.route("/drinks_management", methods=['GET'])

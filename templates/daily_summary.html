@@ -25,17 +25,17 @@
     }
     .ds-name {
         color: white;
-        font-size: 0.75rem;
+        font-size: 0.88rem;
         font-weight: 600;
         line-height: 1.2;
     }
     .ds-meta {
         color: #ddd;
-        font-size: 0.65rem;
+        font-size: 0.78rem;
         line-height: 1.2;
     }
     .ds-badge {
-        font-size: 0.58rem;
+        font-size: 0.70rem;
         padding: 1px 4px;
         border-radius: 7px;
         font-weight: 600;
@@ -49,7 +49,7 @@
         color: #f08080;
         border-radius: 7px;
         padding: 2px 6px;
-        font-size: 0.62rem;
+        font-size: 0.75rem;
         line-height: 1;
         flex-shrink: 0;
         transition: background .15s;
@@ -65,7 +65,7 @@
         text-align: left;
         border-radius: 8px;
         padding: 5px 8px;
-        font-size: 0.65rem;
+        font-size: 0.75rem;
         line-height: 1.5;
         white-space: nowrap;
         position: absolute;
@@ -106,7 +106,7 @@
                          class="ds-icon" style="padding: 2px; background: rgba(255,255,255,0.1);">
                     {% else %}
                     <div class="ds-icon ds-avatar">
-                        <span style="color: white; font-weight: bold; font-size: 0.7rem;">{{ log.drink_name[0] }}</span>
+                        <span style="color: white; font-weight: bold; font-size: 0.82rem;">{{ log.drink_name[0] }}</span>
                     </div>
                     {% endif %}
 
@@ -120,7 +120,7 @@
                             <span class="ds-badge ds-badge-nowater">✗ no water</span>
                             {% endif %}
                             <!-- Breakdown tooltip -->
-                            <span class="breakdown-tooltip" style="color: #6ea8fe; font-size: 0.62rem;">ⓘ
+                            <span class="breakdown-tooltip" style="color: #6ea8fe; font-size: 0.75rem;">ⓘ
                                 <span class="breakdown-tooltiptext">
                                     {% if log.water_quantity > 0 %}
                                     💧 Water: {{ log.water_quantity }}ml<br>
