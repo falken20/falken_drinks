@@ -6,6 +6,8 @@
 import os
 import sys
 import toml
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from pydantic.v1 import BaseSettings
 # from pydantic_settings import BaseSettings # New version
 # import pyshorteners
@@ -16,6 +18,19 @@ from functools import lru_cache
 from .logger import Log
 
 Log.info("***** Loading config.py")
+
+# CET timezone (Europe/Madrid handles CET/CEST daylight saving)
+CET_TZ = ZoneInfo('Europe/Madrid')
+
+
+def now_cet():
+    """Get current datetime in CET timezone"""
+    return datetime.now(CET_TZ)
+
+
+def today_cet():
+    """Get current date in CET timezone"""
+    return now_cet().date()
 
 
 # Method to shorten a URL

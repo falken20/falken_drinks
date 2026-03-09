@@ -137,7 +137,8 @@
                         </div>
                         <!-- Meta row -->
                         <div class="ds-meta">
-                            <span style="color: #e9ecef; font-weight: 600;">{{ log.total_quantity }}ml</span>
+                            <span style="color: #000000;">🕐 {{ log.time_logged.strftime('%H:%M') }}</span>
+                            <span style="color: #e9ecef; font-weight: 600;"> · {{ log.total_quantity }}ml</span>
                             <span style="color: #6ea8fe;"> · {{ log.water_percentage }}% 💧</span>
                             {% if log.alcohol_percentage > 0 %}
                             <span style="color: #f08080;"> · {{ log.alcohol_percentage }}% 🍷</span>

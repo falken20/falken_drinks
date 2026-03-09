@@ -4,9 +4,9 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, login_required, logout_user
-from datetime import date
 import sys
 
+from .config import today_cet
 from .models import db, User
 from .logger import Log
 
@@ -60,7 +60,7 @@ def signup_post():
         email = request.form.get('email')
         name = request.form.get('name')
         password = request.form.get('password')
-        date_created = date.today()
+        date_created = today_cet()
 
         # If this return a user, then the email already exists in database
         user = User.query.filter_by(email=email).first()

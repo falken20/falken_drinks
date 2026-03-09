@@ -1,5 +1,14 @@
 // Initialize all event listeners when the DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize time input with current time
+    const drinkTimeInput = document.getElementById('drink-time');
+    if (drinkTimeInput) {
+        const now = new Date();
+        const hh = String(now.getHours()).padStart(2, '0');
+        const mm = String(now.getMinutes()).padStart(2, '0');
+        drinkTimeInput.value = hh + ':' + mm;
+    }
+
     // Set up the "Other" drink selection dropdown visibility
     const otherRadio = document.getElementById('other');
     const otherSelect = document.getElementById('other-drink-select');
@@ -121,10 +130,12 @@ function addDrink() {
     }
     
     // Prepare data for API call
+    const drinkTimeInput = document.getElementById('drink-time');
     const drinkData = {
         drink_name: drinkType,
         amount: parseInt(amount),
-        alcohol_percentage: parseFloat(alcoholPercentage)
+        alcohol_percentage: parseFloat(alcoholPercentage),
+        drink_time: drinkTimeInput ? drinkTimeInput.value : null
     };
     
     console.log("Sending data to API:", drinkData);

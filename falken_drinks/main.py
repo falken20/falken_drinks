@@ -3,10 +3,10 @@
 
 from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
-from datetime import date
 import sys
 
 from .logger import Log
+from .config import today_cet
 from .controllers import ControllerDrinkLogs, ControllerDrinks
 
 Log.info("***** Loading app.py")
@@ -83,10 +83,10 @@ def analytics():
                 start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
                 end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
             except ValueError:
-                end_date = date.today()
+                end_date = today_cet()
                 start_date = end_date - timedelta(days=30)
         else:
-            end_date = date.today()
+            end_date = today_cet()
             start_date = end_date - timedelta(days=30)
 
     # Pagination

@@ -7,7 +7,6 @@
 
 # import logging
 import sys
-from datetime import date, datetime
 from flask import Flask
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
@@ -16,7 +15,7 @@ from sqlalchemy import inspect
 from flask_validator import (ValidateString, ValidateInteger, ValidateEmail, ValidateLessThanOrEqual,
                              ValidateGreaterThanOrEqual)
 
-from .config import get_settings
+from .config import get_settings, now_cet, today_cet
 from .logger import Log
 
 Log.info("***** Loading models.py")
@@ -33,9 +32,9 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(100), nullable=False, unique=True)
     password = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(100), nullable=False)
-    date_created = db.Column(db.Date, nullable=False, default=date.today)
+    date_created = db.Column(db.Date, nullable=False, default=today_cet)
     date_updated = db.Column(db.Date, nullable=False,
-                             default=date.today, onupdate=date.today)
+                             default=today_cet, onupdate=today_cet)
 
     def __repr__(self) -> str:
         return f"<User ({self.user_id} - {self.name})>"
@@ -151,7 +150,7 @@ class DrinkLog(db.Model):
     log_id = db.Column(db.Integer, primary_key=True)
     drink_id = db.Column(db.Integer, db.ForeignKey('drinks.drink_id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    date_created = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    date_created = db.Column(db.DateTime, nullable=False, default=now_cet)
     drink_total_quantity = db.Column(db.Integer, nullable=False)
     drink_water_quantity = db.Column(db.Integer, nullable=False)
     drink_alcohol_quantity = db.Column(db.Integer, nullable=False)
@@ -174,13 +173,16 @@ class DrinkLog(db.Model):
         user_id=None,
         drink_total_quantity=None,
         drink_water_quantity=None,
-        drink_alcohol_quantity=None
+        drink_alcohol_quantity=None,
+        date_created=None
     ):
         self.drink_id = drink_id
         self.user_id = user_id
         self.drink_total_quantity = drink_total_quantity
         self.drink_water_quantity = drink_water_quantity
         self.drink_alcohol_quantity = drink_alcohol_quantity
+        if date_created is not None:
+            self.date_created = date_created
 
     @validates('drink_id', 'user_id')
     def validate_id(self, key, value):

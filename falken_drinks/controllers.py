@@ -4,6 +4,7 @@ from datetime import date, datetime, timedelta
 import sys
 
 from .models import db, Drink, DrinkLog, User
+from .config import today_cet
 from .logger import Log
 
 Log.info("***** Loading controllers.py")
@@ -179,7 +180,7 @@ class ControllerDrinkLogs:
             f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
 
         if target_date is None:
-            target_date = date.today()
+            target_date = today_cet()
 
         try:
             # Query all drink logs for the user on the target date
@@ -289,7 +290,7 @@ class ControllerDrinkLogs:
             f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
 
         if target_date is None:
-            target_date = date.today()
+            target_date = today_cet()
 
         try:
             # Query all drink logs for the user on the target date with drink information
@@ -370,7 +371,7 @@ class ControllerDrinkLogs:
         Log.info(f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
 
         if end_date is None:
-            end_date = date.today()
+            end_date = today_cet()
         if start_date is None:
             start_date = end_date - timedelta(days=30)
 

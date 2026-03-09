@@ -1,8 +1,10 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
+from datetime import datetime
 import sys
 
 from .controllers import ControllerDrinks, ControllerDrinkLogs
+from .config import CET_TZ, today_cet
 from .logger import Log
 
 
@@ -11,7 +13,7 @@ api_routes = Blueprint('api_routes', __name__)
 
 @api_routes.route('/api/add_drink', methods=['POST'])
 @login_required
-def add_drink():
+def add_drink():  # noqa: C901
     try:
         data = request.get_json()
         Log.info(f"Received data: {data}")
@@ -59,6 +61,20 @@ def add_drink():
         drink_water_quantity = int((drink.drink_water_percentage / 100) * drink_total_quantity)
         drink_alcohol_quantity = int((drink.drink_alcohol_percentage / 100) * drink_total_quantity)
 
+        # Parse optional drink_time (HH:MM) to build date_created in CET
+        drink_time_str = data.get('drink_time')
+        date_created = None
+        if drink_time_str:
+            try:
+                hour, minute = map(int, drink_time_str.split(':'))
+                now_date = today_cet()
+                date_created = datetime(
+                    now_date.year, now_date.month, now_date.day,
+                    hour, minute, tzinfo=CET_TZ
+                )
+            except (ValueError, TypeError):
+                date_created = None
+
         # Prepare drink log data
         drink_log_data = {
             'drink_id': drink.drink_id,
@@ -67,6 +83,8 @@ def add_drink():
             'drink_water_quantity': drink_water_quantity,
             'drink_alcohol_quantity': drink_alcohol_quantity
         }
+        if date_created is not None:
+            drink_log_data['date_created'] = date_created
 
         # Save to database using the controller method
         result = ControllerDrinkLogs.add_drink_log(drink_log_data)
