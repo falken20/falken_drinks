@@ -339,6 +339,8 @@ class ControllerDrinkLogs:
                 'date': target_date,
                 'drink_logs': drink_logs,
                 'total_logs': len(drink_logs),
+                'total_liquid': total_liquid,
+                'total_water': total_water,
                 'consumption_summary': consumption_data,
                 'has_logs': len(drink_logs) > 0
             }

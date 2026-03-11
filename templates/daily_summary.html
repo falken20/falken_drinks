@@ -87,10 +87,14 @@
 <div class="container px-2" style="max-width: 480px; text-align: center;">
 
     <!-- Title -->
-    <h6 style="color: white; margin-bottom: 8px; font-size: 0.82rem; font-weight: 600;">
+    <h6 style="color: white; margin-bottom: 4px; font-size: 0.82rem; font-weight: 600;">
         Today's Drinks
         <span style="color: #adb5bd; font-weight: 400;">({{ daily_summary.total_logs }})</span>
     </h6>
+    <p style="color: #ccc; font-size: 0.78rem; margin: 0 0 10px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 4px; text-align: center;">
+        🥤 {{ daily_summary.total_liquid }}ml total
+        <span style="color: #3a86d6;">· 💧 {{ daily_summary.total_water }}ml water</span>
+    </p>
 
     <!-- Drink Logs List -->
     {% if daily_summary.has_logs %}
@@ -106,7 +110,7 @@
                          class="ds-icon" style="padding: 2px; background: rgba(255,255,255,0.1);">
                     {% else %}
                     <div class="ds-icon ds-avatar">
-                        <span style="color: white; font-weight: bold; font-size: 0.82rem;">{{ log.drink_name[0] }}</span>
+                        <span style="color: white; font-weight: bold; font-size: 0.82rem; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%;">{{ log.drink_name[0] }}</span>
                     </div>
                     {% endif %}
 
@@ -120,7 +124,7 @@
                             <span class="ds-badge ds-badge-nowater">✗ no water</span>
                             {% endif %}
                             <!-- Breakdown tooltip -->
-                            <span class="breakdown-tooltip" style="color: #6ea8fe; font-size: 0.75rem;">ⓘ
+                            <span class="breakdown-tooltip" style="color: #3a86d6; font-size: 0.75rem;">ⓘ
                                 <span class="breakdown-tooltiptext">
                                     {% if log.water_quantity > 0 %}
                                     💧 Water: {{ log.water_quantity }}ml<br>
@@ -139,7 +143,7 @@
                         <div class="ds-meta">
                             <span style="color: #000000;">🕐 {{ log.time_logged.strftime('%H:%M') }}</span>
                             <span style="color: #e9ecef; font-weight: 600;"> · {{ log.total_quantity }}ml</span>
-                            <span style="color: #6ea8fe;"> · {{ log.water_percentage }}% 💧</span>
+                            <span style="color: #3a86d6;"> · {{ log.water_percentage }}% 💧</span>
                             {% if log.alcohol_percentage > 0 %}
                             <span style="color: #f08080;"> · {{ log.alcohol_percentage }}% 🍷</span>
                             {% endif %}
