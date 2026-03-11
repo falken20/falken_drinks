@@ -65,8 +65,8 @@ def create_app(test_config=None):
         @login_manager.user_loader
         def load_user(user_id):
             try:
-                # Since the user_id is just the primary key of our user table, use it in the query for the user
-                return User.query.get(int(user_id))
+                # SQLAlchemy 2.x: use Session.get instead of legacy Query.get
+                return db.session.get(User, int(user_id))
             except Exception:
                 Log.error("Error loading user", None, sys)
                 return None

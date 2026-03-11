@@ -72,10 +72,6 @@ The project is designed with a clean backend structure based on:
 git clone https://github.com/falken20/falken_drinks.git
 cd falken_drinks
 ```
-	<img src="https://img.shields.io/static/v1?label=python&message=3.11%2B&color=blue&logo=python&logoColor=white" alt="Python version"/>
-</p>
-
-<p>
 
 ### 3. Create and activate a virtual environment
 
@@ -85,10 +81,13 @@ source .venv/bin/activate
 ```
 
 ### 4. Install Python dependencies
-pip install -e ".[dev,lint]"
-		<img src="https://img.shields.io/badge/web-richionline-blue" alt="Portfolio"/>
 
-	<a href="https://twitter.com/richionline">
+```bash
+pip install --upgrade pip
+pip install -e ".[dev,lint]"
+```
+
+### 5. Install JavaScript test dependencies
 
 ```bash
 npm install
@@ -145,6 +144,8 @@ This script runs:
 - Coverage report for `falken_drinks/*.py`
 - `flake8` syntax checks
 - `flake8` style checks
+
+Coverage note: the `87%` badge in the header is verified from the current Python suite (`coverage run -m pytest -q`).
 
 ### Run only Python tests
 

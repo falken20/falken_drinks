@@ -2,8 +2,9 @@
 
 # Unit test and coverage
 echo "***** Run Tests *****"
-coverage run -m pytest -v -s
-# coverage run -m unittest -v
+coverage run -m pytest -q # -v -s
+# coverage run -m pytest -v -s # Version with more output for debugging
+
 #### Probar un solo test: pytest -v -s tests/test_auth.py::TestAuth::test_auth_login
 echo "***** Coverage tests last execution *****"
 coverage report --omit="*/tests/*,*/venv/*" -m ./falken_drinks/*.py 

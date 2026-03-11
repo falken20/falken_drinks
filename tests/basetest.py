@@ -66,7 +66,7 @@ class BaseTestCase(unittest.TestCase):
         @login_manager.user_loader
         def load_user(user_id):
             # Since the user_id is just the primary key of our user table, use it in the query for the user
-            return User.query.get(int(user_id))
+            return db.session.get(User, int(user_id))
 
     @staticmethod
     def create_user(user: User = mock_user):

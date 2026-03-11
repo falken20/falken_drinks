@@ -64,7 +64,7 @@ class TestCreateApp(BaseTestCase):
         user = self.create_user()
         
         # Test the user loader
-        loaded_user = User.query.get(user.user_id)
+        loaded_user = db.session.get(User, user.user_id)
         self.assertIsNotNone(loaded_user)
         self.assertEqual(loaded_user.user_id, user.user_id)
         self.assertEqual(loaded_user.email, user.email)
