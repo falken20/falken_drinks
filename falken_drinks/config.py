@@ -121,19 +121,20 @@ class Settings(BaseSettings):
     def __init__(self) -> None:
         super().__init__()
         data_app = self.get_params_from_toml()
+        app_data = data_app.get('tool', {}).get('falken_drinks', {}).get('app_data', {})
         Log.debug("Data from pyproject.toml:")
         Log.info_dict(data_app)
         self.APP_DATA = {
-            'title': data_app['project']['title'],
+            'title': app_data.get('title', 'Falken Drinks'),
             'version': data_app['project']['version'],
             'author': data_app['project']['authors'][0]['name'],
             'license': data_app['project']['license'],
-            'url_github': data_app['project']['url_github'],
-            'url_twitter': data_app['project']['url_twitter'],
-            'url_linkedin': data_app['project']['url_linkedin'],
+            'url_github': app_data.get('url_github', data_app['project']['urls']['Homepage']),
+            'url_twitter': app_data.get('url_twitter', data_app['project']['urls']['Twitter']),
+            'url_linkedin': app_data.get('url_linkedin', data_app['project']['urls']['LinkedIn']),
             'description': data_app['project']['description'],
-            'copyright': data_app['project']['copyright'],
-            'features': data_app['project']['features'],
+            'copyright': app_data.get('copyright', ''),
+            'features': app_data.get('features', []),
         }
 
     def get_params_from_toml(self) -> dict:

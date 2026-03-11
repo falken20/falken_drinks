@@ -12,8 +12,6 @@ from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import validates
 from sqlalchemy import inspect
-from flask_validator import (ValidateString, ValidateInteger, ValidateEmail, ValidateLessThanOrEqual,
-                             ValidateGreaterThanOrEqual)
 
 from .config import get_settings, now_cet, today_cet
 from .logger import Log
@@ -42,18 +40,13 @@ class User(UserMixin, db.Model):
     def __str__(self) -> str:
         return f"<User ({self.user_id} - {self.name})>"
 
-    # Validations => https://flask-validator.readthedocs.io/en/latest/index.html
-    # The __declare_last__() hook allows definition of a class level function that is
-    # automatically called by the MapperEvents.after_configured() event, which occurs
-    # after mappings are assumed to be completed and the ‘configure’ step has finished.
-    @classmethod
-    def __declare_last__(cls):
-        ValidateEmail(cls.email, False, True,
-                      "User email can't be empty or only spaces")
-        ValidateString(cls.name, False, True,
-                       "User name can't be empty or only spaces")
-        ValidateString(cls.password, False, True,
-                       "User password can't be empty or only spaces")
+    @validates('email', 'name', 'password')
+    def validate_required_text(self, key, value):
+        if value is None:
+            raise ValueError(f'{key} cannot be empty')
+        if isinstance(value, str) and not value.strip():
+            raise ValueError(f'{key} cannot be blank')
+        return value.strip() if isinstance(value, str) else value
 
     # Check to use serialize()
     # How to serialize SqlAlchemy PostgreSQL query to JSON => https://stackoverflow.com/a/46180522
@@ -102,32 +95,11 @@ class Drink(db.Model):
     def serialize(self):
         return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
 
-    # Validations => https://flask-validator.readthedocs.io/en/latest/index.html
-    # The __declare_last__() hook allows definition of a class level function that is
-    # automatically called by the MapperEvents.after_configured() event, which occurs
-    # after mappings are assumed to be completed and the ‘configure’ step has finished.
-    @classmethod
-    def __declare_last__(cls):
-        ValidateString(cls.drink_name, False, True,
-                       "Validate String: Drink name can't be empty or only spaces")
-        ValidateInteger(cls.drink_water_percentage, False, True,
-                        "Validate Integer: Drink water percentage should be a number between 0 and 100")
-        ValidateLessThanOrEqual(cls.drink_water_percentage, 100, True,
-                                "ValidateLessThanOrEqual: Drink water percentage should be a number between 0 and 100")
-        ValidateGreaterThanOrEqual(cls.drink_water_percentage, 0, True,
-                                   "ValidateGreaterThanOrEqual: Drink water percentage should be a number between 0 and 100")
-        ValidateInteger(cls.drink_alcohol_percentage, False, True,
-                        "Drink alcohol percentage should be a number between 0 and 100")
-        ValidateLessThanOrEqual(cls.drink_alcohol_percentage, 100, True,
-                                "Drink alcohol percentage should be a number between 0 and 100")
-        ValidateGreaterThanOrEqual(cls.drink_alcohol_percentage, 0, True,
-                                   "Drink alcohol percentage should be a number between 0 and 100")
-
     @validates('drink_name')
     def validate_name(self, key, value):
-        if not value:
+        if value is None or not str(value).strip():
             raise ValueError("Drink name can't be empty")
-        return value
+        return str(value).strip()
 
     @validates('drink_image')
     def validate_empty_string(self, key, value):
@@ -140,6 +112,8 @@ class Drink(db.Model):
     def validate_percentage(self, key, value):
         if value is None:
             raise ValueError("Drink percentage can't be empty")
+        if not isinstance(value, int):
+            raise ValueError(f'{key} must be an integer')
         if not (0 <= value <= 100):
             raise ValueError(f"{key} must be between 0 and 100")
         return value
@@ -196,18 +170,6 @@ class DrinkLog(db.Model):
         if value is None:
             raise ValueError(f"Drink quantity can't be empty: {key} - {value}")
         return value
-
-    # Validations => https://flask-validator.readthedocs.io/en/latest/index.html
-    # The __declare_last__() hook allows definition of a class level function that is
-    # automatically called by the MapperEvents.after_configured() event, which occurs
-    @classmethod
-    def __declare_last__(cls):
-        ValidateInteger(cls.drink_total_quantity, False, True,
-                        "Drink total quantity should be a number")
-        ValidateInteger(cls.drink_water_quantity, False, True,
-                        "Drink water quantity should be a number")
-        ValidateInteger(cls.drink_alcohol_quantity, False, True,
-                        "Drink alcohol quantity should be a number")
 
     def serialize(self):
         return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}

@@ -37,7 +37,7 @@ falken_drinks/
 ### Modelo (models.py)
 - Heredar de `db.Model`
 - Incluir método `serialize()` para JSON
-- Validación con `flask-validator` y/o `@validates`
+- Validación con `@validates` y validaciones explícitas en el modelo
 - Timestamps con timezone CET (`now_cet()`)
 
 ### Controlador (controllers.py)

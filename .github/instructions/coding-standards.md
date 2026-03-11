@@ -41,7 +41,7 @@ Modelo (models.py) → Controlador (controllers.py) → Ruta (routes.py/main.py/
 
 ### Autenticación
 - Flask-Login con `@login_required`
-- Passwords hasheadas con pbkdf2 (werkzeug)
+- Passwords hasheadas con `pbkdf2:sha256` (werkzeug)
 - Session-based authentication
 
 ## Testing
@@ -71,7 +71,7 @@ npm test         # Tests JavaScript
 
 ## Seguridad
 - Nunca hardcodear credenciales; usar `.env` y `credentials.yaml`
-- Validar inputs en modelos (flask-validator + @validates)
+- Validar inputs en modelos con `@validates` y comprobaciones explícitas
 - Usar ORM para queries (nunca SQL raw sin parametrizar)
 - `SECRET_KEY` obligatoria en producción
 - No exponer tracebacks en producción

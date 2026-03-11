@@ -12,7 +12,7 @@ Track your daily drinks, review your hydration habits, and manage your drink cat
 	<img src="https://img.shields.io/static/v1?label=python&message=3.11%2B&color=blue&logo=python&logoColor=white" alt="Python version"/>&nbsp;
 	<img src="https://img.shields.io/badge/release-0.1.0-blue" alt="Release version"/>&nbsp;
 	<img src="https://img.shields.io/badge/ci-passing-brightgreen" alt="CI status"/>&nbsp;
-	<img src="https://img.shields.io/badge/coverage-unverified-lightgrey" alt="Test coverage"/>
+	<img src="https://img.shields.io/badge/coverage-87%25-green" alt="Test coverage"/>
 </p>
 
 <p>

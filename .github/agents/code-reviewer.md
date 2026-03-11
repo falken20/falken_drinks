@@ -28,11 +28,11 @@ Eres un experto en calidad de código Python y JavaScript. Tu objetivo es revisa
 - **Factory pattern**: `create_app()` en `app.py`
 - **Blueprints**: auth, main, api_routes, swagger_ui
 - **Controladores**: métodos estáticos en clases Controller*
-- **Modelos**: SQLAlchemy con validación dual (flask-validator + @validates)
+- **Modelos**: SQLAlchemy con validación mediante `@validates`
 - **Config**: Pydantic BaseSettings con tres entornos
 
 ### Seguridad
-- Passwords hasheadas con pbkdf2 (werkzeug)
+- Passwords hasheadas con `pbkdf2:sha256` (werkzeug)
 - `@login_required` en rutas protegidas
 - Validación de entrada en modelos y controladores
 - No exponer SECRET_KEY ni credenciales en código

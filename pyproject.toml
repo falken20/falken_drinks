@@ -5,15 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "falken-drinks"
 version = "0.1.0"
-title = "Falken Drinks"
 description = "Falken apps to manage daily drinks"
 authors = [{ name = "Falken" }]
 license = { text = "MIT" }
-url_github = "https://github.com/falken20/"
-url_twitter = "https://twitter.com/richionline"
-url_linkedin = "https://www.linkedin.com/in/richionline/"
-copyright = "© 2024 by Richi Rod AKA @richionline / falken20"
-features = ["flask", "gunicorn", "pydantic", "rich", "toml"]
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -21,13 +15,13 @@ dependencies = [
     "flask-login>=0.6.3",
     "flask-sqlalchemy>=3.1.1",
     "flask-swagger-ui>=4.11.1",
-    "flask-validator>=1.4.1",
     "gunicorn>=23.0.0",
     "pydantic>=2.10.6",
     "pydantic-settings>=2.8.1",
     "python-dotenv>=1.0.1",
     "requests>=2.32.3",
     "rich>=13.9.4",
+    "sqlalchemy>=2.0.36,<2.1",
     "toml>=0.10.2",
     "psycopg2-binary", # PostgreSQL adapter
 ]
@@ -42,6 +36,14 @@ packages = ["falken_drinks"]
 
 [tool.setuptools.package-dir]
 "falken_drinks" = "falken_drinks"
+
+[tool.falken_drinks.app_data]
+title = "Falken Drinks"
+url_github = "https://github.com/falken20/"
+url_twitter = "https://twitter.com/richionline"
+url_linkedin = "https://www.linkedin.com/in/richionline/"
+copyright = "© 2024 by Richi Rod AKA @richionline / falken20"
+features = ["flask", "gunicorn", "pydantic", "rich", "toml"]
 
 [project.optional-dependencies]
 dev = [

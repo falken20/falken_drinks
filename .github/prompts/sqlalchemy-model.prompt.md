@@ -48,7 +48,7 @@ class NewModel(db.Model):
 - Timestamps con `now_cet()` para timezone CET
 - Incluir `serialize()` para respuestas JSON
 - Incluir `__repr__()` para debugging
-- Validación con `flask-validator` y/o `@validates`
+- Validación con `@validates` y lógica explícita en el modelo
 - Foreign keys con `db.ForeignKey` y relationships con `db.relationship`
 - Nombres de tabla en snake_case
 - Single quotes para strings

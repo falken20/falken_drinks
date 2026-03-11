@@ -9,12 +9,12 @@
 ## Autenticación
 - Flask-Login gestiona sesiones de usuario
 - `@login_required` en toda ruta que requiera autenticación
-- Passwords hasheadas con `generate_password_hash()` (pbkdf2)
+- Passwords hasheadas con `generate_password_hash(method='pbkdf2:sha256')`
 - Verificar con `check_password_hash()`
 - No almacenar passwords en texto plano bajo ninguna circunstancia
 
 ## Validación de datos
-- Validación en modelos con flask-validator (nivel BD)
+- Validación en modelos con `@validates` y comprobaciones de dominio
 - Validación adicional con `@validates` de SQLAlchemy
 - Validar tipos, longitudes y formatos en el backend
 - No confiar en validación del frontend como única barrera
