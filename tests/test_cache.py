@@ -1,22 +1,27 @@
 # by Richi Rod AKA @richionline / falken20
 
 import unittest
-from io import StringIO
 from unittest.mock import patch
-import time
+from datetime import datetime, timedelta
 
 from falken_drinks import cache
 
+
 class TestCache(unittest.TestCase):
 
-    @patch('sys.stdout', new_callable=StringIO)
-    def test_cache(self, stdout):
+    @patch('falken_drinks.cache.Log.info')
+    def test_cache(self, info_mock):
+        cache.previous_cache = datetime.now()
         cache.check_cache()
-        self.assertIn("Cache span", stdout.getvalue())
-    
-    @patch('sys.stdout', new_callable=StringIO)
-    def test_cache_clean(self, stdout):
-        cache.check_cache()
-        time.sleep(2)
+
+        logged_messages = [call.args[0] for call in info_mock.call_args_list if call.args]
+        self.assertTrue(any("Cache span" in message for message in logged_messages))
+
+    @patch('falken_drinks.cache.Log.info')
+    def test_cache_clean(self, info_mock):
+        # Force cache age to exceed threshold without sleeping.
+        cache.previous_cache = datetime.now() - timedelta(seconds=2)
         cache.check_cache(1)
-        self.assertIn("Cleaning cache by expiration", stdout.getvalue())
+
+        logged_messages = [call.args[0] for call in info_mock.call_args_list if call.args]
+        self.assertTrue(any("Cleaning cache by expiration" in message for message in logged_messages))
