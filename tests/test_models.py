@@ -20,6 +20,18 @@ class TestModelUser(BaseTestCase):
         self.assertIn('email', serialized)
         self.assertIn('name', serialized)
 
+    def test_user_password_hash_fits_model_limit(self):
+        user = User(email='test@test.com', name='Test User', password='x' * 103)
+        self.assertEqual(user.password, 'x' * 103)
+
+    def test_user_email_too_long(self):
+        with self.assertRaises(ValueError):
+            User(email=('a' * 101) + '@mail.com', name='Test User', password='password123')
+
+    def test_user_name_too_long(self):
+        with self.assertRaises(ValueError):
+            User(email='test@test.com', name='a' * 101, password='password123')
+
 
 class TestModelDrink(BaseTestCase):
     def test_repr(self):

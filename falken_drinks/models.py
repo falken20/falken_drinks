@@ -26,9 +26,13 @@ db = SQLAlchemy()
 class User(UserMixin, db.Model):
     __tablename__ = "users"
 
+    MAX_EMAIL_LENGTH = 100
+    MAX_NAME_LENGTH = 100
+    MAX_PASSWORD_LENGTH = 255
+
     user_id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), nullable=False, unique=True)
-    password = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     date_created = db.Column(db.Date, nullable=False, default=today_cet)
     date_updated = db.Column(db.Date, nullable=False,
@@ -46,7 +50,21 @@ class User(UserMixin, db.Model):
             raise ValueError(f'{key} cannot be empty')
         if isinstance(value, str) and not value.strip():
             raise ValueError(f'{key} cannot be blank')
-        return value.strip() if isinstance(value, str) else value
+
+        if not isinstance(value, str):
+            return value
+
+        value = value.strip()
+        max_lengths = {
+            'email': self.MAX_EMAIL_LENGTH,
+            'name': self.MAX_NAME_LENGTH,
+            'password': self.MAX_PASSWORD_LENGTH,
+        }
+        max_length = max_lengths.get(key)
+        if max_length is not None and len(value) > max_length:
+            raise ValueError(f'{key} cannot be longer than {max_length} characters')
+
+        return value
 
     # Check to use serialize()
     # How to serialize SqlAlchemy PostgreSQL query to JSON => https://stackoverflow.com/a/46180522
