@@ -68,7 +68,7 @@ def signup_post():
         # if a user is found, we want to redirect back to signup page so user can try again
         if user:
             # By calling flash function, you can send a message to the next request
-            flash('Email address already exists')
+            flash('Email address already exists. Go to login page.')
             return redirect(url_for('auth.signup'))
 
         # create a new user with the form data. Hash the password so the plaintext version isn't saved.
@@ -81,7 +81,10 @@ def signup_post():
 
         return redirect(url_for('auth.login'))
     except Exception as err:
+        db.session.rollback()
         Log.error("Error in signup_post", err=err, sys=sys)
+        error_message = str(err).strip() or 'Unexpected error creating the account.'
+        flash(f'Error creating your account: {error_message}')
         return redirect(url_for('auth.signup'))
 
 

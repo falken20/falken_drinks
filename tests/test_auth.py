@@ -1,6 +1,7 @@
 # by Richi Rod AKA @richionline / falken20
 
 import unittest
+from unittest.mock import patch
 
 from . import basetest
 
@@ -26,6 +27,12 @@ class TestAuth(basetest.BaseTestCase):
         response = self.client.post('/signup', data=self.mock_user, follow_redirects=True)
         response = self.client.post('/signup', data=self.mock_user, follow_redirects=True)
         self.assertIn('Email address already exists.', response.text)
+        self.assertEqual(response.status_code, 200)
+
+    @patch('falken_drinks.auth.db.session.commit', side_effect=Exception('Database unavailable'))
+    def test_auth_signup_post_shows_error_to_user(self, _commit_mock):
+        response = self.client.post('/signup', data=self.mock_user, follow_redirects=True)
+        self.assertIn('Error creating your account: Database unavailable', response.text)
         self.assertEqual(response.status_code, 200)
 
     def test_auth_logout(self):
