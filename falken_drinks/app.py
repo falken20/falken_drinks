@@ -30,6 +30,46 @@ check_cache()
 basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+def ensure_schema_compatibility(app):
+    """Apply minimal backward-compatible schema updates when old DBs are detected."""
+    with app.app_context():
+        inspector = db.inspect(db.engine)
+        table_names = set(inspector.get_table_names())
+        dialect = db.engine.dialect.name
+
+        if 'drinks' in table_names:
+            drinks_columns = {column['name'] for column in inspector.get_columns('drinks')}
+            if 'counts_as_water' not in drinks_columns:
+                Log.warning("Column drinks.counts_as_water missing. Applying automatic migration...")
+                with db.engine.begin() as conn:
+                    if dialect == 'postgresql':
+                        conn.execute(db.text(
+                            'ALTER TABLE drinks ADD COLUMN counts_as_water BOOLEAN NOT NULL DEFAULT TRUE'
+                        ))
+                        conn.execute(db.text(
+                            'UPDATE drinks SET counts_as_water = FALSE WHERE drink_alcohol_percentage > 0'
+                        ))
+                    else:
+                        conn.execute(db.text(
+                            'ALTER TABLE drinks ADD COLUMN counts_as_water BOOLEAN NOT NULL DEFAULT 1'
+                        ))
+                        conn.execute(db.text(
+                            'UPDATE drinks SET counts_as_water = 0 WHERE drink_alcohol_percentage > 0'
+                        ))
+                Log.info('Automatic migration applied for drinks.counts_as_water')
+
+        if 'users' in table_names:
+            users_columns = {column['name']: column for column in inspector.get_columns('users')}
+            password_column = users_columns.get('password')
+            current_length = getattr(password_column['type'], 'length', None) if password_column else None
+
+            if current_length is not None and current_length < 255 and dialect == 'postgresql':
+                Log.warning('Column users.password shorter than 255. Applying automatic migration...')
+                with db.engine.begin() as conn:
+                    conn.execute(db.text('ALTER TABLE users ALTER COLUMN password TYPE VARCHAR(255)'))
+                Log.info('Automatic migration applied for users.password length')
+
+
 def create_app(test_config=None):
     try:
         Log.info("***** Creating app...")
@@ -54,6 +94,9 @@ def create_app(test_config=None):
 
         db.init_app(app)
         Log.info("Database initialized successfully")
+
+        ensure_schema_compatibility(app)
+        Log.info('Database schema compatibility check completed')
 
         # A user loader tells Flask-Login how to find a specific user from the ID that is stored in their
         # session cookie.
