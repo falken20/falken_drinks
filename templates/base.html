@@ -69,7 +69,7 @@
         </div>
 
         <div class="hero-body">
-            <div class="container has-text-centered contentTable" style="width: 90%; max-width: 90%;">
+            <div class="container has-text-centered contentTable {% if request.endpoint == 'main.index' %}contentTableHome{% endif %}">
                 {% block content %} 
                 {% endblock %}
             </div>
