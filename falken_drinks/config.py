@@ -28,6 +28,11 @@ def now_cet():
     return datetime.now(CET_TZ)
 
 
+def now_cet_naive():
+    """Get current local CET time as naive datetime for DB columns without timezone."""
+    return now_cet().replace(tzinfo=None)
+
+
 def today_cet():
     """Get current date in CET timezone"""
     return now_cet().date()

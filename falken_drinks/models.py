@@ -13,7 +13,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import validates
 from sqlalchemy import inspect
 
-from .config import get_settings, now_cet, today_cet
+from .config import get_settings, now_cet_naive, today_cet
 from .logger import Log
 
 Log.info("***** Loading models.py")
@@ -142,7 +142,7 @@ class DrinkLog(db.Model):
     log_id = db.Column(db.Integer, primary_key=True)
     drink_id = db.Column(db.Integer, db.ForeignKey('drinks.drink_id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    date_created = db.Column(db.DateTime, nullable=False, default=now_cet)
+    date_created = db.Column(db.DateTime, nullable=False, default=now_cet_naive)
     drink_total_quantity = db.Column(db.Integer, nullable=False)
     drink_water_quantity = db.Column(db.Integer, nullable=False)
     drink_alcohol_quantity = db.Column(db.Integer, nullable=False)

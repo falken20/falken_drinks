@@ -2,6 +2,7 @@
 
 import json
 from datetime import date
+from datetime import date
 
 from .basetest import BaseTestCase
 from falken_drinks.models import db, User, Drink, DrinkLog
@@ -76,6 +77,33 @@ class TestAddDrinkRoute(BaseTestCase):
         self.assertIn(response.status_code, [400, 500])
         data = json.loads(response.data)
         self.assertFalse(data['success'])
+
+    def test_add_drink_with_custom_time(self):
+        """Test adding a drink log with explicit HH:MM time"""
+        user = self.create_user()
+        self.client.post('/login', data=self.mock_user, follow_redirects=True)
+
+        drink_data = {
+            'drink_name': 'Water',
+            'amount': 250,
+            'alcohol_percentage': 0,
+            'drink_time': '13:45'
+        }
+        response = self.client.post(
+            '/api/add_drink',
+            data=json.dumps(drink_data),
+            content_type='application/json'
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = json.loads(response.data)
+        self.assertTrue(payload['success'])
+
+        log = DrinkLog.query.filter_by(user_id=user.user_id).order_by(DrinkLog.log_id.desc()).first()
+        self.assertIsNotNone(log)
+        self.assertEqual(log.date_created.hour, 13)
+        self.assertEqual(log.date_created.minute, 45)
+        self.assertEqual(log.date_created.date(), date.today())
 
 
 class TestGetDrinksRoute(BaseTestCase):

@@ -4,7 +4,7 @@ from datetime import datetime
 import sys
 
 from .controllers import ControllerDrinks, ControllerDrinkLogs
-from .config import CET_TZ, today_cet
+from .config import today_cet
 from .logger import Log
 
 
@@ -61,7 +61,8 @@ def add_drink():  # noqa: C901
         drink_water_quantity = int((drink.drink_water_percentage / 100) * drink_total_quantity)
         drink_alcohol_quantity = int((drink.drink_alcohol_percentage / 100) * drink_total_quantity)
 
-        # Parse optional drink_time (HH:MM) to build date_created in CET
+        # Parse optional drink_time (HH:MM) as local app time.
+        # date_created is stored in a timezone-naive DateTime column.
         drink_time_str = data.get('drink_time')
         date_created = None
         if drink_time_str:
@@ -70,7 +71,7 @@ def add_drink():  # noqa: C901
                 now_date = today_cet()
                 date_created = datetime(
                     now_date.year, now_date.month, now_date.day,
-                    hour, minute, tzinfo=CET_TZ
+                    hour, minute
                 )
             except (ValueError, TypeError):
                 date_created = None

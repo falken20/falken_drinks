@@ -69,6 +69,22 @@ def ensure_schema_compatibility(app):
                     conn.execute(db.text('ALTER TABLE users ALTER COLUMN password TYPE VARCHAR(255)'))
                 Log.info('Automatic migration applied for users.password length')
 
+        if 'drinks_logs' in table_names and dialect == 'postgresql':
+            drinks_log_columns = {column['name']: column for column in inspector.get_columns('drinks_logs')}
+            date_created_column = drinks_log_columns.get('date_created')
+            if date_created_column:
+                column_type = str(date_created_column['type']).lower()
+                if 'date' in column_type and 'timestamp' not in column_type:
+                    Log.warning(
+                        'Column drinks_logs.date_created is DATE. Applying automatic migration to TIMESTAMP...'
+                    )
+                    with db.engine.begin() as conn:
+                        conn.execute(db.text(
+                            'ALTER TABLE drinks_logs ALTER COLUMN date_created TYPE TIMESTAMP '
+                            'USING date_created::timestamp'
+                        ))
+                    Log.info('Automatic migration applied for drinks_logs.date_created type')
+
 
 def create_app(test_config=None):
     try:
