@@ -49,9 +49,20 @@ function buildDOM() {
                 <input type="number" id="custom-alcohol">
             </div>
 
-            <div class="amount-option" onclick="selectAmount(100)"><div>100ml</div></div>
-            <div class="amount-option" onclick="selectAmount(250)"><div>250ml</div></div>
-            <div class="amount-option" onclick="selectAmount(500)"><div>500ml</div></div>
+            <div style="border-radius: 15px;">
+                <div class="drink-carousel">
+                    <div class="drink-icon" onclick="selectDrink('Water')"><img alt="Water"></div>
+                    <div class="drink-icon" onclick="selectDrink('Coffee')"><img alt="Coffee"></div>
+                </div>
+            </div>
+
+            <div style="border-radius: 15px;">
+                <div class="amount-carousel">
+                    <div class="amount-option" onclick="selectAmount(100)"><div>100ml</div></div>
+                    <div class="amount-option" onclick="selectAmount(250)"><div>250ml</div></div>
+                    <div class="amount-option" onclick="selectAmount(500)"><div>500ml</div></div>
+                </div>
+            </div>
 
             <div id="custom-amount-container" style="display: none;">
                 <input type="number" id="custom-amount">
@@ -125,36 +136,51 @@ describe('selectAmount', () => {
 // ─── confirmCustomAmount ──────────────────────────────────────────────────────
 
 describe('confirmCustomAmount', () => {
-    test('sets amount input and hides container for valid input', () => {
+    test('hides container for valid input', () => {
         document.getElementById('custom-amount').value = '350';
         document.getElementById('custom-amount-container').style.display = 'flex';
         confirmCustomAmount();
         expect(document.getElementById('custom-amount-container').style.display).toBe('none');
-        expect(document.getElementById('amount').value).toBe('350');
+        const err = document.querySelector('.amount-carousel')
+            .closest('div[style*="border-radius: 15px"]')
+            .querySelector('.carousel-error');
+        expect(err).toBeNull();
     });
 
-    test('alerts when amount is empty', () => {
+    test('shows inline error when amount is empty', () => {
         document.getElementById('custom-amount').value = '';
         confirmCustomAmount();
-        expect(global.alert).toHaveBeenCalledWith('Please enter a valid amount.');
+        const err = document.querySelector('.amount-carousel')
+            .closest('div[style*="border-radius: 15px"]')
+            .querySelector('.carousel-error');
+        expect(err.textContent).toContain('Please enter a valid amount');
     });
 
-    test('alerts when amount is non-numeric', () => {
+    test('shows inline error when amount is non-numeric', () => {
         document.getElementById('custom-amount').value = 'abc';
         confirmCustomAmount();
-        expect(global.alert).toHaveBeenCalledWith('Please enter a valid amount.');
+        const err = document.querySelector('.amount-carousel')
+            .closest('div[style*="border-radius: 15px"]')
+            .querySelector('.carousel-error');
+        expect(err.textContent).toContain('Please enter a valid amount');
     });
 
-    test('alerts when amount is zero', () => {
+    test('shows inline error when amount is zero', () => {
         document.getElementById('custom-amount').value = '0';
         confirmCustomAmount();
-        expect(global.alert).toHaveBeenCalledWith('Please enter a valid amount.');
+        const err = document.querySelector('.amount-carousel')
+            .closest('div[style*="border-radius: 15px"]')
+            .querySelector('.carousel-error');
+        expect(err.textContent).toContain('Please enter a valid amount');
     });
 
-    test('alerts when amount is negative', () => {
+    test('shows inline error when amount is negative', () => {
         document.getElementById('custom-amount').value = '-100';
         confirmCustomAmount();
-        expect(global.alert).toHaveBeenCalledWith('Please enter a valid amount.');
+        const err = document.querySelector('.amount-carousel')
+            .closest('div[style*="border-radius: 15px"]')
+            .querySelector('.carousel-error');
+        expect(err.textContent).toContain('Please enter a valid amount');
     });
 });
 
@@ -210,10 +236,17 @@ describe('confirmCustomAlcohol', () => {
 describe('addDrink – validation', () => {
     // default selectedDrink = 'Water', selectedAmount = 100 (set by beforeEach)
 
-    test('alerts when amount is zero (via selectAmount)', () => {
+    test('shows inline error when amount is zero (via selectAmount)', () => {
+        const waterIcon = document.querySelector('.drink-icon');
+        global.event = { currentTarget: waterIcon };
+        selectDrink('Water');
+
         selectAmount(0);
         addDrink();
-        expect(global.alert).toHaveBeenCalledWith('Please enter a valid amount.');
+        const err = document.querySelector('.amount-carousel')
+            .closest('div[style*="border-radius: 15px"]')
+            .querySelector('.carousel-error');
+        expect(err.textContent).toContain('Please select an amount first');
     });
 
     test('calls fetch with correct payload when input is valid', () => {
@@ -223,6 +256,9 @@ describe('addDrink – validation', () => {
             json: () => Promise.resolve({ success: true })
         }));
 
+        const waterIcon = document.querySelector('.drink-icon');
+        global.event = { currentTarget: waterIcon };
+        selectDrink('Water');
         selectAmount(250);
         addDrink();
 
@@ -242,6 +278,9 @@ describe('addDrink – validation', () => {
             json: () => Promise.resolve({ success: true })
         }));
 
+        const waterIcon = document.querySelector('.drink-icon');
+        global.event = { currentTarget: waterIcon };
+        selectDrink('Water');
         selectAmount(500);
         addDrink();
 
@@ -260,6 +299,9 @@ describe('addDrink – validation', () => {
             json: () => Promise.resolve({ success: true })
         }));
 
+        const waterIcon = document.querySelector('.drink-icon');
+        global.event = { currentTarget: waterIcon };
+        selectDrink('Water');
         selectAmount(250);
         addDrink();
 
