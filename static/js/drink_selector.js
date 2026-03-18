@@ -85,6 +85,31 @@ document.addEventListener('DOMContentLoaded', function() {
 let selectedDrink = 'Water'; // Default drink selected
 let selectedAmount = 100; // Default amount
 let radioId = 'water'; // Default drink type
+let drinkChosen = false;  // true only after user explicitly taps a drink icon
+let amountChosen = false; // true only after user explicitly taps an amount option
+
+function showCarouselError(carouselClass, message) {
+    const carousel = document.querySelector('.' + carouselClass);
+    if (!carousel) return;
+    const wrapper = carousel.closest('div[style*="border-radius: 15px"]') || carousel.parentElement;
+    let err = wrapper.querySelector('.carousel-error');
+    if (!err) {
+        err = document.createElement('div');
+        err.className = 'carousel-error';
+        err.style.cssText = 'display:inline-block; background:#dc3545; color:#fff; font-size:0.78rem; font-weight:600; padding:3px 12px; border-radius:20px; margin:4px auto 2px; text-align:center;';
+        wrapper.appendChild(err);
+    }
+    err.textContent = message;
+    setTimeout(() => { if (err) err.textContent = ''; }, 2500);
+}
+
+function clearCarouselError(carouselClass) {
+    const carousel = document.querySelector('.' + carouselClass);
+    if (!carousel) return;
+    const wrapper = carousel.closest('div[style*="border-radius: 15px"]') || carousel.parentElement;
+    const err = wrapper.querySelector('.carousel-error');
+    if (err) err.textContent = '';
+}
 
 /**
  * Function to add a drink
@@ -98,13 +123,22 @@ function addDrink() {
     console.log("Selected alcohol percentage: " + getSelectedAlcoholPercentage());
     console.log("Drink Type: " + radioId);
 
-    if (!selectedDrink) {
-        alert("Please select a drink.");
-        return;
+    let valid = true;
+
+    if (!drinkChosen) {
+        showCarouselError('drink-carousel', '⚠ Please select a drink first');
+        valid = false;
     }
-    
+
     const amount = selectedAmount;
-    
+
+    if (!amountChosen || !amount || isNaN(amount) || amount <= 0) {
+        showCarouselError('amount-carousel', '⚠ Please select an amount first');
+        valid = false;
+    }
+
+    if (!valid) return;
+
     // If "Other" is selected, get the specific drink type from the dropdown
     let drinkType = selectedDrink;
     if (selectedDrink === "Other") {
@@ -112,11 +146,6 @@ function addDrink() {
         if (otherSelect && otherSelect.selectedIndex >= 0) {
             drinkType = otherSelect.options[otherSelect.selectedIndex].value;
         }
-    }
-    
-    if (!amount || isNaN(amount) || amount <= 0) {
-        alert("Please enter a valid amount.");
-        return;
     }
     
     // Get alcohol percentage if applicable
@@ -182,6 +211,8 @@ function addDrink() {
             
             // Reset selected amount variable
             selectedAmount = 100;
+            drinkChosen = false;
+            amountChosen = false;
             
             // Reset amount option highlights
             document.querySelectorAll('.amount-option').forEach(option => {
@@ -221,6 +252,8 @@ function addDrink() {
 function selectDrink(drinkType) {
     console.log("Selected drink: " + drinkType);
     selectedDrink = drinkType;
+    drinkChosen = true;
+    clearCarouselError('drink-carousel');
 
     // Highlight the selected icon
     const icons = document.querySelectorAll('.drink-icon');
@@ -359,6 +392,8 @@ function selectDrink(drinkType) {
 function selectAmount(amount) {
     console.log(`Selected amount: ${amount}ml`);
     selectedAmount = amount;
+    amountChosen = true;
+    clearCarouselError('amount-carousel');
     document.querySelectorAll('.amount-option').forEach(option => {
         option.querySelector('div').style.background = 'rgba(13, 110, 253, 0.2)';
         option.querySelector('div').style.color = 'white';
@@ -411,9 +446,12 @@ function selectCustomAmount() {
     if (customAmountContainer) {
         customAmountContainer.style.display = 'flex';
         
-        // Focus the input field
+        // Focus the input field and set default value
         const customAmountInput = document.getElementById('custom-amount');
         if (customAmountInput) {
+            if (!customAmountInput.value || customAmountInput.value == 0) {
+                customAmountInput.value = 200;
+            }
             customAmountInput.focus();
             customAmountInput.select();
         }
@@ -423,16 +461,25 @@ function selectCustomAmount() {
 /**
  * Confirm and set the custom amount when the OK button is clicked
  */
+function changeCustomAmount(delta) {
+    const input = document.getElementById('custom-amount');
+    const current = parseInt(input.value) || 200;
+    input.value = Math.max(10, current + delta);
+}
+
+/**
+ * Confirm and set the custom amount when the OK button is clicked
+ */
 function confirmCustomAmount() {
     const customAmountInput = document.getElementById('custom-amount');
-    const amount = customAmountInput.value;
+    const amount = parseInt(customAmountInput.value);
     if (!amount || isNaN(amount) || amount <= 0) {
-        alert("Please enter a valid amount.");
+        showCarouselError('amount-carousel', '⚠ Please enter a valid amount');
         return;
     }
     selectedAmount = amount;
-    alert(`Custom amount set to ${amount}ml`);
-    document.getElementById('amount').value = amount;
+    amountChosen = true;
+    clearCarouselError('amount-carousel');
     document.getElementById('custom-amount-container').style.display = 'none';
 }
 

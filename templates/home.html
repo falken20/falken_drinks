@@ -2,6 +2,17 @@
 
 {% block content %}
 
+<style>
+    /* Hide native spinners on custom amount input */
+    #custom-amount::-webkit-outer-spin-button,
+    #custom-amount::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    #custom-amount { -moz-appearance: textfield; text-align: center; }
+    .custom-amount-btn {
+        width: 34px; height: 34px; padding: 0; font-size: 1.2rem; line-height: 1;
+        border-radius: 50%; font-weight: bold;
+    }
+</style>
+
 <script>
     window.onload = function() {
         activeVisibility('spray', 'spray_icon');
@@ -78,40 +89,40 @@
 
         <!-- Drink icon carousel -->
         <div style="margin: 1px auto; max-width: 100%; padding: 1px; background: rgba(255, 255, 255, 0.069); border-radius: 15px;">
-            <div class="drink-carousel" style="display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 1px; padding: 2px 0; justify-content: left;">
-                <div class="drink-icon" onclick="selectDrink('Water')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+            <div class="drink-carousel" style="display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 1px; padding: 2px 0; justify-content: left; column-gap: 0;">
+                <div class="drink-icon" onclick="selectDrink('Water')" style="cursor: pointer; text-align: center; min-width: 60px; transition: all 0.2s;">
                     <img src="{{ url_for('static', filename='images/drinks/icons8-water-96.png') }}" alt="Water" style="height: 50px; background: rgba(13, 110, 253, 0.2); padding: 5px; border-radius: 50%;">
                     <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Water</p>
                 </div>
-                <div class="drink-icon" onclick="selectDrink('Coffee')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                <div class="drink-icon" onclick="selectDrink('Coffee')" style="cursor: pointer; text-align: center; min-width: 60px; transition: all 0.2s;">
                     <img src="{{ url_for('static', filename='images/drinks/icons8-coffee-96.png') }}" alt="Coffee" style="height: 50px; background: rgba(33, 37, 41, 0.2); padding: 5px; border-radius: 50%;">
                     <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Coffee</p>
                 </div>
-                <div class="drink-icon" onclick="selectDrink('Wine')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                <div class="drink-icon" onclick="selectDrink('Wine')" style="cursor: pointer; text-align: center; min-width: 60px; transition: all 0.2s;">
                     <img src="{{ url_for('static', filename='images/drinks/icons8-wine-96.png') }}" alt="Wine" style="height: 50px; background: rgba(220, 53, 69, 0.2); padding: 5px; border-radius: 50%;">
                     <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Wine</p>
                 </div>
-                <div class="drink-icon" onclick="selectDrink('Beer')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                <div class="drink-icon" onclick="selectDrink('Beer')" style="cursor: pointer; text-align: center; min-width: 60px; transition: all 0.2s;">
                     <img src="{{ url_for('static', filename='images/drinks/icons8-beer-100.png') }}" alt="Beer" style="height: 50px; background: rgba(220, 53, 69, 0.2); padding: 5px; border-radius: 50%;">
                     <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Beer</p>
                 </div>
-                <div class="drink-icon" onclick="selectDrink('Cocktail')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                <div class="drink-icon" onclick="selectDrink('Cocktail')" style="cursor: pointer; text-align: center; min-width: 60px; transition: all 0.2s;">
                     <img src="{{ url_for('static', filename='images/drinks/icons8-alcohol-drink-96.png') }}" alt="Cocktail" style="height: 50px; background: rgba(220, 53, 69, 0.2); padding: 5px; border-radius: 50%;">
                     <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Cocktail</p>
                 </div>
-                <div class="drink-icon" onclick="selectDrink('Shot')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                <div class="drink-icon" onclick="selectDrink('Shot')" style="cursor: pointer; text-align: center; min-width: 60px; transition: all 0.2s;">
                     <img src="{{ url_for('static', filename='images/drinks/icons8-shot-100.png') }}" alt="Shot" style="height: 50px; background: rgba(220, 53, 69, 0.2); padding: 5px; border-radius: 50%;">
                     <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Shot</p>
                 </div>
-                <div class="drink-icon" onclick="selectDrink('Soda')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                <div class="drink-icon" onclick="selectDrink('Soda')" style="cursor: pointer; text-align: center; min-width: 60px; transition: all 0.2s;">
                     <img src="{{ url_for('static', filename='images/drinks/icons8-coke-96.png') }}" alt="Soda" style="height: 50px; background: rgba(25, 135, 84, 0.2); padding: 5px; border-radius: 50%;">
                     <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Soda</p>
                 </div>
-                <div class="drink-icon" onclick="selectDrink('Milk')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                <div class="drink-icon" onclick="selectDrink('Milk')" style="cursor: pointer; text-align: center; min-width: 60px; transition: all 0.2s;">
                     <img src="{{ url_for('static', filename='images/drinks/icons8-milk-96.png') }}" alt="Milk" style="height: 50px; background: rgba(25, 135, 84, 0.2); padding: 5px; border-radius: 50%;">
                     <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Milk</p>
                 </div>
-                <div class="drink-icon" onclick="selectDrink('Energy')" style="cursor: pointer; text-align: center; min-width: 80px; transition: all 0.2s;">
+                <div class="drink-icon" onclick="selectDrink('Energy')" style="cursor: pointer; text-align: center; min-width: 60px; transition: all 0.2s;">
                     <img src="{{ url_for('static', filename='images/drinks/icons8-energy-drink-96.png') }}" alt="Energy Drink" style="height: 50px; background: rgba(25, 135, 84, 0.2); padding: 5px; border-radius: 50%;">
                     <p style="color: white; margin-top: 5px; font-size: 0.8rem; text-align: center;">Energy</p>
                 </div>
@@ -121,31 +132,33 @@
         <!-- Drink amount input carousel -->
         <div style="margin: 10px auto; max-width: 100%; padding: 1px; background: rgba(255, 255, 255, 0.069); border-radius: 15px;">
             <div class="amount-carousel" style="display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 1px; padding: 10px 10px; justify-content: left;">
-                <div class="amount-option" onclick="selectAmount(30)" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
+                <div class="amount-option" onclick="selectAmount(30)" style="cursor: pointer; text-align: center; min-width: 55px; transition: all 0.2s;">
                     <div style="height: 50px; width: 50px; display: flex; justify-content: center; align-items: center; background: rgba(13, 110, 253, 0.2); border-radius: 50%; font-size: 0.9rem; color: white; font-weight: bold;">30ml</div>
                 </div>
-                <div class="amount-option" onclick="selectAmount(100)" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
+                <div class="amount-option" onclick="selectAmount(100)" style="cursor: pointer; text-align: center; min-width: 55px; transition: all 0.2s;">
                     <div style="height: 50px; width: 50px; display: flex; justify-content: center; align-items: center; background: rgba(13, 110, 253, 0.2); border-radius: 50%; font-size: 0.9rem; color: white; font-weight: bold;">100ml</div>
                 </div>
-                <div class="amount-option" onclick="selectAmount(150)" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
+                <div class="amount-option" onclick="selectAmount(150)" style="cursor: pointer; text-align: center; min-width: 55px; transition: all 0.2s;">
                     <div style="height: 50px; width: 50px; display: flex; justify-content: center; align-items: center; background: rgba(13, 110, 253, 0.2); border-radius: 50%; font-size: 0.9rem; color: white; font-weight: bold;">150ml</div>
                 </div>
-                <div class="amount-option" onclick="selectAmount(250)" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
+                <div class="amount-option" onclick="selectAmount(250)" style="cursor: pointer; text-align: center; min-width: 55px; transition: all 0.2s;">
                     <div style="height: 50px; width: 50px; display: flex; justify-content: center; align-items: center; background: rgba(13, 110, 253, 0.2); border-radius: 50%; font-size: 0.9rem; color: white; font-weight: bold;">250ml</div>
                 </div>
-                <div class="amount-option" onclick="selectAmount(330)" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
+                <div class="amount-option" onclick="selectAmount(330)" style="cursor: pointer; text-align: center; min-width: 55px; transition: all 0.2s;">
                     <div style="height: 50px; width: 50px; display: flex; justify-content: center; align-items: center; background: rgba(13, 110, 253, 0.2); border-radius: 50%; font-size: 0.9rem; color: white; font-weight: bold;">330ml</div>
                 </div>
-                <div class="amount-option" onclick="selectAmount(500)" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
+                <div class="amount-option" onclick="selectAmount(500)" style="cursor: pointer; text-align: center; min-width: 55px; transition: all 0.2s;">
                     <div style="height: 50px; width: 50px; display: flex; justify-content: center; align-items: center; background: rgba(13, 110, 253, 0.2); border-radius: 50%; font-size: 0.9rem; color: white; font-weight: bold;">500ml</div>
                 </div>
-                <div class="amount-option" onclick="selectCustomAmount()" style="cursor: pointer; text-align: center; min-width: 70px; transition: all 0.2s;">
+                <div class="amount-option" onclick="selectCustomAmount()" style="cursor: pointer; text-align: center; min-width: 55px; transition: all 0.2s;">
                     <div style="height: 50px; width: 50px; display: flex; justify-content: center; align-items: center; background: rgba(220, 53, 69, 0.2); border-radius: 50%; font-size: 0.9rem; color: white; font-weight: bold;">Other</div>
                 </div>
             </div>
             <div id="custom-amount-container" style="margin-top: 10px; display: none; justify-content: center;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="number" id="custom-amount" class="form-control" style="max-width: 120px;" placeholder="Enter ml">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button class="btn btn-sm btn-outline-light custom-amount-btn" onclick="changeCustomAmount(-10)">−</button>
+                    <input type="number" id="custom-amount" class="form-control form-control-sm" style="max-width: 80px; font-size: 1rem;" value="200" step="10" min="10">
+                    <button class="btn btn-sm btn-outline-light custom-amount-btn" onclick="changeCustomAmount(10)">+</button>
                     <button class="btn btn-sm btn-primary" onclick="confirmCustomAmount()">OK</button>
                 </div>
             </div>
