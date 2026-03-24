@@ -9,6 +9,13 @@ document.addEventListener('DOMContentLoaded', function() {
         drinkTimeInput.value = hh + ':' + mm;
     }
 
+    // Restore repeat banner from sessionStorage
+    const savedDrink = sessionStorage.getItem('lastDrinkData');
+    if (savedDrink) {
+        lastDrinkData = JSON.parse(savedDrink);
+        showRepeatBanner(lastDrinkData);
+    }
+
     // Set up the "Other" drink selection dropdown visibility
     const otherRadio = document.getElementById('other');
     const otherSelect = document.getElementById('other-drink-select');
@@ -87,6 +94,7 @@ let selectedAmount = 100; // Default amount
 let radioId = 'water'; // Default drink type
 let drinkChosen = false;  // true only after user explicitly taps a drink icon
 let amountChosen = false; // true only after user explicitly taps an amount option
+let lastDrinkData = null; // Stores last added drink for repeat functionality
 
 function showCarouselError(carouselClass, message) {
     const carousel = document.querySelector('.' + carouselClass);
@@ -197,11 +205,18 @@ function addDrink() {
         if (data.success) {
             if (alcoholPercentage > 0) {
                 console.log(`Added ${amount}ml of ${drinkType} (${alcoholPercentage}% alcohol)`);
-                //alert(`Added ${amount}ml of ${drinkType} (${alcoholPercentage}% alcohol)!`);
             } else {
                 console.log(`Added ${amount}ml of ${drinkType}`);
-                //alert(`Added ${amount}ml of ${drinkType}!`);
             }
+            
+            // Store last drink data for repeat
+            lastDrinkData = {
+                drink_name: drinkData.drink_name,
+                amount: drinkData.amount,
+                alcohol_percentage: drinkData.alcohol_percentage
+            };
+            sessionStorage.setItem('lastDrinkData', JSON.stringify(lastDrinkData));
+            showRepeatBanner(lastDrinkData);
             
             // Reset form elements
             const amountInput = document.getElementById('amount');
@@ -229,7 +244,7 @@ function addDrink() {
             // Refresh the page to update consumption display
             setTimeout(() => {
                 location.reload();
-            }, 1000);
+            }, 3000);
         } else {
             alert('Error: ' + data.message);
         }
@@ -520,5 +535,66 @@ function getSelectedAlcoholPercentage() {
     } else {
         return parseFloat(alcoholPercentageSelect.value);
     }
+}
+
+/**
+ * Show the repeat drink banner with a summary of the last added drink
+ */
+function showRepeatBanner(drinkData) {
+    const banner = document.getElementById('repeat-drink-banner');
+    const btnLabel = document.getElementById('repeat-drink-btn');
+    if (!banner || !btnLabel) return;
+
+    btnLabel.textContent = `Add other ${drinkData.drink_name} ${drinkData.amount}ml`;
+    banner.style.display = 'block';
+}
+
+/**
+ * Repeat the last added drink with the current time
+ */
+function repeatLastDrink() {
+    if (!lastDrinkData) return;
+
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+
+    const drinkData = {
+        drink_name: lastDrinkData.drink_name,
+        amount: lastDrinkData.amount,
+        alcohol_percentage: lastDrinkData.alcohol_percentage,
+        drink_time: hh + ':' + mm
+    };
+
+    console.log('Repeating drink:', drinkData);
+
+    fetch('/api/add_drink', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify(drinkData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw new Error(err.message || `HTTP error! status: ${response.status}`);
+            }).catch(() => {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            showRepeatBanner(lastDrinkData);
+            setTimeout(() => { location.reload(); }, 3000);
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error repeating drink:', error);
+        alert('Failed to repeat drink: ' + error.message);
+    });
 }
 
