@@ -177,6 +177,14 @@ function addDrink() {
     
     console.log("Sending data to API:", drinkData);
     
+    // Show loading state
+    const addBtn = document.querySelector('button[onclick="addDrink()"]');
+    const addBtnOrigText = addBtn ? addBtn.textContent : '';
+    if (addBtn) {
+        addBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Adding...';
+        addBtn.classList.add('btn-adding');
+    }
+    
     // Make API call to save drink log
     fetch('/api/add_drink', {
         method: 'POST',
@@ -218,6 +226,19 @@ function addDrink() {
             sessionStorage.setItem('lastDrinkData', JSON.stringify(lastDrinkData));
             showRepeatBanner(lastDrinkData);
             
+            // Show success toast
+            let toastMsg = `✓ Added ${amount}ml of ${drinkType}`;
+            if (alcoholPercentage > 0) {
+                toastMsg += ` (${alcoholPercentage}% alc.)`;
+            }
+            showDrinkToast(toastMsg, 'success');
+            
+            // Restore button
+            if (addBtn) {
+                addBtn.textContent = addBtnOrigText;
+                addBtn.classList.remove('btn-adding');
+            }
+            
             // Reset form elements
             const amountInput = document.getElementById('amount');
             if (amountInput) {
@@ -246,17 +267,25 @@ function addDrink() {
                 location.reload();
             }, 3000);
         } else {
-            alert('Error: ' + data.message);
+            showDrinkToast('Error: ' + data.message, 'danger');
+            if (addBtn) {
+                addBtn.textContent = addBtnOrigText;
+                addBtn.classList.remove('btn-adding');
+            }
         }
     })
     .catch(error => {
         console.error('Error:', error);
+        if (addBtn) {
+            addBtn.textContent = addBtnOrigText;
+            addBtn.classList.remove('btn-adding');
+        }
         if (error.message.includes('401')) {
-            alert('Please log in to add drinks.');
+            showDrinkToast('Please log in to add drinks.', 'danger');
         } else if (error.message.includes('500')) {
-            alert('Server error: ' + error.message + '. Please check the server logs.');
+            showDrinkToast('Server error: ' + error.message, 'danger');
         } else {
-            alert('Failed to save drink: ' + error.message);
+            showDrinkToast('Failed to save drink: ' + error.message, 'danger');
         }
     });
 }
@@ -566,6 +595,14 @@ function repeatLastDrink() {
         drink_time: hh + ':' + mm
     };
 
+    // Show loading state on repeat button
+    const repeatBtn = document.getElementById('repeat-drink-btn');
+    const repeatBtnOrigText = repeatBtn ? repeatBtn.textContent : '';
+    if (repeatBtn) {
+        repeatBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Adding...';
+        repeatBtn.classList.add('btn-adding');
+    }
+
     console.log('Repeating drink:', drinkData);
 
     fetch('/api/add_drink', {
@@ -586,15 +623,47 @@ function repeatLastDrink() {
     })
     .then(data => {
         if (data.success) {
+            let msg = `✓ Added ${lastDrinkData.amount}ml of ${lastDrinkData.drink_name}`;
+            if (lastDrinkData.alcohol_percentage > 0) {
+                msg += ` (${lastDrinkData.alcohol_percentage}% alc.)`;
+            }
+            showDrinkToast(msg, 'success');
+            if (repeatBtn) {
+                repeatBtn.textContent = repeatBtnOrigText;
+                repeatBtn.classList.remove('btn-adding');
+            }
             showRepeatBanner(lastDrinkData);
             setTimeout(() => { location.reload(); }, 3000);
         } else {
-            alert('Error: ' + data.message);
+            showDrinkToast('Error: ' + data.message, 'danger');
+            if (repeatBtn) {
+                repeatBtn.textContent = repeatBtnOrigText;
+                repeatBtn.classList.remove('btn-adding');
+            }
         }
     })
     .catch(error => {
         console.error('Error repeating drink:', error);
-        alert('Failed to repeat drink: ' + error.message);
+        showDrinkToast('Failed to repeat drink: ' + error.message, 'danger');
+        if (repeatBtn) {
+            repeatBtn.textContent = repeatBtnOrigText;
+            repeatBtn.classList.remove('btn-adding');
+        }
     });
+}
+
+/**
+ * Show a Bootstrap toast notification
+ */
+function showDrinkToast(message, type) {
+    const toastEl = document.getElementById('drink-toast');
+    const toastBody = document.getElementById('drink-toast-body');
+    if (!toastEl || !toastBody) return;
+
+    toastEl.className = 'toast align-items-center border-0 text-bg-' + type;
+    toastBody.textContent = message;
+
+    const toast = new bootstrap.Toast(toastEl);
+    toast.show();
 }
 
