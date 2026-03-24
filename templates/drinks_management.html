@@ -2,82 +2,330 @@
 
 {% block content %}
 
+<style>
+    section.hero.is-primary.is-fullheight.mainPage {
+        height: auto !important;
+        min-height: 100vh;
+        overflow-y: auto;
+    }
+
+    section.hero.is-primary.is-fullheight.mainPage .hero-body {
+        overflow: visible;
+    }
+
+    .drinks-mgmt-page {
+        max-width: 1120px;
+        text-align: center;
+    }
+
+    .drinks-mgmt-header {
+        margin-bottom: 12px;
+    }
+
+    .drinks-mgmt-header h2 {
+        color: #fff;
+        margin: 0;
+        font-size: 1.45rem;
+        font-weight: 700;
+    }
+
+    .mgmt-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+        align-items: start;
+    }
+
+    .mgmt-panel {
+        background: rgba(8, 16, 28, 0.82);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 12px;
+        padding: 12px;
+        text-align: left;
+    }
+
+    .mgmt-panel-title {
+        color: #f7fbff;
+        margin: 0 0 10px 0;
+        font-size: 1.05rem;
+        font-weight: 700;
+        text-align: left;
+    }
+
+    .compact-form-group {
+        margin-bottom: 10px;
+    }
+
+    .compact-form-group label {
+        color: #f2f7ff;
+        display: block;
+        margin-bottom: 4px;
+        font-size: 0.86rem;
+        font-weight: 600;
+    }
+
+    .compact-help {
+        color: #e9f1ff !important;
+        display: block;
+        margin-top: 3px;
+        font-size: 0.82rem !important;
+        line-height: 1.25;
+    }
+
+    .slider-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .slider-value {
+        color: #ffffff;
+        min-width: 45px;
+        text-align: right;
+        font-size: 0.86rem;
+        font-weight: 700;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin-top: 4px;
+    }
+
+    .drinks-list-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .drinks-list-head h3 {
+        color: #f7fbff;
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 700;
+    }
+
+    .drink-card {
+        background: rgba(0, 0, 0, 0.62);
+        border-radius: 10px;
+        padding: 8px 10px;
+        margin-bottom: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+
+    .drink-card-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .drink-main {
+        display: flex;
+        align-items: center;
+        min-width: 0;
+        gap: 8px;
+    }
+
+    .drink-icon-wrap {
+        flex-shrink: 0;
+    }
+
+    .drink-icon-image,
+    .drink-icon-fallback {
+        height: 30px;
+        width: 30px;
+        border-radius: 50%;
+    }
+
+    .drink-icon-image {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 3px;
+    }
+
+    .drink-icon-fallback {
+        background: rgba(13, 110, 253, 0.28);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.8rem;
+    }
+
+    .drink-info {
+        min-width: 0;
+        color: #f8fbff;
+        font-size: 0.86rem;
+        line-height: 1.25;
+    }
+
+    .drink-name {
+        display: block;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 2px;
+    }
+
+    .drink-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        font-size: 0.82rem;
+        font-weight: 600;
+    }
+
+    .drink-meta span {
+        text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+    }
+
+    .drink-actions {
+        display: flex;
+        gap: 6px;
+    }
+
+    .empty-drinks {
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 22px 14px;
+        color: #e5edff;
+        text-align: center;
+    }
+
+    .empty-drinks .icon {
+        font-size: 2rem;
+        margin-bottom: 6px;
+    }
+
+    .empty-drinks h4 {
+        color: #ffffff;
+        margin-bottom: 5px;
+        font-size: 1rem;
+    }
+
+    .empty-drinks p {
+        color: #e5edff;
+        font-size: 0.9rem !important;
+        text-align: center;
+        margin: 0;
+    }
+
+    .back-home-wrap {
+        margin: 14px auto 8px auto;
+        text-align: center;
+    }
+
+    @media (min-width: 992px) {
+        .mgmt-layout {
+            grid-template-columns: minmax(320px, 430px) minmax(0, 1fr);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .drinks-mgmt-page {
+            padding-left: 6px;
+            padding-right: 6px;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .form-actions .btn {
+            width: 100%;
+        }
+
+        .drink-card-row {
+            grid-template-columns: 1fr;
+        }
+
+        .drink-actions {
+            justify-content: flex-end;
+        }
+    }
+</style>
+
 <script>
     window.onload = function() {
         activeVisibility('drinks', 'drinks_icon');
     }
 </script>
 
-<div class="container" style="text-align: center;">    
+<div class="container drinks-mgmt-page py-2">    
     
     <!-- Drinks Management Header -->
-    <div style="margin-bottom: 30px;">
-        <h2 style="color: white; margin-bottom: 20px;">Drinks Management</h2>
+    <div class="drinks-mgmt-header">
+        <h2>Drinks Management</h2>
     </div>
 
-    <!-- Add/Edit Drink Form -->
-    <div style="max-width: 500px; margin: 0 auto 30px auto;">
-        <div style="background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px;">
-            <h3 style="color: white; margin-bottom: 18px; font-size: 1.3rem;" id="form-title">Add New Drink</h3>
-            
+    <div class="mgmt-layout">
+        <!-- Add/Edit Drink Form -->
+        <div class="mgmt-panel">
+            <h3 class="mgmt-panel-title" id="form-title">Add New Drink</h3>
+
             <form id="drink-form">
                 <input type="hidden" id="drink-id" value="">
-                
+
                 <!-- Drink Name -->
-                <div style="margin-bottom: 15px;">
-                    <label for="drink-name" style="color: white; display: block; margin-bottom: 6px; text-align: left; font-size: 0.9rem;">Drink Name *</label>
+                <div class="compact-form-group">
+                    <label for="drink-name">Drink Name *</label>
                     <input type="text" id="drink-name" class="form-control form-control-sm" placeholder="e.g., Water, Coffee, Wine..." required maxlength="100">
                 </div>
-                
+
                 <!-- Water Percentage -->
-                <div style="margin-bottom: 15px;">
-                    <label for="water-percentage" style="color: white; display: block; margin-bottom: 6px; text-align: left; font-size: 0.9rem;">Water Percentage *</label>
-                    <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="compact-form-group">
+                    <label for="water-percentage">Water Percentage *</label>
+                    <div class="slider-row">
                         <input type="range" id="water-percentage" class="form-range" min="0" max="100" value="100" style="flex: 1;">
-                        <span id="water-value" style="color: white; min-width: 45px; text-align: right; font-size: 0.9rem;">100%</span>
+                        <span id="water-value" class="slider-value">100%</span>
                     </div>
                 </div>
-                
+
                 <!-- Alcohol Percentage -->
-                <div style="margin-bottom: 15px;">
-                    <label for="alcohol-percentage" style="color: white; display: block; margin-bottom: 6px; text-align: left; font-size: 0.9rem;">Alcohol Percentage *</label>
-                    <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="compact-form-group">
+                    <label for="alcohol-percentage">Alcohol Percentage *</label>
+                    <div class="slider-row">
                         <input type="range" id="alcohol-percentage" class="form-range" min="0" max="100" value="0" style="flex: 1;">
-                        <span id="alcohol-value" style="color: white; min-width: 45px; text-align: right; font-size: 0.9rem;">0%</span>
+                        <span id="alcohol-value" class="slider-value">0%</span>
                     </div>
                 </div>
-                
+
                 <!-- Other Percentage (Read-only) -->
-                <div style="margin-bottom: 15px;">
-                    <label style="color: white; display: block; margin-bottom: 6px; text-align: left; font-size: 0.9rem;">Other Percentage (Auto-calculated)</label>
-                    <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="compact-form-group">
+                    <label>Other Percentage (Auto-calculated)</label>
+                    <div class="slider-row">
                         <input type="range" id="other-percentage" class="form-range" min="0" max="100" value="0" style="flex: 1; pointer-events: none; opacity: 0.6;" disabled>
-                        <span id="other-value" style="color: white; min-width: 45px; text-align: right; font-size: 0.9rem;">0%</span>
+                        <span id="other-value" class="slider-value">0%</span>
                     </div>
                 </div>
-                
+
                 <!-- Drink Image (Optional) -->
-                <div style="margin-bottom: 15px;">
-                    <label for="drink-image" style="color: white; display: block; margin-bottom: 6px; text-align: left; font-size: 0.9rem;">Image Filename (Optional)</label>
+                <div class="compact-form-group">
+                    <label for="drink-image">Image Filename (Optional)</label>
                     <input type="text" id="drink-image" class="form-control form-control-sm" placeholder="e.g., icons8-water-96.png">
-                    <small style="color: #aaa; display: block; margin-top: 4px; text-align: left; font-size: 0.75rem;">Leave empty for auto-generated icon</small>
+                    <small class="compact-help">Leave empty for auto-generated icon</small>
                 </div>
-                
+
                 <!-- Counts as Water -->
-                <div style="margin-bottom: 18px;">
+                <div class="compact-form-group" style="margin-bottom: 12px;">
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <input type="checkbox" id="counts-as-water" class="form-check-input" checked style="width: 20px; height: 20px; cursor: pointer;">
-                        <label for="counts-as-water" style="color: white; margin: 0; font-size: 0.9rem; cursor: pointer;">
+                        <input type="checkbox" id="counts-as-water" class="form-check-input" checked style="width: 18px; height: 18px; cursor: pointer;">
+                        <label for="counts-as-water" style="color: white; margin: 0; font-size: 0.84rem; cursor: pointer;">
                             Count this drink towards daily water intake
                         </label>
                     </div>
-                    <small style="color: #aaa; display: block; margin-top: 4px; text-align: left; font-size: 0.75rem;">
+                    <small class="compact-help">
                         Alcoholic drinks are automatically unchecked by default
                     </small>
                 </div>
-                
+
                 <!-- Form Actions -->
-                <div style="display: flex; gap: 10px; justify-content: center;">
+                <div class="form-actions">
                     <button type="submit" class="btn btn-success btn-sm" id="save-btn">
                         <i class="bi bi-check-lg"></i> Save Drink
                     </button>
@@ -87,24 +335,24 @@
                 </div>
             </form>
         </div>
-    </div>
 
-    <!-- Drinks List -->
-    <div style="max-width: 700px; margin: 0 auto;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h3 style="color: white; margin: 0; font-size: 1.3rem;">All Drinks</h3>
-            <button class="btn btn-primary btn-sm" onclick="refreshDrinks()">
-                <i class="bi bi-arrow-clockwise"></i> Refresh
-            </button>
-        </div>
-        
-        <div id="drinks-list">
-            <!-- Drinks will be loaded here -->
+        <!-- Drinks List -->
+        <div class="mgmt-panel">
+            <div class="drinks-list-head">
+                <h3>All Drinks</h3>
+                <button class="btn btn-primary btn-sm" onclick="refreshDrinks()">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                </button>
+            </div>
+
+            <div id="drinks-list">
+                <!-- Drinks will be loaded here -->
+            </div>
         </div>
     </div>
 
     <!-- Back to Home Button -->
-    <div style="margin: 40px auto; text-align: center;">
+    <div class="back-home-wrap">
         <a href="{{ url_for('main.index') }}" class="btn btn-primary" style="min-width: 150px;">Back to Home</a>
     </div>
 
@@ -240,9 +488,9 @@ function displayDrinks(drinks) {
     
     if (drinks.length === 0) {
         drinksList.innerHTML = `
-            <div style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 40px; color: #ccc; text-align: center;">
-                <div style="font-size: 3rem; margin-bottom: 15px;">🍹</div>
-                <h4 style="color: white; margin-bottom: 10px;">No drinks found</h4>
+            <div class="empty-drinks">
+                <div class="icon">🍹</div>
+                <h4>No drinks found</h4>
                 <p>Create your first drink type using the form above!</p>
             </div>
         `;
@@ -255,30 +503,30 @@ function displayDrinks(drinks) {
         const otherPercentage = 100 - drink.drink_water_percentage - drink.drink_alcohol_percentage;
         
         html += `
-            <div class="drink-card" style="background: rgba(0, 0, 0, 0.5); border-radius: 10px; padding: 8px 12px; margin-bottom: 8px; border: 1px solid rgba(255, 255, 255, 0.1);">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <div style="display: flex; align-items: center; flex: 1;">
+            <div class="drink-card">
+                <div class="drink-card-row">
+                    <div class="drink-main">
                         <!-- Drink Icon -->
-                        <div style="margin-right: 12px;">
+                        <div class="drink-icon-wrap">
                             ${hasImage ? 
-                                `<img src="/static/images/drinks/${drink.drink_image}" alt="${drink.drink_name}" style="height: 32px; width: 32px; border-radius: 50%; background: rgba(255,255,255,0.1); padding: 3px;">` :
-                                `<div style="height: 32px; width: 32px; border-radius: 50%; background: rgba(13, 110, 253, 0.3); display: flex; align-items: center; justify-content: center;">
-                                    <span style="color: white; font-weight: bold; font-size: 0.85rem;">${drink.drink_name.charAt(0).toUpperCase()}</span>
+                                `<img src="/static/images/drinks/${drink.drink_image}" alt="${drink.drink_name}" class="drink-icon-image">` :
+                                `<div class="drink-icon-fallback">
+                                    <span>${drink.drink_name.charAt(0).toUpperCase()}</span>
                                 </div>`
                             }
                         </div>
                         
                         <!-- Drink Info -->
-                        <div style="flex: 1;">
-                            <div style="color: white; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;">
-                                <span style="font-weight: bold; margin-right: 8px;">${drink.drink_name}</span>
+                        <div class="drink-info">
+                            <span class="drink-name">${drink.drink_name}</span>
+                            <div class="drink-meta">
                                 <span style="color: #0d6efd;">💧 ${drink.drink_water_percentage}%</span>${drink.drink_alcohol_percentage > 0 ? ` <span style="color: #dc3545;">🍷 ${drink.drink_alcohol_percentage}%</span>` : ''}${otherPercentage > 0 ? ` <span style="color: #198754;">🥤 ${otherPercentage}%</span>` : ''}
                             </div>
                         </div>
                     </div>
                     
                     <!-- Actions -->
-                    <div style="display: flex; gap: 8px;">
+                    <div class="drink-actions">
                         <button class="btn btn-sm btn-outline-primary" onclick="editDrink(${drink.drink_id})" title="Edit">
                             <i class="bi bi-pencil"></i>
                         </button>
