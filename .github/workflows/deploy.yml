@@ -8,6 +8,7 @@ on:
       - '.github/**'
       - 'tests/**'
       - 'coverage/**'
+  workflow_dispatch:
 
 permissions:
   contents: read
