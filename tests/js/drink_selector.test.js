@@ -61,6 +61,7 @@ function buildDOM() {
                     <div class="amount-option" onclick="selectAmount(100)"><div>100ml</div></div>
                     <div class="amount-option" onclick="selectAmount(250)"><div>250ml</div></div>
                     <div class="amount-option" onclick="selectAmount(500)"><div>500ml</div></div>
+                    <div class="amount-option" onclick="selectCustomAmount()"><div>Other</div></div>
                 </div>
             </div>
 
@@ -121,6 +122,12 @@ describe('selectAmount', () => {
         expect(document.getElementById('amount').value).toBe('500');
     });
 
+    test('resets custom amount option label when predefined amount is selected', () => {
+        document.querySelector('.amount-option[onclick="selectCustomAmount()"] div').textContent = '420ml';
+        selectAmount(250);
+        expect(document.querySelector('.amount-option[onclick="selectCustomAmount()"] div').textContent).toBe('Other');
+    });
+
     test('hides the custom amount container', () => {
         document.getElementById('custom-amount-container').style.display = 'flex';
         selectAmount(250);
@@ -141,6 +148,7 @@ describe('confirmCustomAmount', () => {
         document.getElementById('custom-amount-container').style.display = 'flex';
         confirmCustomAmount();
         expect(document.getElementById('custom-amount-container').style.display).toBe('none');
+        expect(document.querySelector('.amount-option[onclick="selectCustomAmount()"] div').textContent).toBe('350ml');
         const err = document.querySelector('.amount-carousel')
             .closest('div[style*="border-radius: 15px"]')
             .querySelector('.carousel-error');

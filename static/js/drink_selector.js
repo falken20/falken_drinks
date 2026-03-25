@@ -438,20 +438,11 @@ function selectAmount(amount) {
     selectedAmount = amount;
     amountChosen = true;
     clearCarouselError('amount-carousel');
-    document.querySelectorAll('.amount-option').forEach(option => {
-        option.querySelector('div').style.background = 'rgba(13, 110, 253, 0.2)';
-        option.querySelector('div').style.color = 'white';
-        option.querySelector('div').style.border = 'none';
-        option.querySelector('div').style.transform = 'scale(1)';
-        option.querySelector('div').style.boxShadow = 'none';
-    });
+    resetAmountOptionStyles();
+    updateCustomAmountOptionLabel();
     const activeOption = document.querySelector(`.amount-option[onclick="selectAmount(${amount})"]`);
     if (activeOption) {
-        activeOption.querySelector('div').style.background = '#0d6efd';
-        activeOption.querySelector('div').style.color = 'white';
-        activeOption.querySelector('div').style.border = '2px solid #fff';
-        activeOption.querySelector('div').style.transform = 'scale(1.15)';
-        activeOption.querySelector('div').style.boxShadow = '0 0 15px rgba(13, 110, 253, 0.8)';
+        highlightAmountOption(activeOption, '#0d6efd', '0 0 15px rgba(13, 110, 253, 0.8)');
     }
     
     // Hide custom amount input if it's visible
@@ -472,18 +463,11 @@ function selectAmount(amount) {
  */
 function selectCustomAmount() {
     console.log("Selected custom amount");
-    
-    // Highlight the "Other" option
-    const amountOptions = document.querySelectorAll('.amount-option');
-    amountOptions.forEach(option => {
-        option.style.transform = 'scale(1)';
-        option.querySelector('div').style.boxShadow = 'none';
-    });
+    resetAmountOptionStyles();
     
     // Find the clicked element and highlight it
     const clickedOption = event.currentTarget;
-    clickedOption.style.transform = 'scale(1.1)';
-    clickedOption.querySelector('div').style.boxShadow = '0 0 10px rgba(255, 255, 255, 0.8)';
+    highlightAmountOption(clickedOption, '#dc3545', '0 0 12px rgba(255, 255, 255, 0.8)');
     
     // Show custom amount container
     const customAmountContainer = document.getElementById('custom-amount-container');
@@ -524,7 +508,51 @@ function confirmCustomAmount() {
     selectedAmount = amount;
     amountChosen = true;
     clearCarouselError('amount-carousel');
+    updateCustomAmountOptionLabel(amount);
+    const customOption = document.querySelector('.amount-option[onclick="selectCustomAmount()"]');
+    if (customOption) {
+        resetAmountOptionStyles();
+        highlightAmountOption(customOption, '#dc3545', '0 0 15px rgba(220, 53, 69, 0.7)');
+    }
     document.getElementById('custom-amount-container').style.display = 'none';
+}
+
+function resetAmountOptionStyles() {
+    document.querySelectorAll('.amount-option').forEach(option => {
+        const optionContent = option.querySelector('div');
+        if (!optionContent) {
+            return;
+        }
+        option.style.transform = 'scale(1)';
+        optionContent.style.background = option.getAttribute('onclick') === 'selectCustomAmount()'
+            ? 'rgba(220, 53, 69, 0.2)'
+            : 'rgba(13, 110, 253, 0.2)';
+        optionContent.style.color = 'white';
+        optionContent.style.border = 'none';
+        optionContent.style.transform = 'scale(1)';
+        optionContent.style.boxShadow = 'none';
+    });
+}
+
+function highlightAmountOption(option, backgroundColor, boxShadow) {
+    const optionContent = option && option.querySelector('div');
+    if (!option || !optionContent) {
+        return;
+    }
+    option.style.transform = 'scale(1.05)';
+    optionContent.style.background = backgroundColor;
+    optionContent.style.color = 'white';
+    optionContent.style.border = '2px solid #fff';
+    optionContent.style.transform = 'scale(1.15)';
+    optionContent.style.boxShadow = boxShadow;
+}
+
+function updateCustomAmountOptionLabel(amount) {
+    const customOption = document.querySelector('.amount-option[onclick="selectCustomAmount()"] div');
+    if (!customOption) {
+        return;
+    }
+    customOption.textContent = amount ? `${amount}ml` : 'Other';
 }
 
 /**
