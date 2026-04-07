@@ -3,6 +3,7 @@
 import json
 from datetime import date
 from datetime import date
+from unittest.mock import patch
 
 from .basetest import BaseTestCase
 from falken_drinks.models import db, User, Drink, DrinkLog
@@ -105,6 +106,51 @@ class TestAddDrinkRoute(BaseTestCase):
         self.assertEqual(log.date_created.minute, 45)
         self.assertEqual(log.date_created.date(), date.today())
 
+    def test_add_drink_failed_get_or_create(self):
+        """Test add_drink returns 500 when drink cannot be created/found"""
+        self.create_user()
+        self.client.post('/login', data=self.mock_user, follow_redirects=True)
+
+        payload = {'drink_name': 'Water', 'amount': 250, 'alcohol_percentage': 0}
+        with patch('falken_drinks.routes.ControllerDrinks.get_or_create_drink', return_value=None):
+            response = self.client.post('/api/add_drink',
+                                        data=json.dumps(payload),
+                                        content_type='application/json')
+
+        self.assertEqual(response.status_code, 500)
+        data = json.loads(response.data)
+        self.assertFalse(data['success'])
+
+    def test_add_drink_failed_save_log(self):
+        """Test add_drink returns 500 when drink log cannot be saved"""
+        self.create_user()
+        self.client.post('/login', data=self.mock_user, follow_redirects=True)
+
+        payload = {'drink_name': 'Water', 'amount': 250, 'alcohol_percentage': 0}
+        with patch('falken_drinks.routes.ControllerDrinkLogs.add_drink_log', return_value=None):
+            response = self.client.post('/api/add_drink',
+                                        data=json.dumps(payload),
+                                        content_type='application/json')
+
+        self.assertEqual(response.status_code, 500)
+        data = json.loads(response.data)
+        self.assertFalse(data['success'])
+
+    def test_add_drink_unhandled_exception(self):
+        """Test add_drink handles unexpected exceptions"""
+        self.create_user()
+        self.client.post('/login', data=self.mock_user, follow_redirects=True)
+
+        payload = {'drink_name': 'Water', 'amount': 250, 'alcohol_percentage': 0}
+        with patch('falken_drinks.routes.ControllerDrinks.get_or_create_drink', side_effect=Exception('boom')):
+            response = self.client.post('/api/add_drink',
+                                        data=json.dumps(payload),
+                                        content_type='application/json')
+
+        self.assertEqual(response.status_code, 500)
+        data = json.loads(response.data)
+        self.assertFalse(data['success'])
+
 
 class TestGetDrinksRoute(BaseTestCase):
     """Test /api/drinks GET endpoint"""
@@ -144,6 +190,18 @@ class TestGetDrinksRoute(BaseTestCase):
         data = json.loads(response.data)
         self.assertTrue(data['success'])
         self.assertEqual(len(data['drinks']), 0)
+
+    def test_get_drinks_unhandled_exception(self):
+        """Test get_drinks handles unexpected exceptions"""
+        self.create_user()
+        self.client.post('/login', data=self.mock_user, follow_redirects=True)
+
+        with patch('falken_drinks.routes.ControllerDrinks.get_drinks', side_effect=Exception('boom')):
+            response = self.client.get('/api/drinks')
+
+        self.assertEqual(response.status_code, 500)
+        data = json.loads(response.data)
+        self.assertFalse(data['success'])
 
 
 class TestCreateDrinkRoute(BaseTestCase):
@@ -218,6 +276,49 @@ class TestCreateDrinkRoute(BaseTestCase):
                                    content_type='application/json')
         
         self.assertEqual(response.status_code, 409)
+        data = json.loads(response.data)
+        self.assertFalse(data['success'])
+
+    def test_create_drink_no_data(self):
+        """Test creating drink with no data body"""
+        self.create_user()
+        self.client.post('/login', data=self.mock_user, follow_redirects=True)
+
+        response = self.client.post('/api/drinks', data='null', content_type='application/json')
+
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.data)
+        self.assertFalse(data['success'])
+
+    def test_create_drink_invalid_percentage_type(self):
+        """Test creating drink with non-numeric percentages"""
+        self.create_user()
+        self.client.post('/login', data=self.mock_user, follow_redirects=True)
+
+        invalid_data = {
+            'drink_name': 'Invalid',
+            'drink_water_percentage': 'abc',
+            'drink_alcohol_percentage': 0
+        }
+        response = self.client.post('/api/drinks',
+                                    data=json.dumps(invalid_data),
+                                    content_type='application/json')
+
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.data)
+        self.assertFalse(data['success'])
+
+    def test_create_drink_failed_save(self):
+        """Test creating drink returns 500 when repository save fails"""
+        self.create_user()
+        self.client.post('/login', data=self.mock_user, follow_redirects=True)
+
+        with patch('falken_drinks.routes.ControllerDrinks.add_drink', return_value=None):
+            response = self.client.post('/api/drinks',
+                                        data=json.dumps(self.MOCK_DRINK),
+                                        content_type='application/json')
+
+        self.assertEqual(response.status_code, 500)
         data = json.loads(response.data)
         self.assertFalse(data['success'])
 
@@ -350,6 +451,38 @@ class TestUpdateDrinkRoute(BaseTestCase):
         self.assertTrue(data['success'])
         self.assertFalse(data['drink']['counts_as_water'])
 
+    def test_update_drink_invalid_percentage_type(self):
+        """Test updating drink with non-numeric percentages"""
+        self.create_user()
+        self.client.post('/login', data=self.mock_user, follow_redirects=True)
+
+        drink = Drink(drink_name='Water', drink_water_percentage=100, drink_alcohol_percentage=0)
+        db.session.add(drink)
+        db.session.commit()
+
+        invalid_data = {'drink_name': 'Water', 'drink_water_percentage': 'abc', 'drink_alcohol_percentage': 0}
+        response = self.client.put(f'/api/drinks/{drink.drink_id}',
+                                   data=json.dumps(invalid_data),
+                                   content_type='application/json')
+
+        self.assertEqual(response.status_code, 400)
+        data = json.loads(response.data)
+        self.assertFalse(data['success'])
+
+    def test_update_drink_unhandled_exception(self):
+        """Test update_drink handles unexpected exceptions and returns 500"""
+        self.create_user()
+        self.client.post('/login', data=self.mock_user, follow_redirects=True)
+
+        with patch('falken_drinks.routes.ControllerDrinks.get_drink', side_effect=Exception('boom')):
+            response = self.client.put('/api/drinks/1',
+                                       data=json.dumps({'drink_name': 'Any'}),
+                                       content_type='application/json')
+
+        self.assertEqual(response.status_code, 500)
+        data = json.loads(response.data)
+        self.assertFalse(data['success'])
+
 
 class TestDeleteDrinkRoute(BaseTestCase):
     """Test /api/drinks/<id> DELETE endpoint"""
@@ -410,6 +543,18 @@ class TestDeleteDrinkRoute(BaseTestCase):
         response = self.client.delete('/api/drinks/1')
         # Flask-Login redirects to login page (302) instead of returning 401
         self.assertEqual(response.status_code, 302)
+
+    def test_delete_drink_unhandled_exception(self):
+        """Test delete_drink handles unexpected exceptions"""
+        self.create_user()
+        self.client.post('/login', data=self.mock_user, follow_redirects=True)
+
+        with patch('falken_drinks.routes.ControllerDrinks.get_drink', side_effect=Exception('boom')):
+            response = self.client.delete('/api/drinks/1')
+
+        self.assertEqual(response.status_code, 500)
+        data = json.loads(response.data)
+        self.assertFalse(data['success'])
 
 
 class TestCreateDrinkCountsAsWaterRoute(BaseTestCase):
@@ -514,6 +659,18 @@ class TestDeleteDrinkLogRoute(BaseTestCase):
         response = self.client.delete('/api/delete_drink_log/1')
         # Flask-Login redirects to login page (302) instead of returning 401
         self.assertEqual(response.status_code, 302)
+
+    def test_delete_drink_log_unhandled_exception(self):
+        """Test delete_drink_log handles unexpected exceptions"""
+        self.create_user()
+        self.client.post('/login', data=self.mock_user, follow_redirects=True)
+
+        with patch('falken_drinks.routes.ControllerDrinkLogs.delete_drink_log_by_user', side_effect=Exception('boom')):
+            response = self.client.delete('/api/delete_drink_log/1')
+
+        self.assertEqual(response.status_code, 500)
+        data = json.loads(response.data)
+        self.assertFalse(data['success'])
 
 
 if __name__ == '__main__':
