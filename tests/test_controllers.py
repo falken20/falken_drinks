@@ -42,6 +42,16 @@ class TestControllerUser(BaseTestCase):
         user = ControllerUser.get_user(1)
         self.assertFalse(user)
 
+    def test_get_user_email_not_found(self):
+        """get_user_email returns None when email does not exist"""
+        result = ControllerUser.get_user_email('nonexistent@mail.com')
+        self.assertIsNone(result)
+
+    def test_get_user_name_not_found(self):
+        """get_user_name returns None when name does not exist"""
+        result = ControllerUser.get_user_name('nobody')
+        self.assertIsNone(result)
+
 
 class TestControllerDrinks(BaseTestCase):
 
@@ -115,6 +125,12 @@ class TestControllerDrinks(BaseTestCase):
         
         drinks = ControllerDrinks.get_drinks()
         self.assertGreaterEqual(len(drinks), 2)
+
+    def test_get_drinks_empty(self):
+        """Test get_drinks returns an empty list when no drinks exist"""
+        drinks = ControllerDrinks.get_drinks()
+        self.assertIsInstance(drinks, list)
+        self.assertEqual(len(drinks), 0)
 
 
 class TestControllerDrinkLogs(BaseTestCase):
@@ -307,6 +323,127 @@ class TestControllerDrinkLogsExtra(BaseTestCase):
         log_id = log.log_id
         ControllerDrinkLogs.delete_drink_log(log_id)
         self.assertIsNone(DrinkLog.query.filter_by(log_id=log_id).first())
+
+    def test_add_drink_log_invalid_data_returns_none(self):
+        """add_drink_log with bad data (missing required field) must return None"""
+        # Pass a dict with an unknown field to trigger an exception path
+        log = ControllerDrinkLogs.add_drink_log({'nonexistent_field': 'bad'})
+        self.assertIsNone(log)
+
+    def test_delete_drink_log_by_user_nonexistent_log_returns_false(self):
+        """delete_drink_log_by_user returns False when log_id does not exist"""
+        user = self.create_user()
+        result = ControllerDrinkLogs.delete_drink_log_by_user(99999, user.user_id)
+        self.assertFalse(result)
+
+    def test_get_daily_consumption_coffee_category(self):
+        """Drink with <90% water and 0% alcohol must be counted in total_coffee"""
+        user = self.create_user()
+        # Espresso-style: 80% water, 0% alcohol → coffee category
+        coffee = Drink(drink_name='Espresso', drink_water_percentage=80,
+                       drink_alcohol_percentage=0, counts_as_water=False)
+        db.session.add(coffee)
+        db.session.commit()
+
+        log = DrinkLog(drink_id=coffee.drink_id, user_id=user.user_id,
+                       drink_total_quantity=50, drink_water_quantity=40,
+                       drink_alcohol_quantity=0)
+        db.session.add(log)
+        db.session.commit()
+
+        consumption = ControllerDrinkLogs.get_daily_consumption(user.user_id, date.today())
+        self.assertEqual(consumption['total_coffee'], 50)
+        self.assertEqual(consumption['total_water'], 0)
+        self.assertEqual(consumption['total_alcohol'], 0)
+
+    def test_get_daily_consumption_other_category(self):
+        """Drink with 90-97% water and 0% alcohol must be counted in total_other"""
+        user = self.create_user()
+        # Juice: 94% water, 0% alcohol → other category
+        juice = Drink(drink_name='Orange Juice', drink_water_percentage=94,
+                      drink_alcohol_percentage=0, counts_as_water=False)
+        db.session.add(juice)
+        db.session.commit()
+
+        log = DrinkLog(drink_id=juice.drink_id, user_id=user.user_id,
+                       drink_total_quantity=200, drink_water_quantity=188,
+                       drink_alcohol_quantity=0)
+        db.session.add(log)
+        db.session.commit()
+
+        consumption = ControllerDrinkLogs.get_daily_consumption(user.user_id, date.today())
+        self.assertEqual(consumption['total_other'], 200)
+        self.assertEqual(consumption['total_coffee'], 0)
+        self.assertEqual(consumption['total_alcohol'], 0)
+
+    def test_get_daily_consumption_default_date_is_today(self):
+        """Calling get_daily_consumption without a date must use today"""
+        user = self.create_user()
+        consumption = ControllerDrinkLogs.get_daily_consumption(user.user_id)
+        self.assertEqual(consumption['date'], date.today())
+
+    def test_get_daily_consumption_progress_capped_at_100(self):
+        """Progress percentage must never exceed 100 regardless of amount consumed"""
+        user = self.create_user()
+        # Add a drink that counts_as_water with a huge quantity
+        water = Drink(drink_name='Water Huge', drink_water_percentage=100,
+                      drink_alcohol_percentage=0, counts_as_water=True)
+        db.session.add(water)
+        db.session.commit()
+
+        log = DrinkLog(drink_id=water.drink_id, user_id=user.user_id,
+                       drink_total_quantity=99999, drink_water_quantity=99999,
+                       drink_alcohol_quantity=0)
+        db.session.add(log)
+        db.session.commit()
+
+        consumption = ControllerDrinkLogs.get_daily_consumption(user.user_id, date.today())
+        self.assertEqual(consumption['progress_percentage'], 100)
+
+    def test_get_daily_summary_empty_has_logs_false(self):
+        """get_daily_summary with no logs must return has_logs=False and empty drink_logs"""
+        user = self.create_user()
+        summary = ControllerDrinkLogs.get_daily_summary(user.user_id, date.today())
+
+        self.assertFalse(summary['has_logs'])
+        self.assertEqual(summary['total_logs'], 0)
+        self.assertEqual(summary['drink_logs'], [])
+
+    def test_get_daily_summary_structure_keys(self):
+        """get_daily_summary must return all expected top-level keys"""
+        user = self.create_user()
+        summary = ControllerDrinkLogs.get_daily_summary(user.user_id, date.today())
+
+        for key in ('date', 'drink_logs', 'total_logs', 'total_liquid',
+                    'total_water', 'consumption_summary', 'has_logs'):
+            self.assertIn(key, summary)
+
+    def test_get_daily_summary_drink_log_detail_structure(self):
+        """Each entry in drink_logs must contain the expected detail keys"""
+        user = self.create_user()
+        water = Drink(drink_name='Spring Water', drink_water_percentage=100,
+                      drink_alcohol_percentage=0, counts_as_water=True)
+        db.session.add(water)
+        db.session.commit()
+
+        log = DrinkLog(drink_id=water.drink_id, user_id=user.user_id,
+                       drink_total_quantity=300, drink_water_quantity=300,
+                       drink_alcohol_quantity=0)
+        db.session.add(log)
+        db.session.commit()
+
+        summary = ControllerDrinkLogs.get_daily_summary(user.user_id, date.today())
+        self.assertTrue(summary['has_logs'])
+        detail = summary['drink_logs'][0]
+        for key in ('log_id', 'drink_name', 'total_quantity', 'water_quantity',
+                    'alcohol_quantity', 'counts_as_water', 'time_logged'):
+            self.assertIn(key, detail)
+
+    def test_get_daily_summary_default_date_is_today(self):
+        """Calling get_daily_summary without a date must use today"""
+        user = self.create_user()
+        summary = ControllerDrinkLogs.get_daily_summary(user.user_id)
+        self.assertEqual(summary['date'], date.today())
 
 
 class TestControllerDrinksExtra(BaseTestCase):
