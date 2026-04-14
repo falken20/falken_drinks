@@ -35,7 +35,11 @@ def profile():
         f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
     Log.debug(f"Current user: {current_user}")
 
-    return render_template('profile.html', name=current_user.name or current_user.email, date_created=current_user.date_created)
+    return render_template(
+        'profile.html',
+        name=current_user.name or current_user.email,
+        date_created=current_user.date_created
+    )
 
 
 @main.route("/daily_summary", methods=['GET'])

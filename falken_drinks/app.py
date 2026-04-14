@@ -30,79 +30,110 @@ check_cache()
 basedir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+def _migrate_drinks_counts_as_water(inspector, dialect):
+    """Migrate drinks.counts_as_water column if missing."""
+    if 'drinks' not in inspector.get_table_names():
+        return
+    drinks_columns = {column['name'] for column in inspector.get_columns('drinks')}
+    if 'counts_as_water' in drinks_columns:
+        return
+    Log.warning("Column drinks.counts_as_water missing. Applying automatic migration...")
+    with db.engine.begin() as conn:
+        if dialect == 'postgresql':
+            conn.execute(db.text(
+                'ALTER TABLE drinks ADD COLUMN counts_as_water BOOLEAN NOT NULL DEFAULT TRUE'
+            ))
+            conn.execute(db.text(
+                'UPDATE drinks SET counts_as_water = FALSE WHERE drink_alcohol_percentage > 0'
+            ))
+        else:
+            conn.execute(db.text(
+                'ALTER TABLE drinks ADD COLUMN counts_as_water BOOLEAN NOT NULL DEFAULT 1'
+            ))
+            conn.execute(db.text(
+                'UPDATE drinks SET counts_as_water = 0 WHERE drink_alcohol_percentage > 0'
+            ))
+    Log.info('Automatic migration applied for drinks.counts_as_water')
+
+
+def _migrate_users_password_length(inspector, dialect):
+    """Migrate users.password to max length 255 if shorter."""
+    if 'users' not in inspector.get_table_names() or dialect != 'postgresql':
+        return
+    users_columns = {column['name']: column for column in inspector.get_columns('users')}
+    password_column = users_columns.get('password')
+    current_length = getattr(password_column['type'], 'length', None) if password_column else None
+    if current_length is None or current_length >= 255:
+        return
+    Log.warning('Column users.password shorter than 255. Applying automatic migration...')
+    with db.engine.begin() as conn:
+        conn.execute(db.text('ALTER TABLE users ALTER COLUMN password TYPE VARCHAR(255)'))
+    Log.info('Automatic migration applied for users.password length')
+
+
+def _migrate_drink_logs_date_created(inspector, dialect):
+    """Migrate drinks_logs.date_created from DATE to TIMESTAMP if needed."""
+    if 'drinks_logs' not in inspector.get_table_names() or dialect != 'postgresql':
+        return
+    drinks_log_columns = {
+        column['name']: column for column in inspector.get_columns('drinks_logs')
+    }
+    date_created_column = drinks_log_columns.get('date_created')
+    if not date_created_column:
+        return
+    column_type = str(date_created_column['type']).lower()
+    if 'date' not in column_type or 'timestamp' in column_type:
+        return
+    msg = 'Column drinks_logs.date_created is DATE. Applying automatic migration to TIMESTAMP...'
+    Log.warning(msg)
+    with db.engine.begin() as conn:
+        conn.execute(db.text(
+            'ALTER TABLE drinks_logs ALTER COLUMN date_created TYPE TIMESTAMP '
+            'USING date_created::timestamp'
+        ))
+    Log.info('Automatic migration applied for drinks_logs.date_created type')
+
+
+def _migrate_drinks_user_id(inspector):
+    """Migrate drinks.user_id column if missing."""
+    if 'drinks' not in inspector.get_table_names():
+        return
+    drinks_columns = {column['name'] for column in inspector.get_columns('drinks')}
+    if 'user_id' in drinks_columns:
+        return
+    Log.warning("Column drinks.user_id missing. Applying automatic migration...")
+    with db.engine.begin() as conn:
+        conn.execute(db.text(
+            'ALTER TABLE drinks ADD COLUMN user_id INTEGER REFERENCES users(user_id)'
+        ))
+    Log.info('Automatic migration applied for drinks.user_id')
+
+
+def _migrate_users_name_nullable(inspector, dialect):
+    """Migrate users.name to nullable if NOT NULL."""
+    if 'users' not in inspector.get_table_names() or dialect != 'postgresql':
+        return
+    users_columns = {column['name']: column for column in inspector.get_columns('users')}
+    name_column = users_columns.get('name')
+    if not name_column or name_column.get('nullable', True):
+        return
+    msg = "Column users.name is NOT NULL. Applying automatic migration to nullable..."
+    Log.warning(msg)
+    with db.engine.begin() as conn:
+        conn.execute(db.text('ALTER TABLE users ALTER COLUMN name DROP NOT NULL'))
+    Log.info('Automatic migration applied for users.name nullable')
+
+
 def ensure_schema_compatibility(app):
     """Apply minimal backward-compatible schema updates when old DBs are detected."""
     with app.app_context():
         inspector = db.inspect(db.engine)
-        table_names = set(inspector.get_table_names())
         dialect = db.engine.dialect.name
-
-        if 'drinks' in table_names:
-            drinks_columns = {column['name'] for column in inspector.get_columns('drinks')}
-            if 'counts_as_water' not in drinks_columns:
-                Log.warning("Column drinks.counts_as_water missing. Applying automatic migration...")
-                with db.engine.begin() as conn:
-                    if dialect == 'postgresql':
-                        conn.execute(db.text(
-                            'ALTER TABLE drinks ADD COLUMN counts_as_water BOOLEAN NOT NULL DEFAULT TRUE'
-                        ))
-                        conn.execute(db.text(
-                            'UPDATE drinks SET counts_as_water = FALSE WHERE drink_alcohol_percentage > 0'
-                        ))
-                    else:
-                        conn.execute(db.text(
-                            'ALTER TABLE drinks ADD COLUMN counts_as_water BOOLEAN NOT NULL DEFAULT 1'
-                        ))
-                        conn.execute(db.text(
-                            'UPDATE drinks SET counts_as_water = 0 WHERE drink_alcohol_percentage > 0'
-                        ))
-                Log.info('Automatic migration applied for drinks.counts_as_water')
-
-        if 'users' in table_names:
-            users_columns = {column['name']: column for column in inspector.get_columns('users')}
-            password_column = users_columns.get('password')
-            current_length = getattr(password_column['type'], 'length', None) if password_column else None
-
-            if current_length is not None and current_length < 255 and dialect == 'postgresql':
-                Log.warning('Column users.password shorter than 255. Applying automatic migration...')
-                with db.engine.begin() as conn:
-                    conn.execute(db.text('ALTER TABLE users ALTER COLUMN password TYPE VARCHAR(255)'))
-                Log.info('Automatic migration applied for users.password length')
-
-        if 'drinks_logs' in table_names and dialect == 'postgresql':
-            drinks_log_columns = {column['name']: column for column in inspector.get_columns('drinks_logs')}
-            date_created_column = drinks_log_columns.get('date_created')
-            if date_created_column:
-                column_type = str(date_created_column['type']).lower()
-                if 'date' in column_type and 'timestamp' not in column_type:
-                    Log.warning(
-                        'Column drinks_logs.date_created is DATE. Applying automatic migration to TIMESTAMP...'
-                    )
-                    with db.engine.begin() as conn:
-                        conn.execute(db.text(
-                            'ALTER TABLE drinks_logs ALTER COLUMN date_created TYPE TIMESTAMP '
-                            'USING date_created::timestamp'
-                        ))
-                    Log.info('Automatic migration applied for drinks_logs.date_created type')
-
-        if 'drinks' in table_names:
-            drinks_columns = {column['name'] for column in inspector.get_columns('drinks')}
-            if 'user_id' not in drinks_columns:
-                Log.warning("Column drinks.user_id missing. Applying automatic migration...")
-                with db.engine.begin() as conn:
-                    conn.execute(db.text(
-                        'ALTER TABLE drinks ADD COLUMN user_id INTEGER REFERENCES users(user_id)'
-                    ))
-                Log.info('Automatic migration applied for drinks.user_id')
-
-        if 'users' in table_names and dialect == 'postgresql':
-            users_columns = {column['name']: column for column in inspector.get_columns('users')}
-            name_column = users_columns.get('name')
-            if name_column and not name_column.get('nullable', True):
-                Log.warning("Column users.name is NOT NULL. Applying automatic migration to nullable...")
-                with db.engine.begin() as conn:
-                    conn.execute(db.text('ALTER TABLE users ALTER COLUMN name DROP NOT NULL'))
-                Log.info('Automatic migration applied for users.name nullable')
+        _migrate_drinks_counts_as_water(inspector, dialect)
+        _migrate_users_password_length(inspector, dialect)
+        _migrate_drink_logs_date_created(inspector, dialect)
+        _migrate_drinks_user_id(inspector)
+        _migrate_users_name_nullable(inspector, dialect)
 
 
 def create_app(test_config=None):

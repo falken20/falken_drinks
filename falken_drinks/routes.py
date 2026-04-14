@@ -50,7 +50,12 @@ def add_drink():  # noqa: C901
             }), 400
 
         # Get or create drink
-        drink = ControllerDrinks.get_or_create_drink(drink_name, alcohol_percentage, drink_total_quantity, user_id=current_user.user_id)
+        drink = ControllerDrinks.get_or_create_drink(
+            drink_name,
+            alcohol_percentage,
+            drink_total_quantity,
+            user_id=current_user.user_id
+        )
         if not drink:
             return jsonify({
                 'success': False,

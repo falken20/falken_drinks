@@ -64,7 +64,12 @@ class ControllerDrinks:
         return Drink.query.filter_by(drink_name=name, user_id=user_id).first()
 
     @staticmethod
-    def get_or_create_drink(drink_name: str, alcohol_percentage: float = 0, drink_total_quantity: int = 0, user_id: int = None):
+    def get_or_create_drink(
+        drink_name: str,
+        alcohol_percentage: float = 0,
+        drink_total_quantity: int = 0,
+        user_id: int = None
+    ):
         """Get existing drink or create new one if it doesn't exist"""
         Log.info(
             f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
