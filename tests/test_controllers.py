@@ -66,11 +66,12 @@ class TestControllerDrinks(BaseTestCase):
 
     def test_get_drink_name(self):
         """Test getting a drink by name"""
-        drink = Drink(drink_name='Test Water', drink_water_percentage=100, drink_alcohol_percentage=0)
+        user = self.create_user()
+        drink = Drink(drink_name='Test Water', drink_water_percentage=100, drink_alcohol_percentage=0, user_id=user.user_id)
         db.session.add(drink)
         db.session.commit()
-        
-        drink_get = ControllerDrinks.get_drink_name('Test Water')
+
+        drink_get = ControllerDrinks.get_drink_name('Test Water', user.user_id)
         self.assertEqual(drink_get.drink_name, 'Test Water')
 
     def test_add_drink(self):
@@ -88,16 +89,18 @@ class TestControllerDrinks(BaseTestCase):
 
     def test_get_or_create_drink_existing(self):
         """Test get_or_create with existing drink"""
-        drink = Drink(drink_name='Test Water', drink_water_percentage=100, drink_alcohol_percentage=0)
+        user = self.create_user()
+        drink = Drink(drink_name='Test Water', drink_water_percentage=100, drink_alcohol_percentage=0, user_id=user.user_id)
         db.session.add(drink)
         db.session.commit()
-        
-        result = ControllerDrinks.get_or_create_drink('Test Water', 0, 250)
+
+        result = ControllerDrinks.get_or_create_drink('Test Water', 0, 250, user_id=user.user_id)
         self.assertEqual(result.drink_id, drink.drink_id)
 
     def test_get_or_create_drink_new(self):
         """Test get_or_create with new drink"""
-        result = ControllerDrinks.get_or_create_drink('New Drink', 5, 250)
+        user = self.create_user()
+        result = ControllerDrinks.get_or_create_drink('New Drink', 5, 250, user_id=user.user_id)
         self.assertIsNotNone(result)
         self.assertEqual(result.drink_name, 'New Drink')
 
@@ -118,17 +121,19 @@ class TestControllerDrinks(BaseTestCase):
 
     def test_get_drinks(self):
         """Test getting all drinks"""
-        drink1 = Drink(drink_name='Water', drink_water_percentage=100, drink_alcohol_percentage=0)
-        drink2 = Drink(drink_name='Beer', drink_water_percentage=95, drink_alcohol_percentage=5)
+        user = self.create_user()
+        drink1 = Drink(drink_name='Water', drink_water_percentage=100, drink_alcohol_percentage=0, user_id=user.user_id)
+        drink2 = Drink(drink_name='Beer', drink_water_percentage=95, drink_alcohol_percentage=5, user_id=user.user_id)
         db.session.add_all([drink1, drink2])
         db.session.commit()
-        
-        drinks = ControllerDrinks.get_drinks()
+
+        drinks = ControllerDrinks.get_drinks(user.user_id)
         self.assertGreaterEqual(len(drinks), 2)
 
     def test_get_drinks_empty(self):
         """Test get_drinks returns an empty list when no drinks exist"""
-        drinks = ControllerDrinks.get_drinks()
+        user = self.create_user()
+        drinks = ControllerDrinks.get_drinks(user.user_id)
         self.assertIsInstance(drinks, list)
         self.assertEqual(len(drinks), 0)
 

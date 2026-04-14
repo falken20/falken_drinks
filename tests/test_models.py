@@ -74,10 +74,12 @@ class TestModelUser(BaseTestCase):
         with self.assertRaises(ValueError):
             User(email='   ', name='Test User', password='password123')
 
-    def test_user_name_none_raises_error(self):
-        """Test User name None raises ValueError"""
-        with self.assertRaises(ValueError):
-            User(email='test@test.com', name=None, password='password123')
+    def test_user_name_none_allowed(self):
+        """Test User name can be None (optional field)"""
+        user = User(email='test@test.com', name=None, password='password123')
+        db.session.add(user)
+        db.session.commit()
+        self.assertIsNone(user.name)
 
     def test_user_name_blank_raises_error(self):
         """Test User name blank/whitespace raises ValueError"""

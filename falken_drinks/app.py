@@ -85,6 +85,25 @@ def ensure_schema_compatibility(app):
                         ))
                     Log.info('Automatic migration applied for drinks_logs.date_created type')
 
+        if 'drinks' in table_names:
+            drinks_columns = {column['name'] for column in inspector.get_columns('drinks')}
+            if 'user_id' not in drinks_columns:
+                Log.warning("Column drinks.user_id missing. Applying automatic migration...")
+                with db.engine.begin() as conn:
+                    conn.execute(db.text(
+                        'ALTER TABLE drinks ADD COLUMN user_id INTEGER REFERENCES users(user_id)'
+                    ))
+                Log.info('Automatic migration applied for drinks.user_id')
+
+        if 'users' in table_names and dialect == 'postgresql':
+            users_columns = {column['name']: column for column in inspector.get_columns('users')}
+            name_column = users_columns.get('name')
+            if name_column and not name_column.get('nullable', True):
+                Log.warning("Column users.name is NOT NULL. Applying automatic migration to nullable...")
+                with db.engine.begin() as conn:
+                    conn.execute(db.text('ALTER TABLE users ALTER COLUMN name DROP NOT NULL'))
+                Log.info('Automatic migration applied for users.name nullable')
+
 
 def create_app(test_config=None):
     try:

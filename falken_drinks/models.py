@@ -33,18 +33,18 @@ class User(UserMixin, db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), nullable=False, unique=True)
     password = db.Column(db.String(255), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=True)
     date_created = db.Column(db.Date, nullable=False, default=today_cet)
     date_updated = db.Column(db.Date, nullable=False,
                              default=today_cet, onupdate=today_cet)
 
     def __repr__(self) -> str:
-        return f"<User ({self.user_id} - {self.name})>"
+        return f"<User ({self.user_id} - {self.name or self.email})>"
 
     def __str__(self) -> str:
-        return f"<User ({self.user_id} - {self.name})>"
+        return f"<User ({self.user_id} - {self.name or self.email})>"
 
-    @validates('email', 'name', 'password')
+    @validates('email', 'password')
     def validate_required_text(self, key, value):
         if value is None:
             raise ValueError(f'{key} cannot be empty')
@@ -57,13 +57,24 @@ class User(UserMixin, db.Model):
         value = value.strip()
         max_lengths = {
             'email': self.MAX_EMAIL_LENGTH,
-            'name': self.MAX_NAME_LENGTH,
             'password': self.MAX_PASSWORD_LENGTH,
         }
         max_length = max_lengths.get(key)
         if max_length is not None and len(value) > max_length:
             raise ValueError(f'{key} cannot be longer than {max_length} characters')
 
+        return value
+
+    @validates('name')
+    def validate_name_optional(self, key, value):
+        if value is None:
+            return None
+        if isinstance(value, str) and not value.strip():
+            raise ValueError('name cannot be blank')
+        if isinstance(value, str):
+            value = value.strip()
+            if len(value) > self.MAX_NAME_LENGTH:
+                raise ValueError(f'name cannot be longer than {self.MAX_NAME_LENGTH} characters')
         return value
 
     # Check to use serialize()
@@ -85,6 +96,7 @@ class Drink(db.Model):
     drink_alcohol_percentage = db.Column(db.Integer, nullable=False, default=0)
     drink_image = db.Column(db.String(100), nullable=True)
     counts_as_water = db.Column(db.Boolean, nullable=False, default=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=True)
 
     def __repr__(self) -> str:
         return f"<Drink ({self.drink_name} - {self.drink_water_percentage}% - {self.drink_alcohol_percentage}%)>"
@@ -98,12 +110,14 @@ class Drink(db.Model):
         drink_water_percentage=None,
         drink_alcohol_percentage=None,
         drink_image=None,
-        counts_as_water=None
+        counts_as_water=None,
+        user_id=None
     ):
         self.drink_name = drink_name
         self.drink_water_percentage = drink_water_percentage
         self.drink_alcohol_percentage = drink_alcohol_percentage
         self.drink_image = drink_image
+        self.user_id = user_id
         # Default counts_as_water to False if drink has alcohol, otherwise True
         if counts_as_water is not None:
             self.counts_as_water = counts_as_water

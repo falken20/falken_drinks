@@ -161,7 +161,7 @@ class TestGetDrinksRoute(BaseTestCase):
         self.client.post('/login', data=self.mock_user, follow_redirects=True)
         
         # Create a test drink
-        drink = Drink(drink_name='Test Water', drink_water_percentage=100, drink_alcohol_percentage=0)
+        drink = Drink(drink_name='Test Water', drink_water_percentage=100, drink_alcohol_percentage=0, user_id=user.user_id)
         db.session.add(drink)
         db.session.commit()
         
@@ -265,10 +265,10 @@ class TestCreateDrinkRoute(BaseTestCase):
         self.client.post('/login', data=self.mock_user, follow_redirects=True)
         
         # Create first drink
-        drink = Drink(drink_name='Test Water', drink_water_percentage=100, drink_alcohol_percentage=0)
+        drink = Drink(drink_name='Test Water', drink_water_percentage=100, drink_alcohol_percentage=0, user_id=user.user_id)
         db.session.add(drink)
         db.session.commit()
-        
+
         # Try to create duplicate
         duplicate_data = {'drink_name': 'Test Water', 'drink_water_percentage': 100, 'drink_alcohol_percentage': 0}
         response = self.client.post('/api/drinks',
@@ -332,10 +332,10 @@ class TestUpdateDrinkRoute(BaseTestCase):
         self.client.post('/login', data=self.mock_user, follow_redirects=True)
         
         # Create a drink
-        drink = Drink(drink_name='Test Water', drink_water_percentage=100, drink_alcohol_percentage=0)
+        drink = Drink(drink_name='Test Water', drink_water_percentage=100, drink_alcohol_percentage=0, user_id=user.user_id)
         db.session.add(drink)
         db.session.commit()
-        
+
         # Update it
         update_data = {'drink_name': 'Updated Water', 'drink_water_percentage': 90, 'drink_alcohol_percentage': 0}
         response = self.client.put(f'/api/drinks/{drink.drink_id}',
@@ -375,7 +375,7 @@ class TestUpdateDrinkRoute(BaseTestCase):
         user = self.create_user()
         self.client.post('/login', data=self.mock_user, follow_redirects=True)
 
-        drink = Drink(drink_name='Test Water', drink_water_percentage=100, drink_alcohol_percentage=0)
+        drink = Drink(drink_name='Test Water', drink_water_percentage=100, drink_alcohol_percentage=0, user_id=user.user_id)
         db.session.add(drink)
         db.session.commit()
 
@@ -394,8 +394,8 @@ class TestUpdateDrinkRoute(BaseTestCase):
         user = self.create_user()
         self.client.post('/login', data=self.mock_user, follow_redirects=True)
 
-        drink1 = Drink(drink_name='Water', drink_water_percentage=100, drink_alcohol_percentage=0)
-        drink2 = Drink(drink_name='Coffee', drink_water_percentage=98, drink_alcohol_percentage=0)
+        drink1 = Drink(drink_name='Water', drink_water_percentage=100, drink_alcohol_percentage=0, user_id=user.user_id)
+        drink2 = Drink(drink_name='Coffee', drink_water_percentage=98, drink_alcohol_percentage=0, user_id=user.user_id)
         db.session.add_all([drink1, drink2])
         db.session.commit()
 
@@ -414,7 +414,7 @@ class TestUpdateDrinkRoute(BaseTestCase):
         user = self.create_user()
         self.client.post('/login', data=self.mock_user, follow_redirects=True)
 
-        drink = Drink(drink_name='Test Water', drink_water_percentage=100, drink_alcohol_percentage=0)
+        drink = Drink(drink_name='Test Water', drink_water_percentage=100, drink_alcohol_percentage=0, user_id=user.user_id)
         db.session.add(drink)
         db.session.commit()
 
@@ -432,7 +432,7 @@ class TestUpdateDrinkRoute(BaseTestCase):
         user = self.create_user()
         self.client.post('/login', data=self.mock_user, follow_redirects=True)
 
-        drink = Drink(drink_name='Beer', drink_water_percentage=95, drink_alcohol_percentage=5)
+        drink = Drink(drink_name='Beer', drink_water_percentage=95, drink_alcohol_percentage=5, user_id=user.user_id)
         db.session.add(drink)
         db.session.commit()
 
@@ -453,10 +453,10 @@ class TestUpdateDrinkRoute(BaseTestCase):
 
     def test_update_drink_invalid_percentage_type(self):
         """Test updating drink with non-numeric percentages"""
-        self.create_user()
+        user = self.create_user()
         self.client.post('/login', data=self.mock_user, follow_redirects=True)
 
-        drink = Drink(drink_name='Water', drink_water_percentage=100, drink_alcohol_percentage=0)
+        drink = Drink(drink_name='Water', drink_water_percentage=100, drink_alcohol_percentage=0, user_id=user.user_id)
         db.session.add(drink)
         db.session.commit()
 
@@ -493,10 +493,10 @@ class TestDeleteDrinkRoute(BaseTestCase):
         self.client.post('/login', data=self.mock_user, follow_redirects=True)
         
         # Create a drink
-        drink = Drink(drink_name='Test Water', drink_water_percentage=100, drink_alcohol_percentage=0)
+        drink = Drink(drink_name='Test Water', drink_water_percentage=100, drink_alcohol_percentage=0, user_id=user.user_id)
         db.session.add(drink)
         db.session.commit()
-        
+
         response = self.client.delete(f'/api/drinks/{drink.drink_id}')
         
         self.assertEqual(response.status_code, 200)
@@ -519,9 +519,9 @@ class TestDeleteDrinkRoute(BaseTestCase):
         """Test deleting drink that has logs"""
         user = self.create_user()
         self.client.post('/login', data=self.mock_user, follow_redirects=True)
-        
+
         # Create drink and log
-        drink = Drink(drink_name='Test Water', drink_water_percentage=100, drink_alcohol_percentage=0)
+        drink = Drink(drink_name='Test Water', drink_water_percentage=100, drink_alcohol_percentage=0, user_id=user.user_id)
         db.session.add(drink)
         db.session.commit()
         

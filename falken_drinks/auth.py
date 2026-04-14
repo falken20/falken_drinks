@@ -8,6 +8,7 @@ import sys
 
 from .config import today_cet
 from .models import db, User
+from .controllers import ControllerDrinks
 from .logger import Log
 
 Log.info("***** Loading auth.py")
@@ -58,7 +59,7 @@ def signup_post():
         Log.info(
             f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
         email = request.form.get('email')
-        name = request.form.get('name')
+        name = request.form.get('name') or None
         password = request.form.get('password')
         date_created = today_cet()
 
@@ -78,6 +79,8 @@ def signup_post():
 
         db.session.add(new_user)
         db.session.commit()
+
+        ControllerDrinks.seed_default_drinks(new_user.user_id)
 
         return redirect(url_for('auth.login'))
     except Exception as err:

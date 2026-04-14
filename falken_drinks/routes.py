@@ -50,7 +50,7 @@ def add_drink():  # noqa: C901
             }), 400
 
         # Get or create drink
-        drink = ControllerDrinks.get_or_create_drink(drink_name, alcohol_percentage, drink_total_quantity)
+        drink = ControllerDrinks.get_or_create_drink(drink_name, alcohol_percentage, drink_total_quantity, user_id=current_user.user_id)
         if not drink:
             return jsonify({
                 'success': False,
@@ -141,7 +141,7 @@ def delete_drink_log(log_id):
 def get_drinks():
     """Get all drinks"""
     try:
-        drinks = ControllerDrinks.get_drinks()
+        drinks = ControllerDrinks.get_drinks(current_user.user_id)
         drinks_data = [drink.serialize() for drink in drinks]
 
         return jsonify({
@@ -207,8 +207,8 @@ def create_drink():  # noqa: C901
                 'message': 'Water + alcohol percentages cannot exceed 100%'
             }), 400
 
-        # Check if drink already exists
-        existing_drink = ControllerDrinks.get_drink_name(drink_name)
+        # Check if drink already exists for this user
+        existing_drink = ControllerDrinks.get_drink_name(drink_name, current_user.user_id)
         if existing_drink:
             return jsonify({
                 'success': False,
@@ -221,7 +221,8 @@ def create_drink():  # noqa: C901
             'drink_water_percentage': drink_water_percentage,
             'drink_alcohol_percentage': drink_alcohol_percentage,
             'drink_image': drink_image if drink_image else None,
-            'counts_as_water': counts_as_water
+            'counts_as_water': counts_as_water,
+            'user_id': current_user.user_id
         }
 
         # Save to database
@@ -269,6 +270,13 @@ def update_drink(drink_id):  # noqa: C901
                 'message': 'Drink not found'
             }), 404
 
+        # Check ownership
+        if drink.user_id != current_user.user_id:
+            return jsonify({
+                'success': False,
+                'message': 'Unauthorized'
+            }), 403
+
         # Extract and validate data
         drink_name = data.get('drink_name', drink.drink_name).strip()
         drink_water_percentage = data.get('drink_water_percentage', drink.drink_water_percentage)
@@ -307,7 +315,7 @@ def update_drink(drink_id):  # noqa: C901
 
         # Check if new name conflicts with existing drink (excluding current drink)
         if drink_name != drink.drink_name:
-            existing_drink = ControllerDrinks.get_drink_name(drink_name)
+            existing_drink = ControllerDrinks.get_drink_name(drink_name, current_user.user_id)
             if existing_drink:
                 return jsonify({
                     'success': False,
@@ -352,6 +360,13 @@ def delete_drink(drink_id):
                 'success': False,
                 'message': 'Drink not found'
             }), 404
+
+        # Check ownership
+        if drink.user_id != current_user.user_id:
+            return jsonify({
+                'success': False,
+                'message': 'Unauthorized'
+            }), 403
 
         # Check if drink is being used in drink logs
         from .models import DrinkLog

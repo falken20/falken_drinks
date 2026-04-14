@@ -58,19 +58,19 @@ class ControllerDrinks:
         return Drink.query.filter_by(drink_id=id).first()
 
     @staticmethod
-    def get_drink_name(name: str):
+    def get_drink_name(name: str, user_id: int = None):
         Log.info(
             f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
-        return Drink.query.filter_by(drink_name=name).first()
+        return Drink.query.filter_by(drink_name=name, user_id=user_id).first()
 
     @staticmethod
-    def get_or_create_drink(drink_name: str, alcohol_percentage: float = 0, drink_total_quantity: int = 0):
+    def get_or_create_drink(drink_name: str, alcohol_percentage: float = 0, drink_total_quantity: int = 0, user_id: int = None):
         """Get existing drink or create new one if it doesn't exist"""
         Log.info(
             f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
         try:
-            # Try to find existing drink
-            drink = Drink.query.filter_by(drink_name=drink_name).first()
+            # Try to find existing drink for this user
+            drink = Drink.query.filter_by(drink_name=drink_name, user_id=user_id).first()
 
             if not drink:
                 # Create new drink if it doesn't exist
@@ -78,7 +78,8 @@ class ControllerDrinks:
                 drink_data = {
                     'drink_name': drink_name,
                     'drink_water_percentage': int(water_percentage),
-                    'drink_alcohol_percentage': int(alcohol_percentage)
+                    'drink_alcohol_percentage': int(alcohol_percentage),
+                    'user_id': user_id
                 }
                 drink = ControllerDrinks.add_drink(drink_data)
 
@@ -88,10 +89,10 @@ class ControllerDrinks:
             return None
 
     @staticmethod
-    def get_drinks():
+    def get_drinks(user_id: int = None):
         Log.info(
             f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
-        all_drinks = Drink.query.all()
+        all_drinks = Drink.query.filter_by(user_id=user_id).all()
         Log.debug(f"Drinks found: {len(all_drinks)}")
         return all_drinks
 
@@ -108,6 +109,39 @@ class ControllerDrinks:
             Log.error("Error in ControllerDrinks.add_drink", err=e, sys=sys)
             db.session.rollback()
             return None
+
+    @staticmethod
+    def seed_default_drinks(user_id: int) -> None:
+        """Create the 9 default drink types for a new user"""
+        Log.info(
+            f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
+        default_drinks = [
+            {'drink_name': 'Water', 'drink_water_percentage': 100, 'drink_alcohol_percentage': 0,
+             'counts_as_water': True, 'drink_image': 'icons8-water-96.png'},
+            {'drink_name': 'Coffee', 'drink_water_percentage': 99, 'drink_alcohol_percentage': 0,
+             'counts_as_water': False, 'drink_image': 'icons8-coffee-96.png'},
+            {'drink_name': 'Wine', 'drink_water_percentage': 88, 'drink_alcohol_percentage': 12,
+             'counts_as_water': False, 'drink_image': 'icons8-wine-96.png'},
+            {'drink_name': 'Beer', 'drink_water_percentage': 93, 'drink_alcohol_percentage': 5,
+             'counts_as_water': False, 'drink_image': 'icons8-beer-96.png'},
+            {'drink_name': 'Cocktail', 'drink_water_percentage': 80, 'drink_alcohol_percentage': 15,
+             'counts_as_water': False, 'drink_image': 'icons8-cocktail-96.png'},
+            {'drink_name': 'Shot', 'drink_water_percentage': 60, 'drink_alcohol_percentage': 40,
+             'counts_as_water': False, 'drink_image': 'icons8-shot-96.png'},
+            {'drink_name': 'Soda', 'drink_water_percentage': 99, 'drink_alcohol_percentage': 0,
+             'counts_as_water': True, 'drink_image': 'icons8-soda-96.png'},
+            {'drink_name': 'Milk', 'drink_water_percentage': 88, 'drink_alcohol_percentage': 0,
+             'counts_as_water': True, 'drink_image': 'icons8-milk-96.png'},
+            {'drink_name': 'Energy', 'drink_water_percentage': 97, 'drink_alcohol_percentage': 0,
+             'counts_as_water': False, 'drink_image': 'icons8-energy-96.png'},
+        ]
+        try:
+            for drink_data in default_drinks:
+                drink_data['user_id'] = user_id
+                ControllerDrinks.add_drink(drink_data)
+            Log.info(f"Seeded {len(default_drinks)} default drinks for user_id={user_id}")
+        except Exception as e:
+            Log.error("Error in ControllerDrinks.seed_default_drinks", err=e, sys=sys)
 
     @staticmethod
     def delete_drink(id: int) -> None:
