@@ -2,9 +2,19 @@
 
 import unittest
 from unittest.mock import patch, MagicMock
+from types import SimpleNamespace
 
 from .basetest import BaseTestCase
-from falken_drinks.app import create_app, settings
+from falken_drinks.app import (
+    create_app,
+    ensure_schema_compatibility,
+    settings,
+    _migrate_drink_logs_date_created,
+    _migrate_drinks_counts_as_water,
+    _migrate_drinks_user_id,
+    _migrate_users_name_nullable,
+    _migrate_users_password_length,
+)
 from falken_drinks.models import db, User
 
 
@@ -231,6 +241,230 @@ class TestEnsureSchemaCompatibility(BaseTestCase):
             required_cols = {'log_id', 'drink_id', 'user_id', 'date_created',
                             'drink_total_quantity', 'drink_water_quantity', 'drink_alcohol_quantity'}
             self.assertTrue(required_cols.issubset(logs_columns))
+
+
+class TestAppMigrationHelpers(BaseTestCase):
+    """Unit tests for app.py migration helper functions."""
+
+    @staticmethod
+    def _mock_tx_connection():
+        conn = MagicMock()
+        tx_ctx = MagicMock()
+        tx_ctx.__enter__.return_value = conn
+        tx_ctx.__exit__.return_value = False
+        return conn, tx_ctx
+
+    def test_migrate_drinks_counts_as_water_skips_when_table_missing(self):
+        inspector = MagicMock()
+        inspector.get_table_names.return_value = ['users']
+
+        with patch('falken_drinks.app.db.engine.begin') as begin_mock:
+            _migrate_drinks_counts_as_water(inspector, 'sqlite')
+
+        begin_mock.assert_not_called()
+
+    def test_migrate_drinks_counts_as_water_applies_for_postgresql(self):
+        inspector = MagicMock()
+        inspector.get_table_names.return_value = ['drinks']
+        inspector.get_columns.return_value = [
+            {'name': 'drink_id'},
+            {'name': 'drink_name'},
+        ]
+        conn, tx_ctx = self._mock_tx_connection()
+
+        with patch('falken_drinks.app.db.engine.begin', return_value=tx_ctx):
+            _migrate_drinks_counts_as_water(inspector, 'postgresql')
+
+        self.assertEqual(conn.execute.call_count, 2)
+        executed_sql = [str(call.args[0]) for call in conn.execute.call_args_list]
+        self.assertIn('DEFAULT TRUE', executed_sql[0])
+        self.assertIn('counts_as_water = FALSE', executed_sql[1])
+
+    def test_migrate_drinks_counts_as_water_applies_for_sqlite(self):
+        inspector = MagicMock()
+        inspector.get_table_names.return_value = ['drinks']
+        inspector.get_columns.return_value = [{'name': 'drink_id'}]
+        conn, tx_ctx = self._mock_tx_connection()
+
+        with patch('falken_drinks.app.db.engine.begin', return_value=tx_ctx):
+            _migrate_drinks_counts_as_water(inspector, 'sqlite')
+
+        self.assertEqual(conn.execute.call_count, 2)
+        executed_sql = [str(call.args[0]) for call in conn.execute.call_args_list]
+        self.assertIn('DEFAULT 1', executed_sql[0])
+        self.assertIn('counts_as_water = 0', executed_sql[1])
+
+    def test_migrate_users_password_length_applies_for_short_postgres_column(self):
+        inspector = MagicMock()
+        inspector.get_table_names.return_value = ['users']
+        inspector.get_columns.return_value = [
+            {'name': 'password', 'type': SimpleNamespace(length=120)}
+        ]
+        conn, tx_ctx = self._mock_tx_connection()
+
+        with patch('falken_drinks.app.db.engine.begin', return_value=tx_ctx):
+            _migrate_users_password_length(inspector, 'postgresql')
+
+        conn.execute.assert_called_once()
+        self.assertIn('password TYPE VARCHAR(255)', str(conn.execute.call_args.args[0]))
+
+    def test_migrate_users_password_length_skips_non_postgresql(self):
+        inspector = MagicMock()
+        inspector.get_table_names.return_value = ['users']
+        inspector.get_columns.return_value = [
+            {'name': 'password', 'type': SimpleNamespace(length=100)}
+        ]
+
+        with patch('falken_drinks.app.db.engine.begin') as begin_mock:
+            _migrate_users_password_length(inspector, 'sqlite')
+
+        begin_mock.assert_not_called()
+
+    def test_migrate_users_password_length_skips_when_password_length_is_unknown(self):
+        inspector = MagicMock()
+        inspector.get_table_names.return_value = ['users']
+        inspector.get_columns.return_value = [
+            {'name': 'password', 'type': SimpleNamespace()}
+        ]
+
+        with patch('falken_drinks.app.db.engine.begin') as begin_mock:
+            _migrate_users_password_length(inspector, 'postgresql')
+
+        begin_mock.assert_not_called()
+
+    def test_migrate_drink_logs_date_created_applies_for_date_column(self):
+        inspector = MagicMock()
+        inspector.get_table_names.return_value = ['drinks_logs']
+        inspector.get_columns.return_value = [
+            {'name': 'date_created', 'type': 'DATE'}
+        ]
+        conn, tx_ctx = self._mock_tx_connection()
+
+        with patch('falken_drinks.app.db.engine.begin', return_value=tx_ctx):
+            _migrate_drink_logs_date_created(inspector, 'postgresql')
+
+        conn.execute.assert_called_once()
+        executed_sql = str(conn.execute.call_args.args[0])
+        self.assertIn('date_created TYPE TIMESTAMP', executed_sql)
+        self.assertIn('USING date_created::timestamp', executed_sql)
+
+    def test_migrate_drink_logs_date_created_skips_timestamp_column(self):
+        inspector = MagicMock()
+        inspector.get_table_names.return_value = ['drinks_logs']
+        inspector.get_columns.return_value = [
+            {'name': 'date_created', 'type': 'TIMESTAMP'}
+        ]
+
+        with patch('falken_drinks.app.db.engine.begin') as begin_mock:
+            _migrate_drink_logs_date_created(inspector, 'postgresql')
+
+        begin_mock.assert_not_called()
+
+    def test_migrate_drink_logs_date_created_skips_when_column_missing(self):
+        inspector = MagicMock()
+        inspector.get_table_names.return_value = ['drinks_logs']
+        inspector.get_columns.return_value = [
+            {'name': 'log_id', 'type': 'INTEGER'}
+        ]
+
+        with patch('falken_drinks.app.db.engine.begin') as begin_mock:
+            _migrate_drink_logs_date_created(inspector, 'postgresql')
+
+        begin_mock.assert_not_called()
+
+    def test_migrate_drinks_user_id_applies_when_missing(self):
+        inspector = MagicMock()
+        inspector.get_table_names.return_value = ['drinks']
+        inspector.get_columns.return_value = [{'name': 'drink_id'}]
+        conn, tx_ctx = self._mock_tx_connection()
+
+        with patch('falken_drinks.app.db.engine.begin', return_value=tx_ctx):
+            _migrate_drinks_user_id(inspector)
+
+        conn.execute.assert_called_once()
+        self.assertIn('ADD COLUMN user_id INTEGER', str(conn.execute.call_args.args[0]))
+
+    def test_migrate_users_name_nullable_applies_for_postgresql_not_null(self):
+        inspector = MagicMock()
+        inspector.get_table_names.return_value = ['users']
+        inspector.get_columns.return_value = [
+            {'name': 'name', 'nullable': False}
+        ]
+        conn, tx_ctx = self._mock_tx_connection()
+
+        with patch('falken_drinks.app.db.engine.begin', return_value=tx_ctx):
+            _migrate_users_name_nullable(inspector, 'postgresql')
+
+        conn.execute.assert_called_once()
+        self.assertIn('name DROP NOT NULL', str(conn.execute.call_args.args[0]))
+
+    def test_migrate_users_name_nullable_skips_non_postgresql(self):
+        inspector = MagicMock()
+        inspector.get_table_names.return_value = ['users']
+        inspector.get_columns.return_value = [
+            {'name': 'name', 'nullable': False}
+        ]
+
+        with patch('falken_drinks.app.db.engine.begin') as begin_mock:
+            _migrate_users_name_nullable(inspector, 'sqlite')
+
+        begin_mock.assert_not_called()
+
+    def test_migrate_users_name_nullable_skips_when_already_nullable(self):
+        inspector = MagicMock()
+        inspector.get_table_names.return_value = ['users']
+        inspector.get_columns.return_value = [
+            {'name': 'name', 'nullable': True}
+        ]
+
+        with patch('falken_drinks.app.db.engine.begin') as begin_mock:
+            _migrate_users_name_nullable(inspector, 'postgresql')
+
+        begin_mock.assert_not_called()
+
+    def test_ensure_schema_compatibility_calls_all_migration_helpers(self):
+        with patch('falken_drinks.app._migrate_drinks_counts_as_water') as m1, \
+                patch('falken_drinks.app._migrate_users_password_length') as m2, \
+                patch('falken_drinks.app._migrate_drink_logs_date_created') as m3, \
+                patch('falken_drinks.app._migrate_drinks_user_id') as m4, \
+                patch('falken_drinks.app._migrate_users_name_nullable') as m5:
+            ensure_schema_compatibility(self.app)
+
+        self.assertTrue(m1.called)
+        self.assertTrue(m2.called)
+        self.assertTrue(m3.called)
+        self.assertTrue(m4.called)
+        self.assertTrue(m5.called)
+
+
+class TestCreateAppAdditionalCoverage(BaseTestCase):
+    """Additional tests to cover create_app exception and non-testing branches."""
+
+    def test_create_app_logs_full_config_in_non_testing_mode(self):
+        with patch.object(settings, 'CONFIG_MODE', 'development'):
+            with patch('falken_drinks.app.Log.info_dict') as info_dict_mock:
+                app = create_app()
+
+        self.assertIsNotNone(app)
+        self.assertTrue(info_dict_mock.called)
+
+    def test_create_app_returns_none_when_flask_init_fails(self):
+        with patch('falken_drinks.app.Flask', side_effect=RuntimeError('boom')):
+            app = create_app()
+
+        self.assertIsNone(app)
+
+    def test_user_loader_returns_none_when_session_get_raises(self):
+        app = create_app(settings.CONFIG_ENV['testing'])
+
+        self.assertTrue(hasattr(app, 'login_manager'))
+        self.assertIsNotNone(app.login_manager._user_callback)
+
+        with app.app_context():
+            with patch('falken_drinks.app.db.session.get', side_effect=Exception('boom')):
+                loaded_user = app.login_manager._user_callback('1')
+
+        self.assertIsNone(loaded_user)
 
 
 if __name__ == '__main__':
