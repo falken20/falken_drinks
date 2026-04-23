@@ -200,3 +200,58 @@ th, td {
     visibility: visible;
     opacity: 1;
 }
+
+/* ===================== Mobile-first responsive fixes ===================== */
+@media (max-width: 576px) {
+    /* Base font size reduction for small screens */
+    .mainPage {
+        font-size: 1.4em;
+    }
+
+    /* Prevent hero-body horizontal overflow */
+    .hero-body {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+
+    /* Keep tooltips inside the viewport on small screens */
+    .breakdown-tooltip .breakdown-tooltiptext {
+        width: 160px;
+        margin-left: -80px;
+        font-size: 0.7rem;
+    }
+
+    /* Make tables scroll horizontally instead of overflowing */
+    .table-responsive-mobile {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Enlarge tap targets for icon buttons */
+    .buttons_app {
+        padding: 0.35rem 0.5rem !important;
+    }
+
+    /* Analytics summary cards: 2 columns on mobile */
+    .analytics-summary-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    /* Analytics data row: wrap to 2 columns on mobile */
+    .analytics-data-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media (max-width: 360px) {
+    /* Very small screens: single column for analytics data */
+    .analytics-data-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    /* Navbar buttons: allow wrapping so they never overflow */
+    .navbar .buttons {
+        flex-wrap: wrap !important;
+        justify-content: flex-end !important;
+    }
+}

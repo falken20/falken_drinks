@@ -48,7 +48,7 @@
 
     <!-- Summary Cards -->
     <div style="max-width: 700px; margin: 0 auto 12px auto;">
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
+        <div class="analytics-summary-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
             <div style="background: rgba(13, 110, 253, 0.3); border-radius: 8px; padding: 4px 8px;">
                 <div style="color: #adb5bd; font-size: 0.62rem;">Total Liquid</div>
                 <div style="color: white; font-size: 0.95rem; font-weight: 700;">{{ analytics.summary.total_liquid }}ml</div>
@@ -77,7 +77,7 @@
             <div style="background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 5px 11px; margin-bottom: 5px; text-align: left;">
                 <div style="color: white; font-size: 0.78rem; font-weight: 600; margin-bottom: 3px;">{{ group.label }}</div>
                 
-                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 3px;">
+                <div class="analytics-data-grid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 3px;">
                     <div>
                         <div style="color: #adb5bd; font-size: 0.6rem;">Liquid</div>
                         <div style="color: white; font-size: 0.75rem; font-weight: 600;">{{ group.total_liquid }}ml</div>
