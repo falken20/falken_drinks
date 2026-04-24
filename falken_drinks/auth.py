@@ -43,7 +43,7 @@ def login_post():
             f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
         email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '')
-        remember = True if request.form.get('remember') else False
+        remember = bool(request.form.get('remember'))
 
         if not _EMAIL_PATTERN.match(email):
             flash('Please check your login details and try again.')

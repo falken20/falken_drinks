@@ -152,8 +152,13 @@ class ControllerDrinks:
     def delete_drink(id: int) -> None:
         Log.info(
             f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
-        Drink.query.filter_by(drink_id=id).delete()
-        db.session.commit()
+        try:
+            Drink.query.filter_by(drink_id=id).delete()
+            db.session.commit()
+        except Exception as e:
+            Log.error("Error in ControllerDrinks.delete_drink", err=e, sys=sys)
+            db.session.rollback()
+            raise
 
 
 class ControllerDrinkLogs:
@@ -222,58 +227,50 @@ class ControllerDrinkLogs:
             target_date = today_cet()
 
         try:
-            # Query all drink logs for the user on the target date
-            # Since date_created is DateTime, filter by date range
+            # Single JOIN query — eliminates N+1 per-log Drink lookups
             start_datetime = datetime.combine(target_date, datetime.min.time())
             end_datetime = datetime.combine(target_date, datetime.max.time())
 
-            logs = DrinkLog.query.filter(
+            rows = db.session.query(DrinkLog, Drink).join(
+                Drink, DrinkLog.drink_id == Drink.drink_id
+            ).filter(
                 DrinkLog.user_id == user_id,
                 DrinkLog.date_created >= start_datetime,
                 DrinkLog.date_created <= end_datetime
             ).all()
 
-            # Calculate totals by drink type (entire drink amount, not just content)
+            # Calculate totals in a single pass
             total_liquid = 0
-            total_water = 0  # Only pure water drinks
-            total_coffee = 0  # Coffee/tea drinks (full amount)
-            total_alcohol = 0  # Alcoholic drinks (full amount)
-            total_other = 0  # Other drinks (full amount)
+            total_water = 0
+            total_coffee = 0
+            total_alcohol = 0
+            total_other = 0
+            total_water_for_progress = 0
 
-            for log in logs:
-                drink = Drink.query.filter_by(drink_id=log.drink_id).first()
-                if drink:
-                    total_liquid += log.drink_total_quantity
+            for log, drink in rows:
+                total_liquid += log.drink_total_quantity
 
-                    # Categorize by drink type
-                    if drink.drink_alcohol_percentage > 0:
-                        # Any drink with alcohol counts as alcohol (full amount)
-                        total_alcohol += log.drink_total_quantity
-                    elif drink.drink_water_percentage >= 98:
-                        # Pure water (98%+ water)
-                        total_water += log.drink_total_quantity
-                    elif drink.drink_water_percentage < 90:
-                        # Coffee/tea (less than 90% water, no alcohol)
-                        total_coffee += log.drink_total_quantity
-                    else:
-                        # Other beverages
-                        total_other += log.drink_total_quantity
+                if drink.counts_as_water:
+                    total_water_for_progress += log.drink_water_quantity
+
+                if drink.drink_alcohol_percentage > 0:
+                    total_alcohol += log.drink_total_quantity
+                elif drink.drink_water_percentage >= 98:
+                    total_water += log.drink_total_quantity
+                elif drink.drink_water_percentage < 90:
+                    total_coffee += log.drink_total_quantity
+                else:
+                    total_other += log.drink_total_quantity
 
             Log.debug(f"Total water: {total_water} ml, "
                       f"Total coffee/tea: {total_coffee} ml, "
                       f"Total alcohol: {total_alcohol} ml, "
                       f"Total other: {total_other} ml")
 
+            Log.debug(f"Total water for progress: {total_water_for_progress} ml")
+
             # Daily goal (you can make this configurable per user later)
             daily_goal = 2560  # ml (approximately 8 glasses of water)
-
-            # Calculate progress percentage based only on water content from drinks that count as water
-            total_water_for_progress = 0
-            for log in logs:
-                drink = Drink.query.filter_by(drink_id=log.drink_id).first()
-                if drink and drink.counts_as_water:
-                    total_water_for_progress += log.drink_water_quantity
-            Log.debug(f"Total water for progress: {total_water_for_progress} ml")
 
             progress_percentage = min(100, (total_water_for_progress / daily_goal * 100)) if daily_goal > 0 else 0
 

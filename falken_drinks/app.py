@@ -159,6 +159,10 @@ def create_app(test_config=None):
             app.config.from_object(test_config)
         else:
             app.config.from_object(settings.CONFIG_ENV[config_mode])
+            if config_mode == 'production' and not os.getenv('PRODUCTION_DATABASE_URL'):
+                Log.warning(
+                    'PRODUCTION_DATABASE_URL is not set. '
+                    'Falling back to in-memory SQLite — ALL DATA WILL BE LOST on restart.')
         app.config['TEMPLATE_AUTO_RELOAD'] = True
         app.config['DEBUG'] = config_mode == 'development'
         app.config['ENV'] = config_mode

@@ -195,7 +195,7 @@ class DrinkLog(db.Model):
 
     @validates('drink_id', 'user_id')
     def validate_id(self, key, value):
-        if not value:
+        if value is None:
             raise ValueError("Drink ID or User ID can't be empty")
         return value
 

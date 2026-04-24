@@ -60,17 +60,10 @@ def shorten_url(url: str) -> str:
 
 
 class Config:
-    SQLALCHEMY_TRACK_MODIFICATIONS = True
-
-    @property
-    def SQLALCHEMY_DATABASE_URI(self):
-        return self.SQLALCHEMY_DATABASE_URI
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     def __repr__(self) -> str:
         return "Config()"
-
-    def __str__(self) -> str:
-        return self.SQLALCHEMY_DATABASE_URI
 
 
 # Valid SQLite URL forms are:
@@ -98,9 +91,18 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     PRODUCTION = True
     DEBUG = False
-    # SQLALCHEMY_DATABASE_URI = os.environ['PRODUCTION_DATABASE_URL'].replace("://", "ql://", 1)
-    # URL from Neon is not neccesary change :// by ql://
-    SQLALCHEMY_DATABASE_URI = os.getenv('PRODUCTION_DATABASE_URL', 'sqlite:///:memory:')
+    SQLALCHEMY_DATABASE_URI = os.getenv('PRODUCTION_DATABASE_URL', '')
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+
+    @classmethod
+    def _warn_if_missing_db(cls):
+        if not cls.SQLALCHEMY_DATABASE_URI:
+            Log.warning(
+                'PRODUCTION_DATABASE_URL is not set. '
+                'Falling back to in-memory SQLite — ALL DATA WILL BE LOST on restart.')
+            cls.SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
 
 
 class Settings(BaseSettings):

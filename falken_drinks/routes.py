@@ -39,7 +39,6 @@ def add_drink():  # noqa: C901
         try:
             drink_total_quantity = int(drink_total_quantity)
             alcohol_percentage = float(alcohol_percentage)
-            drink_total_quantity = int(drink_total_quantity)
         except (ValueError, TypeError):
             return jsonify({
                 'success': False,
@@ -51,6 +50,9 @@ def add_drink():  # noqa: C901
                 'success': False,
                 'message': 'Invalid drink name or amount'
             }), 400
+
+        if len(drink_name) > 100:
+            return jsonify({'success': False, 'message': 'Drink name cannot exceed 100 characters'}), 400
 
         # Get or create drink
         drink = ControllerDrinks.get_or_create_drink(
@@ -197,6 +199,9 @@ def create_drink():  # noqa: C901
             return jsonify({'success': False, 'message': 'Drink name cannot exceed 100 characters'}), 400
         if len(drink_image) > 100:
             return jsonify({'success': False, 'message': 'Drink image path cannot exceed 100 characters'}), 400
+        # Prevent path traversal in image filename
+        if drink_image and ('/' in drink_image or '\\' in drink_image or '..' in drink_image):
+            return jsonify({'success': False, 'message': 'Invalid drink image filename'}), 400
 
         # Convert percentages to integers
         try:
@@ -296,7 +301,7 @@ def update_drink(drink_id):  # noqa: C901
         drink_water_percentage = data.get('drink_water_percentage', drink.drink_water_percentage)
         drink_alcohol_percentage = data.get('drink_alcohol_percentage', drink.drink_alcohol_percentage)
         drink_image = data.get('drink_image', drink.drink_image)
-        counts_as_water = data.get('counts_as_water', drink.counts_as_water if hasattr(drink, 'counts_as_water') else True)
+        counts_as_water = data.get('counts_as_water', drink.counts_as_water)
 
         if not drink_name:
             return jsonify({
