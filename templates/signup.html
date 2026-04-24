@@ -14,22 +14,23 @@
                 {% endfor %}
             {% endif %}
             {% endwith %}
-            <form method="POST" action="/signup">
+            <form method="POST" action="/signup" autocomplete="on">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="field">
                     <div class="control">
-                        <input class="input is-large" type="email" name="email" placeholder="Email" autofocus="">
+                        <input class="input is-large" type="email" name="email" placeholder="Email" autofocus="" autocomplete="email">
                     </div>
                 </div>
 
                 <div class="field">
                     <div class="control">
-                        <input class="input is-large" type="text" name="name" placeholder="Name (optional)">
+                        <input class="input is-large" type="text" name="name" placeholder="Name (optional)" autocomplete="name">
                     </div>
                 </div>
 
                 <div class="field">
                     <div class="control">
-                        <input class="input is-large" type="password" name="password" placeholder="Password">
+                        <input class="input is-large" type="password" name="password" placeholder="Password (min. 8 characters)" autocomplete="new-password">
                     </div>
                 </div>
 

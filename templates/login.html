@@ -12,16 +12,17 @@
                 </div>
             {% endif %}
             {% endwith %}
-            <form method="POST" action="/login">
+            <form method="POST" action="/login" autocomplete="on">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="field">
                     <div class="contro">
-                        <input class="input is-large" type="email" name="email" placeholder="Your Email" autofocus="">
+                        <input class="input is-large" type="email" name="email" placeholder="Your Email" autofocus="" autocomplete="email">
                     </div>
                 </div>
 
                 <div class="field">
                     <div class="control">
-                        <input class="input is-large" type="password" name="password" placeholder="Your Password">
+                        <input class="input is-large" type="password" name="password" placeholder="Your Password" autocomplete="current-password">
                     </div>
                 </div>
                 <div class="field">

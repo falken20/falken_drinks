@@ -21,7 +21,7 @@ class TestModelUser(BaseTestCase):
         self.assertIn('TestUser', str(user))
 
     def test_user_serialize(self):
-        """Test User serialize method"""
+        """Test User serialize method excludes password field"""
         user = User(email='test@test.com', name='Test User', password='password123')
         db.session.add(user)
         db.session.commit()
@@ -29,7 +29,7 @@ class TestModelUser(BaseTestCase):
         self.assertIsInstance(serialized, dict)
         self.assertIn('email', serialized)
         self.assertIn('name', serialized)
-        self.assertIn('password', serialized)
+        self.assertNotIn('password', serialized)  # password must be excluded for security
         self.assertIn('user_id', serialized)
         self.assertEqual(serialized['email'], 'test@test.com')
         self.assertEqual(serialized['name'], 'Test User')

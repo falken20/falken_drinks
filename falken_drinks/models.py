@@ -80,7 +80,10 @@ class User(UserMixin, db.Model):
     # Check to use serialize()
     # How to serialize SqlAlchemy PostgreSQL query to JSON => https://stackoverflow.com/a/46180522
     def serialize(self):
-        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
+        _excluded = {'password'}
+        return {c.key: getattr(self, c.key)
+                for c in inspect(self).mapper.column_attrs
+                if c.key not in _excluded}
 
     # We have to override the method get_id() to return the user_id because we use
     # the user_id instead of the id field. And Flask-Login uses the id field by default.

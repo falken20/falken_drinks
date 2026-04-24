@@ -31,6 +31,7 @@ class BaseTestCase(unittest.TestCase):
         self.app = create_app(settings.CONFIG_ENV['testing'])
         self.app.config['SECRET_KEY'] = 'secret_key_test'
         self.app.config['TESTING'] = True
+        self.app.config['WTF_CSRF_ENABLED'] = False
         self.app.config['CONFIG_MODE'] = 'testing'
         self.app.config['ENV'] = 'testing'
         self.app.config['SQLALCHEMY_DATABASE_URI'] = settings.CONFIG_ENV['testing'].SQLALCHEMY_DATABASE_URI

@@ -1,11 +1,13 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 from datetime import datetime
+import html
 import sys
 
 from .controllers import ControllerDrinks, ControllerDrinkLogs
 from .config import today_cet
 from .logger import Log
+from .models import db, DrinkLog
 
 
 api_routes = Blueprint('api_routes', __name__)
@@ -16,7 +18,7 @@ api_routes = Blueprint('api_routes', __name__)
 def add_drink():  # noqa: C901
     try:
         data = request.get_json()
-        Log.info(f"Received data: {data}")
+        Log.info(f"Processing add_drink for user_id={current_user.user_id}")
 
         if not data:
             return jsonify({
@@ -25,7 +27,9 @@ def add_drink():  # noqa: C901
             }), 400
 
         # Extract data from request
-        drink_name = data.get('drink_name')
+        drink_name = data.get('drink_name', '')
+        if isinstance(drink_name, str):
+            drink_name = drink_name.strip()
         drink_total_quantity = data.get('amount', 0)
         alcohol_percentage = data.get('alcohol_percentage', 0)
 
@@ -36,11 +40,10 @@ def add_drink():  # noqa: C901
             drink_total_quantity = int(drink_total_quantity)
             alcohol_percentage = float(alcohol_percentage)
             drink_total_quantity = int(drink_total_quantity)
-        except (ValueError, TypeError) as e:
-            Log.error(f"Data type conversion error: {e}")
+        except (ValueError, TypeError):
             return jsonify({
                 'success': False,
-                'message': f'Invalid data types: {str(e)}'
+                'message': 'Invalid data types provided'
             }), 400
 
         if not drink_name or drink_total_quantity <= 0:
@@ -98,7 +101,7 @@ def add_drink():  # noqa: C901
         if result:
             return jsonify({
                 'success': True,
-                'message': f'Added {drink_total_quantity}ml of {drink_name}',
+                'message': f'Added {drink_total_quantity}ml of {html.escape(str(drink_name))}',
                 'log_id': result.log_id
             }), 200
         else:
@@ -168,7 +171,7 @@ def create_drink():  # noqa: C901
     """Create a new drink"""
     try:
         data = request.get_json()
-        Log.info(f"Creating drink with data: {data}")
+        Log.info(f"Creating drink for user_id={current_user.user_id}")
 
         if not data:
             return jsonify({
@@ -188,6 +191,12 @@ def create_drink():  # noqa: C901
                 'success': False,
                 'message': 'Drink name is required'
             }), 400
+
+        # Enforce field length limits matching the DB model
+        if len(drink_name) > 100:
+            return jsonify({'success': False, 'message': 'Drink name cannot exceed 100 characters'}), 400
+        if len(drink_image) > 100:
+            return jsonify({'success': False, 'message': 'Drink image path cannot exceed 100 characters'}), 400
 
         # Convert percentages to integers
         try:
@@ -236,7 +245,7 @@ def create_drink():  # noqa: C901
         if result:
             return jsonify({
                 'success': True,
-                'message': f'Drink "{drink_name}" created successfully',
+                'message': f'Drink "{html.escape(drink_name)}" created successfully',
                 'drink': result.serialize()
             }), 201
         else:
@@ -259,7 +268,7 @@ def update_drink(drink_id):  # noqa: C901
     """Update an existing drink"""
     try:
         data = request.get_json()
-        Log.info(f"Updating drink {drink_id} with data: {data}")
+        Log.info(f"Updating drink_id={drink_id} for user_id={current_user.user_id}")
 
         if not data:
             return jsonify({
@@ -334,18 +343,16 @@ def update_drink(drink_id):  # noqa: C901
         drink.drink_image = drink_image if drink_image else None
         drink.counts_as_water = counts_as_water
 
-        from .models import db
         db.session.commit()
 
         return jsonify({
             'success': True,
-            'message': f'Drink "{drink_name}" updated successfully',
+            'message': f'Drink "{html.escape(drink_name)}" updated successfully',
             'drink': drink.serialize()
         }), 200
 
     except Exception as e:
         Log.error("Error in update_drink route", err=e, sys=sys)
-        from .models import db
         db.session.rollback()
         return jsonify({
             'success': False,
@@ -374,7 +381,6 @@ def delete_drink(drink_id):
             }), 403
 
         # Check if drink is being used in drink logs
-        from .models import DrinkLog
         logs_count = DrinkLog.query.filter_by(drink_id=drink_id).count()
         if logs_count > 0:
             message = (
@@ -392,7 +398,7 @@ def delete_drink(drink_id):
 
         return jsonify({
             'success': True,
-            'message': f'Drink "{drink_name}" deleted successfully'
+            'message': f'Drink "{html.escape(drink_name)}" deleted successfully'
         }), 200
 
     except Exception as e:

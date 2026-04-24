@@ -6,6 +6,10 @@ import os
 import sys
 from dotenv import load_dotenv, find_dotenv
 from flask_login import LoginManager
+from flask_wtf.csrf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_talisman import Talisman
 
 from .logger import Log, console
 from .config import get_settings, print_settings_environment
@@ -19,7 +23,9 @@ load_dotenv(find_dotenv())
 
 settings = get_settings()
 Log.info("***** Environment vars:")
-Log.info_dict(settings.dict(), level_log="INFO")
+_safe_settings = {k: ('***' if k.upper() in ('SECRET_KEY', 'PASSWORD', 'TOKEN') else v)
+                  for k, v in settings.dict().items()}
+Log.info_dict(_safe_settings, level_log="INFO")
 
 console.rule(settings.APP_DATA['title'] + " "
              + " " + settings.APP_DATA['version'] + " " + settings.APP_DATA['author'])
@@ -154,9 +160,53 @@ def create_app(test_config=None):
         else:
             app.config.from_object(settings.CONFIG_ENV[config_mode])
         app.config['TEMPLATE_AUTO_RELOAD'] = True
-        app.config['DEBUG'] = True if config_mode == "development" else False
+        app.config['DEBUG'] = config_mode == 'development'
         app.config['ENV'] = config_mode
+        app.config['MAX_CONTENT_LENGTH'] = 1 * 1024 * 1024  # 1 MB max request size
+        app.config['REMEMBER_COOKIE_HTTPONLY'] = True
+        app.config['REMEMBER_COOKIE_SECURE'] = config_mode == 'production'
+        app.config['SESSION_COOKIE_HTTPONLY'] = True
+        app.config['SESSION_COOKIE_SECURE'] = config_mode == 'production'
+        app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
         Log.info(f"App config loaded from {config_mode} successfully")
+
+        # CSRF protection for all forms
+        CSRFProtect(app)
+
+        # Rate limiter (in-memory storage; switch to Redis in production)
+        Limiter(
+            get_remote_address,
+            app=app,
+            default_limits=[],
+            storage_uri='memory://'
+        )
+
+        # HTTP security headers (CSP relaxed to allow CDN assets)
+        csp = {
+            'default-src': ["'self'"],
+            'script-src': [
+                "'self'",
+                'https://cdn.jsdelivr.net',
+                'https://cdnjs.cloudflare.com',
+            ],
+            'style-src': [
+                "'self'",
+                "'unsafe-inline'",
+                'https://cdn.jsdelivr.net',
+                'https://cdnjs.cloudflare.com',
+            ],
+            'img-src': ["'self'", 'data:'],
+            'font-src': ["'self'", 'https://cdn.jsdelivr.net'],
+        }
+        Talisman(
+            app,
+            force_https=config_mode == 'production',
+            strict_transport_security=config_mode == 'production',
+            content_security_policy=csp,
+            frame_options='DENY',
+            x_content_type_options=True,
+            referrer_policy='strict-origin-when-cross-origin',
+        )
 
         db.init_app(app)
         Log.info("Database initialized successfully")
