@@ -1,12 +1,4 @@
 #!/usr/bin/env python3
-"""Compatibility wrapper for relocated migration script."""
-
-from scripts.migrations.migrate_add_counts_as_water import migrate_database
-
-
-if __name__ == '__main__':
-    migrate_database()
-#!/usr/bin/env python3
 # Migration script to add counts_as_water column to drinks table
 
 import sys

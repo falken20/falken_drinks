@@ -1,12 +1,4 @@
 #!/usr/bin/env python3
-"""Compatibility wrapper for relocated migration script."""
-
-from scripts.migrations.migrate_expand_user_password_length import migrate_database
-
-
-if __name__ == '__main__':
-    migrate_database()
-#!/usr/bin/env python3
 """Expand the users.password column to support modern password hashes."""
 
 import sys

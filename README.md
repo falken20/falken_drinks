@@ -146,7 +146,7 @@ This script runs:
 - `flake8` style checks
 
 Coverage note: the `87%` badge in the header is verified from the current Python suite (`coverage run -m pytest -q`).
-Last verified: `2026-04-21`.
+Last verified: `2026-04-24`.
 
 ### Run only Python tests
 
