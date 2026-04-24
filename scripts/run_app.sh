@@ -1,13 +1,8 @@
-#!/bin/sh
-
-# Compatibility wrapper: keep historical command working.
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-exec "$SCRIPT_DIR/scripts/run_app.sh" "$@"
 #!/usr/bin/env bash
 
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VENV_PATH="${ROOT_DIR}/.venv/bin/activate"
 
 if [[ -f "${VENV_PATH}" ]]; then

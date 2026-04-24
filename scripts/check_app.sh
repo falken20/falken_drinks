@@ -1,5 +1,9 @@
 #!/bin/sh
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$ROOT_DIR"
+
 if [ -x ".venv/bin/coverage" ]; then
 	COVERAGE_BIN=".venv/bin/coverage"
 else

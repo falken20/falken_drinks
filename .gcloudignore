@@ -55,6 +55,7 @@ build/
 # Documentation and CI
 README.md
 LICENSE
-check_app.sh
-migrate_*.py
+scripts/
+archive/
+instance/
 *.bak
