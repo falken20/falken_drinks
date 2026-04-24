@@ -143,8 +143,7 @@ def create_app(test_config=None):
         config_mode = settings.CONFIG_MODE
         Log.info(f"***** Running in {config_mode.upper()} mode")
 
-        app = Flask(__name__, template_folder="../templates",
-                    static_folder="../static")
+        app = Flask(__name__)
         Log.debug(f"App name: {app.name}")
         app.config.from_object(settings)
 

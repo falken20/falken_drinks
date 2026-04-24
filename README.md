@@ -1,5 +1,5 @@
 <div align="center">
-<img src="./static/images/logo_app.png" alt="Falken Drinks logo" width="320"/>
+<img src="./falken_drinks/static/images/logo_app.png" alt="Falken Drinks logo" width="320"/>
 
 # Falken Drinks
 
@@ -118,7 +118,7 @@ Core variables from `.env.sample`:
 ```bash
 LEVEL_LOG="DEBUG, INFO, WARNING, ERROR"
 CONFIG_MODE="development"
-DEVELOPMENT_DATABASE_URL="sqlite://database.db"
+DEVELOPMENT_DATABASE_URL="sqlite://instance/database.db"
 TESTING_DATABASE_URL="sqlite:///:memory:"
 PRODUCTION_DATABASE_URL=
 SECRET_KEY=
@@ -145,8 +145,8 @@ This script runs:
 - `flake8` syntax checks
 - `flake8` style checks
 
-Coverage note: the `87%` badge in the header is verified from the current Python suite (`coverage run -m pytest -q`).
-Last verified: `2026-04-21`.
+Coverage note: the coverage badge in the header is updated automatically by `./check_app.sh` after successful test runs.
+Last verified: `2026-04-24`.
 
 ### Run only Python tests
 
@@ -195,14 +195,20 @@ falken_drinks/
 │   ├── config.py       # Environment and settings
 │   ├── logger.py       # Logging utilities
 │   ├── cache.py        # Cache checks/helpers
-│   └── swagger.py      # Swagger configuration
-├── templates/          # Jinja2 templates
-├── static/             # CSS, JS and images
+│   ├── swagger.py      # Swagger configuration
+│   ├── templates/      # Jinja2 templates
+│   └── static/         # CSS, JS and images
 ├── tests/              # Python and JS tests
+├── scripts/            # Operational scripts
+│   ├── check_app.sh
+│   ├── run_app.sh
+│   └── migrations/     # Migration helper scripts
+├── instance/           # Local runtime data (e.g. sqlite db)
 ├── .github/            # CI, templates, prompts, agents, instructions
 ├── pyproject.toml      # Python project metadata and dependencies
 ├── package.json        # Jest configuration for frontend tests
-├── check_app.sh        # Python checks entrypoint
+├── check_app.sh        # Compatibility wrapper -> scripts/check_app.sh
+├── run_app.sh          # Compatibility wrapper -> scripts/run_app.sh
 └── app.yaml            # Google App Engine deployment config
 ```
 

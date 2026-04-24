@@ -33,9 +33,16 @@ LinkedIn = "https://www.linkedin.com/in/richionline/"
 
 [tool.setuptools]
 packages = ["falken_drinks"]
+include-package-data = true
 
 [tool.setuptools.package-dir]
 "falken_drinks" = "falken_drinks"
+
+[tool.setuptools.package-data]
+"falken_drinks" = [
+    "templates/**/*.html",
+    "static/**/*",
+]
 
 [tool.falken_drinks.app_data]
 title = "Falken Drinks"

@@ -82,7 +82,7 @@ class DevelopmentConfig(Config):
     DEBUG = True
     # The path to the database file is relative to the project root.
     base_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-    development_database_url = os.getenv('DEVELOPMENT_DATABASE_URL', 'sqlite://database.db')
+    development_database_url = os.getenv('DEVELOPMENT_DATABASE_URL', 'sqlite://instance/database.db')
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + \
         os.path.join(base_dir,
                      development_database_url.replace('sqlite://', ''))
