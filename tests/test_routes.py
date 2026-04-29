@@ -673,6 +673,65 @@ class TestDeleteDrinkLogRoute(BaseTestCase):
         self.assertFalse(data['success'])
 
 
+class TestSecurityValidations(BaseTestCase):
+    """Security validations added by the hardening audit."""
+
+    def _login(self):
+        self.create_user()
+        self.client.post('/login', data=self.mock_user, follow_redirects=True)
+
+    def test_add_drink_rejects_name_over_100_chars(self):
+        self._login()
+        payload = {'drink_name': 'A' * 101, 'amount': 250, 'alcohol_percentage': 0}
+        response = self.client.post(
+            '/api/add_drink', data=json.dumps(payload), content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('cannot exceed 100', json.loads(response.data)['message'])
+
+    def test_create_drink_rejects_name_over_100_chars(self):
+        self._login()
+        payload = {
+            'drink_name': 'A' * 101,
+            'drink_water_percentage': 100,
+            'drink_alcohol_percentage': 0,
+        }
+        response = self.client.post(
+            '/api/drinks', data=json.dumps(payload), content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('cannot exceed 100', json.loads(response.data)['message'])
+
+    def test_create_drink_rejects_image_path_traversal(self):
+        self._login()
+        for bad_image in ('../etc/passwd', 'dir/file.png', '..\\windows\\system32'):
+            payload = {
+                'drink_name': f'TestDrink-{bad_image}',
+                'drink_water_percentage': 100,
+                'drink_alcohol_percentage': 0,
+                'drink_image': bad_image,
+            }
+            response = self.client.post(
+                '/api/drinks', data=json.dumps(payload), content_type='application/json'
+            )
+            self.assertEqual(response.status_code, 400, msg=f'image={bad_image}')
+            self.assertIn('Invalid drink image filename', json.loads(response.data)['message'])
+
+    def test_create_drink_rejects_image_over_100_chars(self):
+        self._login()
+        payload = {
+            'drink_name': 'Valid',
+            'drink_water_percentage': 100,
+            'drink_alcohol_percentage': 0,
+            'drink_image': 'a' * 101,
+        }
+        response = self.client.post(
+            '/api/drinks', data=json.dumps(payload), content_type='application/json'
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('image path cannot exceed', json.loads(response.data)['message'])
+
+
 if __name__ == '__main__':
     import unittest
     unittest.main()

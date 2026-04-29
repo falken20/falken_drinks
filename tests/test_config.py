@@ -34,6 +34,18 @@ class TestConfig(unittest.TestCase):
         today = config.today_cet()
         self.assertIsInstance(today, date)
 
+    def test_day_bounds_returns_start_and_end_of_day(self):
+        from datetime import datetime
+        target = date(2026, 4, 24)
+        start, end = config.day_bounds(target)
+        self.assertEqual(start, datetime(2026, 4, 24, 0, 0, 0))
+        self.assertEqual(end.year, 2026)
+        self.assertEqual(end.month, 4)
+        self.assertEqual(end.day, 24)
+        self.assertEqual(end.hour, 23)
+        self.assertEqual(end.minute, 59)
+        self.assertLess(start, end)
+
     def test_shorten_url_returns_same_url(self):
         url = 'https://example.com/some/path'
         self.assertEqual(config.shorten_url(url), url)

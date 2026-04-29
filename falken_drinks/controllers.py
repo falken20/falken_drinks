@@ -4,7 +4,7 @@ from datetime import date, datetime, timedelta
 import sys
 
 from .models import db, Drink, DrinkLog, User
-from .config import today_cet
+from .config import today_cet, day_bounds
 from .logger import Log
 
 Log.info("***** Loading controllers.py")
@@ -228,8 +228,7 @@ class ControllerDrinkLogs:
 
         try:
             # Single JOIN query — eliminates N+1 per-log Drink lookups
-            start_datetime = datetime.combine(target_date, datetime.min.time())
-            end_datetime = datetime.combine(target_date, datetime.max.time())
+            start_datetime, end_datetime = day_bounds(target_date)
 
             rows = db.session.query(DrinkLog, Drink).join(
                 Drink, DrinkLog.drink_id == Drink.drink_id
@@ -331,8 +330,7 @@ class ControllerDrinkLogs:
         try:
             # Query all drink logs for the user on the target date with drink information
             # Since date_created is DateTime, filter by date range
-            start_datetime = datetime.combine(target_date, datetime.min.time())
-            end_datetime = datetime.combine(target_date, datetime.max.time())
+            start_datetime, end_datetime = day_bounds(target_date)
 
             logs = db.session.query(DrinkLog, Drink).join(
                 Drink, DrinkLog.drink_id == Drink.drink_id

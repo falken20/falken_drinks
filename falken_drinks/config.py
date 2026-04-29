@@ -38,6 +38,18 @@ def today_cet():
     return now_cet().date()
 
 
+def day_bounds(target_date):
+    """Return (start_of_day, end_of_day) datetimes for a given date.
+
+    Useful when filtering DateTime columns by a single calendar day.
+    """
+    from datetime import datetime as _dt
+    return (
+        _dt.combine(target_date, _dt.min.time()),
+        _dt.combine(target_date, _dt.max.time()),
+    )
+
+
 # Method to shorten a URL
 def shorten_url(url: str) -> str:
     """ Shorten a URL """
