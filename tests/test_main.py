@@ -305,3 +305,18 @@ class TestMain(basetest.BaseTestCase):
         response = self.client.get('/drinks_management', follow_redirects=False)
         self.assertEqual(response.status_code, 302)
         self.assertIn('/login', response.headers['Location'])
+
+    def test_daily_habits(self):
+        """Test GET /daily_habits renders daily habits page"""
+        self.create_user()
+        self.login_http(self)
+
+        response = self.client.get('/daily_habits')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Daily Habits', response.data)
+
+    def test_daily_habits_unauthorized(self):
+        """Test GET /daily_habits redirects to login when not authenticated"""
+        response = self.client.get('/daily_habits', follow_redirects=False)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/login', response.headers['Location'])

@@ -135,3 +135,31 @@ def drinks_management():
     Log.debug(f"Drinks retrieved: {drinks}")
 
     return render_template('drinks_management.html', drinks=drinks)
+
+
+@main.route('/daily_habits', methods=['GET'])
+@login_required
+def daily_habits():
+    Log.info(
+        f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
+    Log.debug(f"Current user: {current_user}")
+
+    habits_overview = {
+        'headline': 'Track the routines that support your day',
+        'habits': [
+            {
+                'name': 'Hydration goal',
+                'description': 'Keep your water target visible next to your drink history.'
+            },
+            {
+                'name': 'Movement',
+                'description': 'Reserve a place for walks, workouts, or any daily activity.'
+            },
+            {
+                'name': 'Sleep routine',
+                'description': 'Prepare a space for rest quality and sleeping consistency.'
+            }
+        ]
+    }
+
+    return render_template('daily_habits.html', habits_overview=habits_overview)
