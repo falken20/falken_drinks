@@ -14,7 +14,7 @@ from flask_talisman import Talisman
 from .logger import Log, console
 from .config import get_settings, print_settings_environment
 from .cache import check_cache
-from .models import db
+from .models import db, init_db_if_needed
 
 Log.info("***** Loading app.py")
 
@@ -214,6 +214,10 @@ def create_app(test_config=None):
 
         db.init_app(app)
         Log.info("Database initialized successfully")
+
+        # Auto-create tables in development/testing if they don't exist
+        if config_mode in ['development', 'testing'] or test_config is not None:
+            init_db_if_needed(app)
 
         ensure_schema_compatibility(app)
         Log.info('Database schema compatibility check completed')

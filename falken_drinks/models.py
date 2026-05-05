@@ -210,6 +210,34 @@ class DrinkLog(db.Model):
         return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
 
 
+def init_db_if_needed(app):
+    """
+    Automatically create database tables if they don't exist.
+    Non-interactive version for development/testing environments.
+    """
+    try:
+        with app.app_context():
+            inspector = db.inspect(db.engine)
+            existing_tables = set(inspector.get_table_names())
+            
+            # Define all table names that should exist
+            required_tables = {'users', 'drinks', 'drinks_logs'}
+            
+            # If all required tables exist, nothing to do
+            if required_tables.issubset(existing_tables):
+                Log.debug("All required database tables already exist")
+                return
+            
+            # Create all tables
+            Log.info("Creating missing database tables...")
+            db.create_all()
+            db.session.commit()
+            Log.info("Database tables initialized successfully")
+    except Exception as err:
+        Log.error("Error in init_db_if_needed", err, sys=sys)
+        raise
+
+
 def init_db(app):
     """
     Main process to create the needed tables for the application
