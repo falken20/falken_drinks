@@ -2,36 +2,272 @@
 
 {% block content %}
 
-<div class="container" style="text-align: center; max-width: 820px; margin: 0 auto;">
-    <div style="background: rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 22px 18px; backdrop-filter: blur(6px);">
-        <div style="display: inline-flex; align-items: center; justify-content: center; width: 62px; height: 62px; border-radius: 50%; background: rgba(40, 167, 69, 0.18); margin-bottom: 14px;">
-            <i class="bi bi-check2-square" style="font-size: 1.6rem; color: #b8f7c5;" title="Daily Habits"></i>
-        </div>
+<style>
+    .dh-card {
+        background: rgba(230, 230, 234, 0.42);
+        border-radius: 10px;
+        padding: 8px 12px;
+        margin-bottom: 6px;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .dh-badge {
+        font-size: 0.72rem;
+        padding: 2px 7px;
+        border-radius: 8px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .dh-badge-hard    { background: rgba(220,53,69,0.25);   color: #f08080; }
+    .dh-badge-normal  { background: rgba(40,167,69,0.25);   color: #6ee387; }
+    .dh-badge-soft    { background: rgba(13,110,253,0.25);  color: #74aaff; }
+    .dh-badge-mushy   { background: rgba(255,193,7,0.25);   color: #ffe082; }
+    .dh-badge-liquid  { background: rgba(108,117,125,0.25); color: #ccc; }
+    .dh-delete {
+        background: transparent;
+        border: 1px solid rgba(220,53,69,0.5);
+        color: #f08080;
+        border-radius: 7px;
+        padding: 2px 7px;
+        font-size: 0.75rem;
+        line-height: 1;
+        margin-left: auto;
+        flex-shrink: 0;
+        transition: background .15s;
+        cursor: pointer;
+    }
+    .dh-delete:hover { background: rgba(220,53,69,0.3); color: white; }
+    .qty-btn {
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        border: 2px solid rgba(255,255,255,0.35);
+        background: rgba(255,255,255,0.12);
+        color: #ffffff;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background .15s, border-color .15s, box-shadow .15s, transform .1s;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .qty-btn.selected {
+        background: #1f9d55;
+        border-color: #d7ffe0;
+        color: #ffffff;
+        box-shadow: 0 0 0 3px rgba(215,255,224,0.35);
+        transform: translateY(-1px);
+    }
+    .qty-btn:hover:not(.selected) {
+        background: rgba(255,255,255,0.22);
+        border-color: rgba(255,255,255,0.6);
+    }
+</style>
 
-        <h4 style="color: white; font-weight: 700; margin-bottom: 8px;">Daily Habits</h4>
-        <p style="color: rgba(255, 255, 255, 0.85); font-size: 0.95rem; margin: 0 auto 18px auto; max-width: 560px;">
-            {{ habits_overview.headline }}
-        </p>
+<script>
+    function getCsrfToken() {
+        const metaEl = document.querySelector('meta[name="csrf-token"]');
+        const hiddenEl = document.getElementById('csrf-token-value');
+        return (metaEl && metaEl.getAttribute('content')) ||
+               (hiddenEl && hiddenEl.value) ||
+               '';
+    }
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; text-align: left;">
-            {% for habit in habits_overview.habits %}
-            <div style="background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 14px; padding: 14px; min-height: 140px;">
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #d7ffe0; font-weight: 700;">
-                    <i class="bi bi-check-circle"></i>
-                    <span>{{ habit.name }}</span>
-                </div>
-                <p style="color: rgba(255, 255, 255, 0.8); font-size: 0.86rem; margin-bottom: 0;">
-                    {{ habit.description }}
-                </p>
+    let selectedQty = null;
+
+    function selectQty(btn, qty) {
+        selectedQty = qty;
+        document.querySelectorAll('.qty-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        document.getElementById('qty-hidden').value = qty;
+    }
+
+    async function submitHabit(e) {
+        e.preventDefault();
+        const form = e.target;
+        const qty = parseInt(document.getElementById('qty-hidden').value);
+        const texture = form.texture.value;
+        const date = form.date.value;
+
+        if (!qty || qty < 1 || qty > 5) {
+            showMsg('Please select a quantity (1–5).', 'danger'); return;
+        }
+        if (!texture) {
+            showMsg('Please select a texture.', 'danger'); return;
+        }
+
+        try {
+            const csrfToken = getCsrfToken();
+            if (!csrfToken) {
+                showMsg('CSRF token missing. Reload the page and try again.', 'danger');
+                return;
+            }
+
+            const resp = await fetch('/api/daily_habits', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ quantity: qty, texture, date })
+            });
+
+            let data;
+            const contentType = resp.headers.get('content-type') || '';
+            if (contentType.includes('application/json')) {
+                data = await resp.json();
+            } else {
+                const text = await resp.text();
+                data = { success: false, message: text.slice(0, 180) };
+            }
+
+            if (data.success) {
+                showMsg('Habit recorded!', 'success');
+                setTimeout(() => location.reload(), 700);
+            } else {
+                showMsg(data.message || 'Error saving habit.', 'danger');
+            }
+        } catch (err) {
+            showMsg('Network error.', 'danger');
+        }
+    }
+
+    async function deleteHabit(habitId) {
+        try {
+            const csrfToken = getCsrfToken();
+            const resp = await fetch(`/api/daily_habits/${habitId}`, {
+                method: 'DELETE',
+                headers: { 'X-CSRFToken': csrfToken },
+                credentials: 'same-origin'
+            });
+            const data = await resp.json();
+            if (data.success) {
+                document.getElementById(`habit-${habitId}`).remove();
+                const empty = document.getElementById('no-habits');
+                if (empty && !document.querySelector('[id^="habit-"]')) empty.style.display = '';
+            } else {
+                showMsg(data.message || 'Error deleting habit.', 'danger');
+            }
+        } catch (err) {
+            showMsg('Network error.', 'danger');
+        }
+    }
+
+    function showMsg(msg, type) {
+        const el = document.getElementById('habit-msg');
+        el.className = `alert alert-${type} py-1 px-2 mb-2`;
+        el.textContent = msg;
+        el.style.display = '';
+        setTimeout(() => { el.style.display = 'none'; }, 3000);
+    }
+
+</script>
+
+<div class="container px-2" style="max-width: 480px; text-align: center;">
+
+    <!-- Header -->
+    <div style="display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px;
+                border-radius: 50%; background: rgba(40,167,69,0.18); margin-bottom: 10px;">
+        <i class="bi bi-badge-wc" style="font-size: 1.5rem; color: #b8f7c5;"></i>
+    </div>
+    <h5 style="color: white; font-weight: 700; margin-bottom: 4px;">Daily Habits</h5>
+    <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem; margin-bottom: 14px;">
+        {{ today.strftime('%A, %d %B %Y') }}
+    </p>
+    <div style="margin-bottom: 12px;">
+        <a href="{{ url_for('main.daily_habits_calendar', year=today.year, month=today.month) }}" class="btn btn-outline-light btn-sm">
+            <i class="bi bi-calendar3 me-1"></i> Calendar view
+        </a>
+    </div>
+
+    <!-- Alert -->
+    <div id="habit-msg" class="alert py-1 px-2 mb-2" style="display:none; font-size:0.82rem;"></div>
+
+    <!-- Form -->
+    <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+                border-radius: 14px; padding: 16px; margin-bottom: 16px; text-align: left;">
+        <h6 style="color: #d7ffe0; font-weight: 600; margin-bottom: 12px;">
+            <i class="bi bi-plus-circle me-1"></i> Record a habit
+        </h6>
+        <form id="habit-form" onsubmit="submitHabit(event)">
+            <input type="hidden" id="csrf-token-value" value="{{ csrf_token() }}">
+            <input type="hidden" id="qty-hidden" name="quantity" value="">
+
+            <!-- Date -->
+            <div class="mb-3">
+                <label style="color: rgba(255,255,255,0.75); font-size: 0.82rem; display:block; margin-bottom:4px;">Date</label>
+                <input type="date" name="date" value="{{ today.isoformat() }}"
+                       class="form-control form-control-sm"
+                       style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2);
+                              color: white; max-width: 180px;">
             </div>
-            {% endfor %}
-        </div>
 
-        <div style="margin-top: 18px;">
-            <a href="{{ url_for('main.index') }}" class="btn btn-primary btn-sm" style="min-width: 130px;">
-                Back to Home
-            </a>
+            <!-- Quantity -->
+            <div class="mb-3">
+                <label style="color: rgba(255,255,255,0.75); font-size: 0.82rem; display:block; margin-bottom:6px;">
+                    Quantity <span style="color:#adb5bd;">(times today)</span>
+                </label>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    {% for i in range(1, 6) %}
+                    <button type="button" class="qty-btn" onclick="selectQty(this, {{ i }})">{{ i }}</button>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Texture -->
+            <div class="mb-3">
+                <label style="color: rgba(255,255,255,0.75); font-size: 0.82rem; display:block; margin-bottom:4px;">Texture</label>
+                <select name="texture" class="form-select form-select-sm"
+                        style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2);
+                               color: white; max-width: 180px;">
+                    <option value="" disabled selected style="background:#333;">Select...</option>
+                    {% for t in texture_options %}
+                    <option value="{{ t }}" style="background:#333; text-transform:capitalize;">{{ t | capitalize }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-success btn-sm" style="min-width: 110px;">
+                <i class="bi bi-check2 me-1"></i> Save
+            </button>
+        </form>
+    </div>
+
+    <!-- Today's records -->
+    <h6 style="color: white; font-weight: 600; margin-bottom: 8px; text-align: left;">
+        Today's records
+        <span style="color: #adb5bd; font-weight: 400;">({{ habits | length }})</span>
+    </h6>
+
+    {% if habits %}
+        {% for habit in habits %}
+        <div class="dh-card" id="habit-{{ habit.habit_id }}">
+            <i class="bi bi-circle-fill" style="color: #6ee387; font-size: 0.55rem; flex-shrink:0;"></i>
+            <div style="flex:1; min-width:0;">
+                <span style="color: white; font-size: 0.88rem; font-weight: 600;">
+                    × {{ habit.quantity }}
+                </span>
+                <span class="dh-badge dh-badge-{{ habit.texture }} ms-2">{{ habit.texture | capitalize }}</span>
+            </div>
+            <span style="color: #adb5bd; font-size: 0.75rem;">
+                {{ habit.date_created.strftime('%H:%M') if habit.date_created else '' }}
+            </span>
+            <button class="dh-delete" onclick="deleteHabit({{ habit.habit_id }})">
+                <i class="bi bi-trash"></i>
+            </button>
         </div>
+        {% endfor %}
+    {% else %}
+        <p id="no-habits" style="color: rgba(255,255,255,0.5); font-size: 0.85rem; text-align: center; margin-top: 8px;">
+            No habits recorded yet today.
+        </p>
+    {% endif %}
+
+    <div style="margin-top: 18px;">
+        <a href="{{ url_for('main.index') }}" class="btn btn-outline-light btn-sm" style="min-width: 120px;">
+            <i class="bi bi-arrow-left me-1"></i> Back to Home
+        </a>
     </div>
 </div>
 

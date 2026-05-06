@@ -3,7 +3,7 @@ from datetime import date, datetime, timedelta
 # import pprint
 import sys
 
-from .models import db, Drink, DrinkLog, User
+from .models import db, Drink, DrinkLog, User, DailyHabit
 from .config import today_cet, day_bounds
 from .logger import Log
 
@@ -528,4 +528,124 @@ class ControllerDrinkLogs:
                     'avg_daily_liquid': 0,
                     'avg_daily_water': 0
                 }
+            }
+
+
+class ControllerDailyHabits:
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def get_habits_by_date(user_id: int, target_date: date = None):
+        Log.info(
+            f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
+        if target_date is None:
+            target_date = today_cet()
+        try:
+            return DailyHabit.query.filter_by(
+                user_id=user_id, date=target_date
+            ).order_by(DailyHabit.date_created.desc()).all()
+        except Exception as e:
+            Log.error("Error in ControllerDailyHabits.get_habits_by_date", err=e, sys=sys)
+            return []
+
+    @staticmethod
+    def add_habit(habit_data: dict):
+        Log.info(
+            f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
+        try:
+            new_habit = DailyHabit(**habit_data)
+            db.session.add(new_habit)
+            db.session.commit()
+            return new_habit
+        except Exception as e:
+            Log.error("Error in ControllerDailyHabits.add_habit", err=e, sys=sys)
+            db.session.rollback()
+            return None
+
+    @staticmethod
+    def delete_habit(habit_id: int, user_id: int):
+        Log.info(
+            f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
+        try:
+            habit = DailyHabit.query.filter_by(habit_id=habit_id, user_id=user_id).first()
+            if habit:
+                db.session.delete(habit)
+                db.session.commit()
+                return True
+            return False
+        except Exception as e:
+            Log.error("Error in ControllerDailyHabits.delete_habit", err=e, sys=sys)
+            db.session.rollback()
+            return False
+
+    @staticmethod
+    def get_monthly_calendar(user_id: int, year: int, month: int):
+        """Return a month grid with all daily habit entries grouped by day."""
+        Log.info(
+            f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
+        try:
+            import calendar
+
+            first_day = date(year, month, 1)
+            if month == 12:
+                next_month_start = date(year + 1, 1, 1)
+            else:
+                next_month_start = date(year, month + 1, 1)
+
+            habits = DailyHabit.query.filter(
+                DailyHabit.user_id == user_id,
+                DailyHabit.date >= first_day,
+                DailyHabit.date < next_month_start
+            ).order_by(DailyHabit.date.asc(), DailyHabit.date_created.asc()).all()
+
+            habits_by_date = {}
+            for habit in habits:
+                key = habit.date.isoformat()
+                if key not in habits_by_date:
+                    habits_by_date[key] = []
+                habits_by_date[key].append(habit)
+
+            cal = calendar.Calendar(firstweekday=0)
+            weeks = []
+            for week_dates in cal.monthdatescalendar(year, month):
+                week = []
+                for current_day in week_dates:
+                    day_key = current_day.isoformat()
+                    day_habits = habits_by_date.get(day_key, [])
+                    week.append({
+                        'date': current_day,
+                        'day': current_day.day,
+                        'is_current_month': current_day.month == month,
+                        'total_entries': len(day_habits),
+                        'habits': day_habits
+                    })
+                weeks.append(week)
+
+            prev_year, prev_month = (year - 1, 12) if month == 1 else (year, month - 1)
+            next_year, next_month = (year + 1, 1) if month == 12 else (year, month + 1)
+
+            return {
+                'year': year,
+                'month': month,
+                'month_name': calendar.month_name[month],
+                'weeks': weeks,
+                'total_entries': len(habits),
+                'prev_year': prev_year,
+                'prev_month': prev_month,
+                'next_year': next_year,
+                'next_month': next_month,
+            }
+        except Exception as e:
+            Log.error("Error in ControllerDailyHabits.get_monthly_calendar", err=e, sys=sys)
+            return {
+                'year': year,
+                'month': month,
+                'month_name': str(month),
+                'weeks': [],
+                'total_entries': 0,
+                'prev_year': year,
+                'prev_month': max(1, month - 1),
+                'next_year': year,
+                'next_month': min(12, month + 1),
             }

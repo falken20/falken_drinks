@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+    .dhc-wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 0 8px;
+    }
+    .dhc-header {
+        background: rgba(18, 27, 38, 0.88);
+        border: 1px solid rgba(188, 220, 255, 0.38);
+        border-radius: 14px;
+        padding: 12px;
+        margin-bottom: 12px;
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
+    }
+    .dhc-title {
+        color: white;
+        font-weight: 700;
+        font-size: 1.05rem;
+        margin: 0;
+    }
+    .dhc-subtitle {
+        color: rgba(236, 247, 255, 0.92);
+        font-size: 0.82rem;
+        margin: 2px 0 0 0;
+    }
+    .dhc-grid {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 8px;
+    }
+    .dhc-weekday {
+        color: #f1f7ff;
+        font-size: 0.77rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        text-align: center;
+        padding: 4px 0;
+        text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+    }
+    .dhc-day {
+        background: rgba(16, 25, 37, 0.9);
+        border: 1px solid rgba(190, 220, 255, 0.24);
+        border-radius: 10px;
+        min-height: 74px;
+        padding: 4px;
+        text-align: left;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    .dhc-day--other {
+        opacity: 0.72;
+        background: rgba(10, 16, 26, 0.65);
+        border-color: rgba(190, 220, 255, 0.15);
+    }
+    .dhc-day-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 3px;
+    }
+    .dhc-day-num {
+        color: #ffffff;
+        font-size: 0.74rem;
+        font-weight: 700;
+    }
+    .dhc-day-count {
+        background: #1f9d55;
+        color: #ffffff;
+        border: 1px solid #d7ffe0;
+        border-radius: 999px;
+        font-size: 0.58rem;
+        line-height: 1;
+        padding: 2px 4px;
+        font-weight: 700;
+        box-shadow: 0 0 0 2px rgba(215, 255, 224, 0.25);
+    }
+    .dhc-list {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .dhc-item {
+        background: rgba(255, 255, 255, 0.16);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 7px;
+        padding: 2px 4px;
+        color: #ffffff;
+        font-size: 0.62rem;
+        line-height: 1.05;
+        font-weight: 600;
+    }
+    .dhc-empty {
+        color: rgba(238, 247, 255, 0.78);
+        font-size: 0.6rem;
+        margin-top: 4px;
+    }
+
+    @media (max-width: 800px) {
+        .dhc-grid {
+            gap: 6px;
+        }
+        .dhc-day {
+            min-height: 64px;
+            padding: 4px;
+        }
+        .dhc-item {
+            font-size: 0.58rem;
+        }
+    }
+</style>
+
+<div class="dhc-wrap">
+    <div class="dhc-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap: 8px;">
+            <div>
+                <h5 class="dhc-title">Daily Habits Calendar</h5>
+                <p class="dhc-subtitle">
+                    {{ calendar_data.month_name }} {{ calendar_data.year }} · {{ calendar_data.total_entries }} entries
+                </p>
+                <p class="dhc-subtitle" style="color:#d7ffe0; font-weight:700;">
+                    Total records in month: {{ calendar_data.total_entries }}
+                </p>
+            </div>
+            <div class="d-flex" style="gap: 6px;">
+                <a class="btn btn-outline-light btn-sm"
+                   href="{{ url_for('main.daily_habits_calendar', year=calendar_data.prev_year, month=calendar_data.prev_month) }}">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+                <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.daily_habits') }}">
+                    <i class="bi bi-journal-check me-1"></i> Daily Habits
+                </a>
+                <a class="btn btn-outline-light btn-sm"
+                   href="{{ url_for('main.daily_habits_calendar', year=calendar_data.next_year, month=calendar_data.next_month) }}">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="dhc-grid" style="margin-bottom: 6px;">
+        <div class="dhc-weekday">Mon</div>
+        <div class="dhc-weekday">Tue</div>
+        <div class="dhc-weekday">Wed</div>
+        <div class="dhc-weekday">Thu</div>
+        <div class="dhc-weekday">Fri</div>
+        <div class="dhc-weekday">Sat</div>
+        <div class="dhc-weekday">Sun</div>
+    </div>
+
+    <div class="dhc-grid">
+        {% for week in calendar_data.weeks %}
+            {% for day in week %}
+                <div class="dhc-day {% if not day.is_current_month %}dhc-day--other{% endif %}">
+                    <div class="dhc-day-head">
+                        <span class="dhc-day-num">{{ day.day }}</span>
+                        {% if day.total_entries > 0 %}
+                            <span class="dhc-day-count">{{ day.total_entries }}</span>
+                        {% endif %}
+                    </div>
+
+                    {% if day.habits %}
+                        <div class="dhc-list">
+                            {% for habit in day.habits %}
+                                <div class="dhc-item">
+                                    Qty {{ habit.quantity }} · {{ habit.texture|capitalize }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="dhc-empty">No records</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

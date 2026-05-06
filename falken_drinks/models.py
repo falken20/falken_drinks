@@ -210,6 +210,48 @@ class DrinkLog(db.Model):
         return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
 
 
+class DailyHabit(db.Model):
+    __tablename__ = 'daily_habits'
+
+    TEXTURE_OPTIONS = ['hard', 'normal', 'soft', 'mushy', 'liquid']
+    MIN_QUANTITY = 1
+    MAX_QUANTITY = 5
+
+    habit_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    date = db.Column(db.Date, nullable=False, default=today_cet)
+    quantity = db.Column(db.Integer, nullable=False)
+    texture = db.Column(db.String(20), nullable=False)
+    date_created = db.Column(db.DateTime, nullable=False, default=now_cet_naive)
+
+    def __repr__(self) -> str:
+        return f"<DailyHabit ({self.habit_id} - {self.date} - qty:{self.quantity} - {self.texture})>"
+
+    def __str__(self) -> str:
+        return f"<DailyHabit ({self.habit_id} - {self.date} - qty:{self.quantity} - {self.texture})>"
+
+    @validates('quantity')
+    def validate_quantity(self, key, value):
+        if value is None:
+            raise ValueError('quantity cannot be empty')
+        value = int(value)
+        if not (self.MIN_QUANTITY <= value <= self.MAX_QUANTITY):
+            raise ValueError(f'quantity must be between {self.MIN_QUANTITY} and {self.MAX_QUANTITY}')
+        return value
+
+    @validates('texture')
+    def validate_texture(self, key, value):
+        if value is None or not str(value).strip():
+            raise ValueError('texture cannot be empty')
+        value = value.strip().lower()
+        if value not in self.TEXTURE_OPTIONS:
+            raise ValueError(f'texture must be one of: {", ".join(self.TEXTURE_OPTIONS)}')
+        return value
+
+    def serialize(self):
+        return {c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs}
+
+
 def init_db_if_needed(app):
     """
     Automatically create database tables if they don't exist.
@@ -221,7 +263,7 @@ def init_db_if_needed(app):
             existing_tables = set(inspector.get_table_names())
             
             # Define all table names that should exist
-            required_tables = {'users', 'drinks', 'drinks_logs'}
+            required_tables = {'users', 'drinks', 'drinks_logs', 'daily_habits'}
             
             # If all required tables exist, nothing to do
             if required_tables.issubset(existing_tables):

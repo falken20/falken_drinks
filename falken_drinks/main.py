@@ -7,7 +7,7 @@ import sys
 
 from .logger import Log
 from .config import today_cet
-from .controllers import ControllerDrinkLogs, ControllerDrinks
+from .controllers import ControllerDrinkLogs, ControllerDrinks, ControllerDailyHabits
 
 Log.info("***** Loading app.py")
 
@@ -144,22 +144,32 @@ def daily_habits():
         f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
     Log.debug(f"Current user: {current_user}")
 
-    habits_overview = {
-        'headline': 'Track the routines that support your day',
-        'habits': [
-            {
-                'name': 'Hydration goal',
-                'description': 'Keep your water target visible next to your drink history.'
-            },
-            {
-                'name': 'Movement',
-                'description': 'Reserve a place for walks, workouts, or any daily activity.'
-            },
-            {
-                'name': 'Sleep routine',
-                'description': 'Prepare a space for rest quality and sleeping consistency.'
-            }
-        ]
-    }
+    from .models import DailyHabit
+    habits = ControllerDailyHabits.get_habits_by_date(current_user.user_id)
 
-    return render_template('daily_habits.html', habits_overview=habits_overview)
+    return render_template(
+        'daily_habits.html',
+        habits=habits,
+        texture_options=DailyHabit.TEXTURE_OPTIONS,
+        today=today_cet()
+    )
+
+
+@main.route('/daily_habits/calendar', methods=['GET'])
+@login_required
+def daily_habits_calendar():
+    Log.info(
+        f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
+    Log.debug(f"Current user: {current_user}")
+
+    today = today_cet()
+    year = request.args.get('year', today.year, type=int)
+    month = request.args.get('month', today.month, type=int)
+
+    # Keep month values in a valid range to avoid invalid-date crashes
+    if month < 1 or month > 12:
+        month = today.month
+
+    calendar_data = ControllerDailyHabits.get_monthly_calendar(current_user.user_id, year, month)
+
+    return render_template('daily_habits_calendar.html', calendar_data=calendar_data)

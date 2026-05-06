@@ -4,10 +4,10 @@ from datetime import datetime
 import html
 import sys
 
-from .controllers import ControllerDrinks, ControllerDrinkLogs
+from .controllers import ControllerDrinks, ControllerDrinkLogs, ControllerDailyHabits
 from .config import today_cet
 from .logger import Log
-from .models import db, DrinkLog
+from .models import db, DrinkLog, DailyHabit
 
 
 api_routes = Blueprint('api_routes', __name__)
@@ -412,3 +412,99 @@ def delete_drink(drink_id):
             'success': False,
             'message': 'An error occurred while deleting the drink'
         }), 500
+
+
+@api_routes.route('/api/daily_habits', methods=['GET'])
+@login_required
+def get_daily_habits():
+    """Get daily habits for the current user on a given date (default today)"""
+    try:
+        date_str = request.args.get('date')
+        target_date = None
+        if date_str:
+            from datetime import date as date_type
+            try:
+                target_date = date_type.fromisoformat(date_str)
+            except ValueError:
+                return jsonify({'success': False, 'message': 'Invalid date format'}), 400
+
+        habits = ControllerDailyHabits.get_habits_by_date(current_user.user_id, target_date)
+        return jsonify({
+            'success': True,
+            'habits': [h.serialize() for h in habits]
+        }), 200
+
+    except Exception as e:
+        Log.error("Error in get_daily_habits route", err=e, sys=sys)
+        return jsonify({'success': False, 'message': 'An error occurred while fetching habits'}), 500
+
+
+@api_routes.route('/api/daily_habits', methods=['POST'])
+@login_required
+def add_daily_habit():
+    """Record a new daily habit entry"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'message': 'No data received'}), 400
+
+        quantity = data.get('quantity')
+        texture = data.get('texture', '').strip().lower()
+        date_str = data.get('date')
+
+        # Validate quantity
+        try:
+            quantity = int(quantity)
+        except (TypeError, ValueError):
+            return jsonify({'success': False, 'message': 'quantity must be an integer'}), 400
+        if not (DailyHabit.MIN_QUANTITY <= quantity <= DailyHabit.MAX_QUANTITY):
+            return jsonify({
+                'success': False,
+                'message': f'quantity must be between {DailyHabit.MIN_QUANTITY} and {DailyHabit.MAX_QUANTITY}'
+            }), 400
+
+        # Validate texture
+        if texture not in DailyHabit.TEXTURE_OPTIONS:
+            return jsonify({
+                'success': False,
+                'message': f'texture must be one of: {", ".join(DailyHabit.TEXTURE_OPTIONS)}'
+            }), 400
+
+        # Parse optional date
+        habit_date = today_cet()
+        if date_str:
+            from datetime import date as date_type
+            try:
+                habit_date = date_type.fromisoformat(date_str)
+            except ValueError:
+                return jsonify({'success': False, 'message': 'Invalid date format'}), 400
+
+        habit = ControllerDailyHabits.add_habit({
+            'user_id': current_user.user_id,
+            'date': habit_date,
+            'quantity': quantity,
+            'texture': texture
+        })
+
+        if habit:
+            return jsonify({'success': True, 'habit': habit.serialize()}), 201
+        return jsonify({'success': False, 'message': 'Failed to save habit'}), 500
+
+    except Exception as e:
+        Log.error("Error in add_daily_habit route", err=e, sys=sys)
+        return jsonify({'success': False, 'message': 'An error occurred while saving the habit'}), 500
+
+
+@api_routes.route('/api/daily_habits/<int:habit_id>', methods=['DELETE'])
+@login_required
+def delete_daily_habit(habit_id):
+    """Delete a daily habit entry"""
+    try:
+        result = ControllerDailyHabits.delete_habit(habit_id, current_user.user_id)
+        if result:
+            return jsonify({'success': True, 'message': f'Habit {habit_id} deleted successfully'}), 200
+        return jsonify({'success': False, 'message': 'Habit not found or unauthorized'}), 404
+
+    except Exception as e:
+        Log.error("Error in delete_daily_habit route", err=e, sys=sys)
+        return jsonify({'success': False, 'message': 'An error occurred while deleting the habit'}), 500
