@@ -68,50 +68,97 @@
     function getCsrfToken() {
         const metaEl = document.querySelector('meta[name="csrf-token"]');
         const hiddenEl = document.getElementById('csrf-token-value');
-        return (metaEl && metaEl.getAttribute('content')) ||
-               (hiddenEl && hiddenEl.value) ||
-               '';
+        const token = (metaEl && metaEl.getAttribute('content')) ||
+                      (hiddenEl && hiddenEl.value) ||
+                      '';
+        if (!token) {
+            console.warn('⚠️  CSRF token not found in page');
+        }
+        return token;
     }
 
     let selectedQty = null;
 
     function selectQty(btn, qty) {
-        selectedQty = qty;
-        document.querySelectorAll('.qty-btn').forEach(b => b.classList.remove('selected'));
+        // Remove selected state from all buttons
+        document.querySelectorAll('.qty-btn').forEach(b => {
+            b.classList.remove('selected');
+        });
+        
+        // Add selected state to clicked button
         btn.classList.add('selected');
-        document.getElementById('qty-hidden').value = qty;
+        
+        // Update the hidden input
+        const qtyInput = document.getElementById('qty-hidden');
+        qtyInput.value = qty;
+        
+        selectedQty = qty;
+        console.log('✅ Quantity selected:', qty, '(Hidden input updated)');
     }
 
-    async function submitHabit(e) {
-        e.preventDefault();
-        const form = e.target;
-        const qty = parseInt(document.getElementById('qty-hidden').value);
+    async function submitHabit() {
+        const form = document.getElementById('habit-form');
+        const qtyInput = document.getElementById('qty-hidden').value;
+        const qty = qtyInput ? parseInt(qtyInput) : 0;
         const texture = form.texture.value;
         const date = form.date.value;
 
-        if (!qty || qty < 1 || qty > 5) {
-            showMsg('Please select a quantity (1–5).', 'danger'); return;
+        console.log('=== DAILY HABITS FORM SUBMISSION ===');
+        console.log('Form submission:', { qty, texture, date, qtyInput });
+
+        // Validate quantity
+        if (!qtyInput || qtyInput === '') {
+            const msg = 'Error: Please click a quantity button (1–5) before saving.';
+            console.error(msg);
+            showMsg(msg, 'danger');
+            return;
         }
-        if (!texture) {
-            showMsg('Please select a texture.', 'danger'); return;
+        if (isNaN(qty) || qty < 1 || qty > 5) {
+            const msg = `Error: Invalid quantity. Got "${qtyInput}" but need 1–5.`;
+            console.error(msg);
+            showMsg(msg, 'danger');
+            return;
+        }
+
+        // Validate texture
+        if (!texture || texture.trim() === '') {
+            const msg = 'Error: Please select a texture before saving.';
+            console.error(msg);
+            showMsg(msg, 'danger');
+            return;
+        }
+
+        // Validate date
+        if (!date) {
+            const msg = 'Error: Date field is empty.';
+            console.error(msg);
+            showMsg(msg, 'danger');
+            return;
         }
 
         try {
             const csrfToken = getCsrfToken();
-            if (!csrfToken) {
-                showMsg('CSRF token missing. Reload the page and try again.', 'danger');
-                return;
-            }
+            console.log('CSRF token present:', !!csrfToken);
 
-            const resp = await fetch('/api/daily_habits', {
+            const payload = { quantity: qty, texture, date };
+            console.log('Sending payload:', JSON.stringify(payload));
+
+            const fetchOptions = {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken
+                    'Content-Type': 'application/json'
                 },
                 credentials: 'same-origin',
-                body: JSON.stringify({ quantity: qty, texture, date })
-            });
+                body: JSON.stringify(payload)
+            };
+
+            if (csrfToken) {
+                fetchOptions.headers['X-CSRFToken'] = csrfToken;
+            }
+
+            console.log('Making fetch request to /api/daily_habits...');
+            const resp = await fetch('/api/daily_habits', fetchOptions);
+            console.log('Response status:', resp.status);
 
             let data;
             const contentType = resp.headers.get('content-type') || '';
@@ -122,45 +169,94 @@
                 data = { success: false, message: text.slice(0, 180) };
             }
 
+            console.log('Response data:', data);
+
             if (data.success) {
-                showMsg('Habit recorded!', 'success');
+                console.log('✅ Success! Habit saved. Reloading page...');
+                showMsg('✅ Habit recorded! Reloading...', 'success');
                 setTimeout(() => location.reload(), 700);
             } else {
-                showMsg(data.message || 'Error saving habit.', 'danger');
+                const errMsg = data.message || 'Error saving habit (unknown error).';
+                console.error('❌ API error:', errMsg);
+                showMsg('❌ ' + errMsg, 'danger');
             }
         } catch (err) {
-            showMsg('Network error.', 'danger');
+            console.error('❌ Network/JavaScript error:', err);
+            showMsg('❌ Network error: ' + err.message, 'danger');
         }
     }
 
     async function deleteHabit(habitId) {
         try {
+            console.log('Delete request for habit:', habitId);
             const csrfToken = getCsrfToken();
-            const resp = await fetch(`/api/daily_habits/${habitId}`, {
+
+            const fetchOptions = {
                 method: 'DELETE',
-                headers: { 'X-CSRFToken': csrfToken },
                 credentials: 'same-origin'
-            });
+            };
+
+            if (csrfToken) {
+                fetchOptions.headers = { 'X-CSRFToken': csrfToken };
+            }
+
+            console.log('Sending DELETE to /api/daily_habits/' + habitId);
+            const resp = await fetch(`/api/daily_habits/${habitId}`, fetchOptions);
+            console.log('Delete response status:', resp.status);
+
             const data = await resp.json();
+            console.log('Delete response data:', data);
+
             if (data.success) {
-                document.getElementById(`habit-${habitId}`).remove();
+                const habitEl = document.getElementById(`habit-${habitId}`);
+                if (habitEl) {
+                    habitEl.remove();
+                    console.log('✅ Habit element removed from UI');
+                }
                 const empty = document.getElementById('no-habits');
-                if (empty && !document.querySelector('[id^="habit-"]')) empty.style.display = '';
+                if (empty && !document.querySelector('[id^="habit-"]')) {
+                    empty.style.display = '';
+                    console.log('✅ Showing "no habits" message');
+                }
+                showMsg('✅ Habit deleted', 'success');
             } else {
-                showMsg(data.message || 'Error deleting habit.', 'danger');
+                const errMsg = data.message || 'Error deleting habit.';
+                console.error('❌ Delete error:', errMsg);
+                showMsg('❌ ' + errMsg, 'danger');
             }
         } catch (err) {
-            showMsg('Network error.', 'danger');
+            console.error('❌ Delete error:', err);
+            showMsg('❌ Network error: ' + err.message, 'danger');
         }
     }
 
-    function showMsg(msg, type) {
+    function showMsg(msg, type = 'info') {
         const el = document.getElementById('habit-msg');
+        if (!el) {
+            console.warn('Message element #habit-msg not found. Showing alert instead.');
+            alert(msg);
+            return;
+        }
         el.className = `alert alert-${type} py-1 px-2 mb-2`;
         el.textContent = msg;
         el.style.display = '';
-        setTimeout(() => { el.style.display = 'none'; }, 3000);
+        console.log(`📢 Message (${type}):`, msg);
+        setTimeout(() => { el.style.display = 'none'; }, 5000);
     }
+
+    // Diagnostics on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('📋 === DAILY HABITS PAGE LOADED ===');
+        console.log('✓ Checking form elements...');
+        const form = document.getElementById('habit-form');
+        console.log('  - Form element:', form ? '✅ Found' : '❌ Missing');
+        console.log('  - qty-hidden:', document.getElementById('qty-hidden') ? '✅' : '❌');
+        console.log('  - texture select:', document.querySelector('select[name="texture"]') ? '✅' : '❌');
+        console.log('  - date input:', document.querySelector('input[name="date"]') ? '✅' : '❌');
+        console.log('  - qty buttons:', document.querySelectorAll('.qty-btn').length, 'found');
+        console.log('  - Submit button:', document.querySelector('button[type="submit"]') ? '✅' : '❌');
+        console.log('✓ All checks complete. Open DevTools Console to see detailed logging.');
+    });
 
 </script>
 
@@ -190,7 +286,7 @@
         <h6 style="color: #d7ffe0; font-weight: 600; margin-bottom: 12px;">
             <i class="bi bi-plus-circle me-1"></i> Record a habit
         </h6>
-        <form id="habit-form" onsubmit="submitHabit(event)">
+        <form id="habit-form">
             <input type="hidden" id="csrf-token-value" value="{{ csrf_token() }}">
             <input type="hidden" id="qty-hidden" name="quantity" value="">
 
@@ -228,7 +324,7 @@
                 </select>
             </div>
 
-            <button type="submit" class="btn btn-success btn-sm" style="min-width: 110px;">
+            <button type="button" class="btn btn-success btn-sm" style="min-width: 110px;" onclick="submitHabit()">
                 <i class="bi bi-check2 me-1"></i> Save
             </button>
         </form>

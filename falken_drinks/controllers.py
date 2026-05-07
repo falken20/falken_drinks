@@ -536,6 +536,24 @@ class ControllerDailyHabits:
         pass
 
     @staticmethod
+    def _normalize_habit_date(habit_date):
+        """Normalize habit date to a plain date object, handling datetime and string formats."""
+        if isinstance(habit_date, date) and not isinstance(habit_date, datetime):
+            return habit_date
+        if isinstance(habit_date, datetime):
+            return habit_date.date()
+        if isinstance(habit_date, str):
+            try:
+                return datetime.fromisoformat(habit_date).date()
+            except ValueError:
+                try:
+                    return date.fromisoformat(habit_date)
+                except ValueError:
+                    Log.warning(f"Skipping habit with invalid date format: {habit_date}")
+                    return None
+        return None
+
+    @staticmethod
     def get_habits_by_date(user_id: int, target_date: date = None):
         Log.info(
             f"Method {sys._getframe().f_code.co_filename}: {sys._getframe().f_code.co_name}")
@@ -601,7 +619,12 @@ class ControllerDailyHabits:
 
             habits_by_date = {}
             for habit in habits:
-                key = habit.date.isoformat()
+                # Normalize potential legacy datetime/string values to a plain date key.
+                habit_date = ControllerDailyHabits._normalize_habit_date(habit.date)
+                if habit_date is None:
+                    continue
+
+                key = habit_date.isoformat()
                 if key not in habits_by_date:
                     habits_by_date[key] = []
                 habits_by_date[key].append(habit)

@@ -3,7 +3,7 @@ import pytest
 from datetime import datetime
 
 from . import basetest
-from falken_drinks.models import db, Drink, DrinkLog
+from falken_drinks.models import db, Drink, DrinkLog, DailyHabit
 
 
 class TestMain(basetest.BaseTestCase):
@@ -320,3 +320,23 @@ class TestMain(basetest.BaseTestCase):
         response = self.client.get('/daily_habits', follow_redirects=False)
         self.assertEqual(response.status_code, 302)
         self.assertIn('/login', response.headers['Location'])
+
+    def test_daily_habits_calendar_shows_existing_record(self):
+        """Test GET /daily_habits/calendar renders saved habits in the selected month."""
+        user = self.create_user()
+        self.login_http(self)
+
+        habit_date = datetime(2026, 5, 7).date()
+        habit = DailyHabit(
+            user_id=user.user_id,
+            date=habit_date,
+            quantity=3,
+            texture='normal'
+        )
+        db.session.add(habit)
+        db.session.commit()
+
+        response = self.client.get('/daily_habits/calendar?year=2026&month=5')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Qty 3', response.data)
+        self.assertIn(b'Normal', response.data)
